@@ -5,6 +5,18 @@
 @section('client-application')
     active
 @endsection
+@section('APP-CSS')
+    <style>
+        .thumbnail-link img {
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .thumbnail-link img:hover {
+            transform: scale(1.1);
+            cursor: pointer;
+        }
+    </style>
+@endsection
 @section('APP-CONTENT')
     <div class="row" id="addForm">
         <div class="col-lg-12">
@@ -181,29 +193,32 @@
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
-                    console.log(response.fsic_requirements);
                     if (response.fsic_requirements && response.fsic_requirements.length > 0) {
-                        let html = '<ul class="list-group">';
-                        response.fsic_requirements.forEach(req => {
-                            console.log("Checking Image: ", req.thumbnail);
-                            let img = new Image();
-                            img.src = req.thumbnail;
-                            img.onload = function() {
-                                console.log("Image Loaded Successfully: " + req.thumbnail);
-                            };
-                            img.onerror = function() {
-                                console.log("Image Failed to Load: " + req.thumbnail);
-                            };
+                        let count = 1;
+                        let html = '<ul class="list-group list-group-flush">';
+
+                        response.fsic_requirements.forEach((req, index) => {
+                            let displayName = req.name.replace(/_/g,
+                                ' '); // Convert underscores to spaces
+
                             html += `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="${req.url}" target="_blank">${req.name}</a>
-                                <img src="${req.thumbnail}" alt="Thumbnail" class="img-thumbnail" width="50">
-                            </li>`;
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span class="text-capitalize fw-medium">${count}. ${displayName}</span>
+                                    <a href="${req.url}" data-fslightbox="fsic-gallery" data-type="image" class="thumbnail-link">
+                                        <img src="${req.thumbnail}" alt="Thumbnail" class="img-thumbnail shadow-sm rounded" width="60">
+                                    </a>
+                                </li>`;
+                            count++;
                         });
+
                         html += '</ul>';
                         $('#requirementsContainer').html(html);
+
+                        // Refresh FS Lightbox to register new elements
+                        refreshFsLightbox();
                     } else {
-                        $('#requirementsContainer').html('<p class="text-muted">No requirements found.</p>');
+                        $('#requirementsContainer').html(
+                            '<p class="text-muted text-center">No requirements found.</p>');
                     }
 
                     $('#requirements').modal('show'); // Show the modal
@@ -272,7 +287,17 @@
                     },
                     {
                         field: 'application_date',
-                        title: 'Application Date'
+                        title: 'Application Date',
+                        formatter: function(value, row, index) {
+                            if (!value) return 'N/A'; // Handle empty values
+
+                            let date = new Date(value);
+                            return date.toLocaleDateString('en-US', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric'
+                            });
+                        }
                     },
                     {
                         field: 'establishment.name',
@@ -280,7 +305,16 @@
                     },
                     {
                         field: 'fsic_type',
-                        title: 'FSIC Type'
+                        title: 'FSIC Type',
+                        formatter: function(value, row, index) {
+                            const FSIC_TYPES = {
+                                0: 'Occupancy',
+                                1: 'New Business',
+                                2: 'Renewal Business'
+                            };
+
+                            return FSIC_TYPES[value] || 'Unknown';
+                        }
                     },
                     {
                         field: 'application_statuses',
@@ -297,6 +331,23 @@
                             });
 
                             return latestStatus.status;
+                        }
+                    },
+                    {
+                        field: 'application_statuses',
+                        title: 'Remarks',
+                        formatter: function(value, row, index) {
+                            if (!value || value.length === 0) {
+                                return 'No Remarks';
+                            }
+
+                            // Find the latest status update based on 'updated_at'
+                            let latestStatus = value.reduce((latest, status) => {
+                                return new Date(status.updated_at) > new Date(latest
+                                    .updated_at) ? status : latest;
+                            });
+
+                            return latestStatus.remarks || 'No Remarks';
                         }
                     },
                     {

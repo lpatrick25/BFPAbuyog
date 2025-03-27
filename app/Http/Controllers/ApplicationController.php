@@ -174,9 +174,8 @@ class ApplicationController extends Controller
                 return [
                     'id' => $media->id,
                     'name' => $media->name,
-                    'url' => $media->getUrl(),  // Full URL of the file
-                    'thumbnail' => $media->getUrl('thumbnail'), // If using conversions
-                    // 'thumbnail' => asset('storage/' . $media->id . '/conversions/' . $media->file_name),
+                    'url' => $media->getUrl(),
+                    'thumbnail' => $media->getUrl('thumbnail'),
                 ];
             });
 

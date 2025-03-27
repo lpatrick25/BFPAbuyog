@@ -48,6 +48,8 @@
 
     <!-- RTL Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
+
+    @yield('APP-CSS')
 </head>
 
 <body class="theme-color-red light">
