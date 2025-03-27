@@ -1,0 +1,535 @@
+@extends('layout.master')
+@section('APP-TITLE')
+    Application
+@endsection
+@section('client-application')
+    active
+@endsection
+@section('APP-CONTENT')
+    <div class="row" id="addForm">
+        <div class="col-lg-12">
+            <div class="card rounded">
+                <div class="card-content">
+                    <div class="card-header d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">Application List</h4>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="toolbar">
+                            <button type="submit" class="btn btn-primary" id="add-btn">Add New Application</button>
+                        </div>
+                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1"
+                            data-i18n-enhance="true" data-mobile-responsive="true" data-multiple-sort="true"
+                            data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true" data-sticky-header="true"
+                            data-toolbar="#toolbar" data-pagination="true" data-search="true" data-show-refresh="true"
+                            data-show-copy-rows="true" data-show-columns="true" data-url="">
+                        </table>
+                    </div>
+                    <div class="card-footer text-end">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="applicationStatus" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="applicationStatusLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applicationStatusLabel">Application Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="iq-timeline0 m-0 d-flex align-items-center justify-content-between position-relative">
+                        <ul class="list-inline p-0 m-0">
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer text-end">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="reUploadRequirements" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="reUploadRequirementsLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <form id="reUploadForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reUploadRequirementsLabel">Application Requiments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="fileUploadContainer"></div>
+                </div>
+                <div class="modal-footer text-end">
+                    <button type="submit" id="submit-btn" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal fade" id="requirements" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="requirementsLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <form id="reUploadForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="requirementsLabel">Application Requiments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="requirementsContainer"></div>
+                </div>
+                <div class="modal-footer text-end">
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
+@section('APP-SCRIPT')
+    <script type="text/javascript">
+        let applicationId;
+
+        // Redirect to the edit page with a session token
+        function reuploadFSICRequirements(applicationID, fsicType) {
+            applicationId = applicationID;
+            let requirements = {
+                0: [ // Occupancy
+                    {
+                        name: "ENDORSEMENT FROM OFFICE OF THE BUILDING OFFICIAL (OBO)",
+                        required: true
+                    },
+                    {
+                        name: "CERTIFICATE OF COMPLETION",
+                        required: true
+                    },
+                    {
+                        name: "CERTIFIED TRUE COPY OF ASSESSMENT FEE FOR CERTIFICATE OCCUPANCY FROM OBO",
+                        required: true
+                    },
+                    {
+                        name: "AS-BUILT PLAN (IF NECESSARY)",
+                        required: false
+                    },
+                    {
+                        name: "FIRE SAFETY COMPLIANCE AND COMMISSIONING REPORT (FSCCR) (IF NECESSARY)",
+                        required: false
+                    }
+                ],
+                1: [ // New Business
+                    {
+                        name: "CERTIFIED TRUE COPY OF VALID CERTIFICATE OF OCCUPANCY",
+                        required: true
+                    },
+                    {
+                        name: "ASSESSMENT OF BUSINESS PERMIT FEE/TAX ASSESSMENT BILL FROM BPLO",
+                        required: true
+                    },
+                    {
+                        name: "AFFIDAVIT OF UNDERTAKING NO SUBSTANTIAL CHANGES",
+                        required: true
+                    },
+                    {
+                        name: "COPY OF FIRE INSURANCE (IF NECESSARY)",
+                        required: false
+                    }
+                ],
+                2: [ // Renewal Business
+                    {
+                        name: "ASSESSMENT OF THE BUSINESS PERMIT FEE/TAX ASSESSMENT BILL FROM BPLO",
+                        required: true
+                    },
+                    {
+                        name: "COPY OF FIRE INSURANCE (IF NECESSARY)",
+                        required: false
+                    },
+                    {
+                        name: "FIRE SAFETY MAINTENANCE REPORT (FSMR) (IF NECESSARY)",
+                        required: false
+                    },
+                    {
+                        name: "FIRE SAFETY CLEARANCE HOT WORK OPERATIONS (IF REQUIRED)",
+                        required: false
+                    }
+                ]
+            };
+
+            let fileInputs = "";
+            requirements[fsicType].forEach(req => {
+                let inputName = req.name
+                    .toLowerCase()
+                    .replace(/\s+/g, '_') // Convert spaces to underscores
+                    .replace(/[()]/g, '') // Remove parentheses
+                    .replace(/\//g, '_'); // Replace slashes with underscores
+
+                let requiredTag = req.required ? 'required' : '';
+                let requiredText = req.required ? '<span class="text-danger">*</span>' : '';
+
+                fileInputs += `<div class="form-group">
+                    <label class="form-label">${req.name} ${requiredText}</label>
+                    <input type="file" name="${inputName}" class="form-control" ${requiredTag}>
+                </div>`;
+            });
+
+            $("#fileUploadContainer").html(fileInputs);
+            $('#reUploadRequirements').modal('show');
+        }
+
+        function viewFSICRequirements(applicationId) {
+            $.ajax({
+                method: 'GET',
+                url: `/applications/${applicationId}`,
+                dataType: 'JSON',
+                cache: false,
+                success: function(response) {
+                    console.log(response.fsic_requirements);
+                    if (response.fsic_requirements && response.fsic_requirements.length > 0) {
+                        let html = '<ul class="list-group">';
+                        response.fsic_requirements.forEach(req => {
+                            console.log("Checking Image: ", req.thumbnail);
+                            let img = new Image();
+                            img.src = req.thumbnail;
+                            img.onload = function() {
+                                console.log("Image Loaded Successfully: " + req.thumbnail);
+                            };
+                            img.onerror = function() {
+                                console.log("Image Failed to Load: " + req.thumbnail);
+                            };
+                            html += `
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="${req.url}" target="_blank">${req.name}</a>
+                                <img src="${req.thumbnail}" alt="Thumbnail" class="img-thumbnail" width="50">
+                            </li>`;
+                        });
+                        html += '</ul>';
+                        $('#requirementsContainer').html(html);
+                    } else {
+                        $('#requirementsContainer').html('<p class="text-muted">No requirements found.</p>');
+                    }
+
+                    $('#requirements').modal('show'); // Show the modal
+                },
+                error: function(xhr) {
+                    showToast('danger', xhr.responseJSON.error || 'Something went wrong.');
+                }
+            });
+        }
+
+        function deleteApplication(applicationId) {
+            $.ajax({
+                method: 'DELETE',
+                url: `/applications/${applicationId}`,
+                dataType: 'JSON',
+                cache: false,
+                success: function(response) {
+                    $('#table1').bootstrapTable('refresh');
+                    showToast('success', response.message);
+                },
+                error: function(xhr) {
+                    showToast('danger', xhr.responseJSON.message || 'Something went wrong.');
+                }
+            });
+        }
+
+        $(document).ready(function() {
+
+            $('#add-btn').click(function(event) {
+                event.preventDefault();
+                window.location.href = '{{ route('application.add') }}';
+            });
+
+            var $table1 = $('#table1');
+
+            $table1.bootstrapTable({
+                url: '/applications',
+                method: 'GET',
+                pagination: true,
+                sidePagination: 'server',
+                pageSize: 10,
+                pageList: [5, 10, 25, 50, 100],
+                search: true,
+                buttonsAlign: 'left',
+                searchAlign: 'left',
+                toolbarAlign: 'right',
+                queryParams: function(params) {
+                    return {
+                        limit: params.limit,
+                        page: params.offset / params.limit + 1
+                    };
+                },
+                responseHandler: function(res) {
+                    return {
+                        total: res.total,
+                        rows: res.rows
+                    };
+                },
+                columns: [{
+                        field: 'id',
+                        title: 'ID'
+                    },
+                    {
+                        field: 'application_number',
+                        title: 'Application Number'
+                    },
+                    {
+                        field: 'application_date',
+                        title: 'Application Date'
+                    },
+                    {
+                        field: 'establishment.name',
+                        title: 'Establishment Name'
+                    },
+                    {
+                        field: 'fsic_type',
+                        title: 'FSIC Type'
+                    },
+                    {
+                        field: 'application_statuses',
+                        title: 'Status',
+                        formatter: function(value, row, index) {
+                            if (!value || value.length === 0) {
+                                return 'No Status';
+                            }
+
+                            // Find the latest status based on 'updated_at'
+                            let latestStatus = value.reduce((latest, status) => {
+                                return new Date(status.updated_at) > new Date(latest
+                                    .updated_at) ? status : latest;
+                            });
+
+                            return latestStatus.status;
+                        }
+                    },
+                    {
+                        field: 'action',
+                        title: 'Actions',
+                        formatter: actionFormatter
+                    }
+                ]
+            });
+
+            // Format the "Actions" column
+            function actionFormatter(value, row, index) {
+                // Check if "Under Review" exists in the application's statuses
+                let underReview = row.application_statuses.some(status => status.status === "Under Review");
+
+                // Default action buttons
+                let actionButtons = '';
+
+                if (underReview) {
+                    // If "Under Review", add "Reupload Requirements" button
+                    actionButtons += `
+                        <button class="btn btn-sm btn-warning" onclick="reuploadFSICRequirements('${row.id}', '${row.fsic_type}')">
+                            <i class="bi bi-upload"></i>
+                        </button>`;
+                }
+                // else {
+                //     // Otherwise, add "View Requirements" button
+                //     actionButtons += `
+            //         <button class="btn btn-sm btn-info" onclick="viewFSICRequirements('${row.id}')">
+            //             <i class="bi bi-eye"></i>
+            //         </button>`;
+                // }
+
+                actionButtons += `
+                        <button class="btn btn-sm btn-info" onclick="viewFSICRequirements('${row.id}')">
+                            <i class="bi bi-eye"></i>
+                        </button>`;
+                actionButtons += `
+                    <button class="btn btn-sm btn-danger" onclick="deleteApplication('${row.id}')">
+                        <i class="bi bi-trash"></i>
+                    </button> `;
+
+                return actionButtons;
+            }
+
+
+            // Click event for the table rows
+            $table1.on('click-row.bs.table', function(e, row, $element) {
+                // Prevent multiple event bindings
+                if (!$element.data('click-bound')) {
+                    $element.data('click-bound', true);
+
+                    // Attach click event to all <td> except the last column (Actions)
+                    $element.find('td:not(:last)').on('click', function() {
+                        // Open the modal
+                        $('#applicationStatus').modal('show');
+
+                        // Sort statuses from latest to oldest
+                        let sortedStatuses = row.application_statuses.sort((a, b) =>
+                            new Date(b.updated_at) - new Date(a.updated_at)
+                        );
+
+                        // Find the date of "Under Review" status
+                        let underReviewStatus = sortedStatuses.find(status => status.status ===
+                            "Under Review");
+                        let submittedDate = underReviewStatus ?
+                            underReviewStatus.updated_at :
+                            sortedStatuses[sortedStatuses.length - 1]?.updated_at;
+
+                        // Clear previous content
+                        let timelineContainer = $('#applicationStatus .iq-timeline0 ul');
+                        timelineContainer.empty();
+
+                        // Define available colors
+                        let colors = ['text-primary', 'text-success', 'text-danger',
+                            'text-warning'
+                        ];
+
+                        // Map statuses to Bootstrap Icons
+                        let statusIcons = {
+                            "Application Submitted": "bi-file-earmark-text",
+                            "Under Review": "bi-eye",
+                            "Scheduled for Inspection": "bi-calendar-check",
+                            "In Progress": "bi-arrow-repeat",
+                            "Approved": "bi-hand-thumbs-up",
+                            "Certificate Approval Pending": "bi-hourglass-split",
+                            "Certificate Issued": "bi-award",
+                            "Completed": "bi-check-circle",
+                            "Closed": "bi-x-circle",
+                            "Error": "bi-exclamation-circle"
+                        };
+
+                        // Add "Application Submitted" as the first timeline entry
+                        if (submittedDate) {
+                            let formattedSubmittedDate = new Date(submittedDate).toLocaleDateString(
+                                'en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
+
+                            let submittedColor = colors[Math.floor(Math.random() * colors
+                                .length)]; // Assign a random color
+                            let submittedIcon = statusIcons["Application Submitted"];
+
+                            let submittedHTML = `
+                                <li>
+                                    <div class="timeline-dots1 border-primary ${submittedColor}">
+                                        <i class="icon-20 bi ${submittedIcon}"></i>
+                                    </div>
+                                    <h6 class="float-left mb-1">Application Submitted</h6>
+                                    <small class="float-right mt-1">${formattedSubmittedDate}</small>
+                                    <div class="d-inline-block w-100">
+                                        <p>Initial submission of application.</p>
+                                    </div>
+                                </li>
+                            `;
+
+                            timelineContainer.append(submittedHTML);
+                        }
+
+                        // Loop through sorted statuses and append them to the modal
+                        sortedStatuses.forEach(status => {
+                            let remarksText = status.remarks ? `<p>${status.remarks}</p>` :
+                                '';
+
+                            // Format date
+                            let formattedDate = new Date(status.updated_at)
+                                .toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric'
+                                });
+
+                            let randomColor = colors[Math.floor(Math.random() * colors
+                                .length)]; // Assign a new random color for each status
+                            let statusIcon = statusIcons[status.status] ||
+                                "bi-question-circle"; // Default icon if not found
+
+                            let statusHTML = `
+                                <li>
+                                    <div class="timeline-dots1 border-primary ${randomColor}">
+                                        <i class="icon-20 bi ${statusIcon}"></i>
+                                    </div>
+                                    <h6 class="float-left mb-1">${status.status}</h6>
+                                    <small class="float-right mt-1">${formattedDate}</small>
+                                    <div class="d-inline-block w-100">
+                                        ${remarksText}
+                                    </div>
+                                </li>
+                            `;
+
+                            timelineContainer.append(statusHTML);
+                        });
+                    });
+
+                    // Initialize tooltip once
+                    $element.attr('title', `Show application status`).tooltip({
+                        trigger: 'hover',
+                        placement: 'top'
+                    });
+                }
+            });
+
+            $('#reUploadForm').submit(function(event) {
+                event.preventDefault();
+
+                let submitBtn = $('button[id="submit-btn"]');
+                submitBtn.prop('disabled', true).text('Processing...');
+
+                // Remove previous error messages and invalid classes
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+
+                const formData = new FormData(this);
+
+                // Add `_method: PUT` to simulate a PUT request
+                formData.append('_method', 'PUT');
+
+                $.ajax({
+                    method: 'POST', // Still use POST, Laravel will interpret `_method: PUT`
+                    url: `/applications/${applicationId}`,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    dataType: 'JSON',
+                    enctype: "multipart/form-data",
+                    success: function(response) {
+                        $("#fileUploadContainer").html('');
+                        showToast('success', response.message);
+                        $('#reUploadRequirements').modal('hide');
+                    },
+                    error: function(xhr) {
+                        $('html, body').animate({
+                            scrollTop: 0
+                        }, 'slow');
+
+                        if (xhr.status === 422 && xhr.responseJSON.errors) {
+                            var errors = xhr.responseJSON.errors;
+
+                            $.each(errors, function(field, messages) {
+                                var inputElement = $('[name="' + field + '"]');
+
+                                if (inputElement.length > 0) {
+                                    inputElement.addClass('is-invalid');
+                                    var errorContainer = $(
+                                        '<div class="invalid-feedback"></div>');
+                                    errorContainer.html(messages.join('<br>'));
+                                    inputElement.after(errorContainer);
+                                }
+
+                                inputElement.on('input', function() {
+                                    $(this).removeClass('is-invalid');
+                                    $(this).next('.invalid-feedback').remove();
+                                });
+                            });
+
+                            showToast('danger', 'Please check the form for errors.');
+                        } else {
+                            showToast('danger', xhr.responseJSON.message ||
+                                'Something went wrong.');
+                        }
+                    },
+                    complete: function() {
+                        submitBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+
+        });
+    </script>
+@endsection
