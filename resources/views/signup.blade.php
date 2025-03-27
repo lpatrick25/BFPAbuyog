@@ -142,7 +142,7 @@
                                                 Up</button>
                                         </div>
                                         <p class="mt-3 text-center">
-                                            Already have an Account <a href="sign-in.html" class="text-underline">Sign
+                                            Already have an Account <a href="{{ route('signin') }}" class="text-underline">Sign
                                                 In</a>
                                         </p>
                                     </form>

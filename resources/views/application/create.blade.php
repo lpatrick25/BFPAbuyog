@@ -358,6 +358,8 @@
 
         $(document).ready(function() {
 
+            $('#back-btn').show();
+
             $('#establishment_id').change(function() {
                 let establishmentId = $(this).val();
                 $.ajax({

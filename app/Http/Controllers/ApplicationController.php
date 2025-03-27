@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ApplicationStoreRequest;
 use App\Http\Requests\ApplicationUpdateRequest;
 use App\Models\Application;
+use App\Models\Establishment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -132,23 +133,26 @@ class ApplicationController extends Controller
             $limit = $request->get('limit', 10); // Default to 10 records per page
             $page = $request->get('page', 1); // Default to page 1
 
-            // Fetch paginated applications with relationships and media
-            $applications = Application::with(['establishment', 'applicationStatuses'])
-                ->paginate($limit, ['*'], 'page', $page);
+            if (auth()->user()->role === 'Marshall') {
+                // Fetch paginated applications with relationships and media
+                $applications = Application::with(['establishment', 'applicationStatuses'])
+                    ->paginate($limit, ['*'], 'page', $page);
+            } else {
+                $client_id = optional(auth()->user())->client->id;
 
-            // Transform applications to include fsic_requirements
-            // $applications->getCollection()->transform(function ($application) {
-            //     $application->fsic_requirements = $application->getMedia('fsic_requirements')->map(function ($media) {
-            //         return [
-            //             'id' => $media->id,
-            //             'name' => $media->name,
-            //             'url' => $media->getUrl(),  // Full URL of the file
-            //             'thumbnail' => $media->getUrl('thumbnail'), // If using conversions
-            //         ];
-            //     });
+                // Retrieve the establishment instance
+                $establishment = Establishment::where('client_id', $client_id)->first();
 
-            //     return $application;
-            // });
+                // Ensure establishment exists before querying applications
+                if (!$establishment) {
+                    return response()->json(['error' => 'Establishment not found.'], 404);
+                }
+
+                // Fetch paginated applications with relationships and media
+                $applications = Application::with(['establishment', 'applicationStatuses'])
+                    ->where('establishment_id', $establishment->id) // Access 'id' safely
+                    ->paginate($limit, ['*'], 'page', $page);
+            }
 
             // Format response for Bootstrap Table
             return response()->json([

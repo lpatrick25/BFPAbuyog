@@ -39,6 +39,18 @@ Route::get('/signup', function () {
 })->name('signup')->middleware('guest');
 
 Route::post('/login', [LoginController::class, 'login'])->name('login');
+
+Route::get('/logout', function (Request $request) {
+    Auth::logout(); // Logout the user
+
+    // Invalidate the session and regenerate the CSRF token
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    // Redirect to the login page or home page
+    return redirect('/')->with('success', 'You have been logged out.');
+})->name('logout');
+
 Route::post('/register', [RegistrationController::class, 'register'])->name('register');
 
 Route::get('/email/verification', function () {
