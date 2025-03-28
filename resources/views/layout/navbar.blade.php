@@ -50,15 +50,7 @@
                         <img src="{{ asset('assets/images/avatars/avtar_3.png') }}" alt="User-Profile"
                             class="theme-color-pink-img img-fluid avatar avatar-50 avatar-rounded">
                         <div class="caption ms-3 d-none d-md-block ">
-                            @php
-                                $user = auth()->user();
-                                $firstName = optional($user->client)->first_name;
-                                $middleName = optional($user->client)->middle_name;
-                                $lastName = optional($user->client)->last_name;
-                                $extensionName = optional($user->client)->extensionName;
-                            @endphp
-                            <h6 class="mb-0 caption-title">{{ $firstName }} {{ $middleName ?? '' }}
-                                {{ $lastName }}</h6>
+                            <h6 class="mb-0 caption-title">{{ optional(auth()->user())->getFullName() }}</h6>
                             <p class="mb-0 caption-sub-title">{{ auth()->user()->role }}</p>
                         </div>
                     </a>

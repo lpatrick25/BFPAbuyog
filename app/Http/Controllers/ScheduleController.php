@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ScheduleStoreRequest;
 use App\Models\Schedule;
 use App\Models\Application;
 use App\Models\Inspector;
@@ -14,19 +15,13 @@ class ScheduleController extends Controller
     /**
      * Store a new Schedule.
      */
-    public function store(Request $request)
+    public function store(ScheduleStoreRequest $request)
     {
-        // Validate request
-        $validated = $request->validate([
-            'application_id' => 'required|exists:applications,id',
-            'inspector_id' => 'required|exists:inspectors,id',
-            'schedule_date' => 'required|date|after_or_equal:today',
-        ]);
-
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
             // Create Schedule
-            $schedule = Schedule::create($validated);
+            $schedule = Schedule::create($request);
 
             DB::commit();
             Log::info('Schedule created successfully', ['schedule_id' => $schedule->id]);

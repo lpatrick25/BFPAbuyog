@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('application_id')->constrained('applications')->onDelete('restrict');
             $table->string('status', 50);
-            $table->string('remarks', 255)->nullable();
+            $table->text('remarks')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

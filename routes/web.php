@@ -2,6 +2,7 @@
 
 use App\Events\NewApplication;
 use App\Http\Controllers\ApplicationController;
+use App\Http\Controllers\ApplicationStatusController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\ClientController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\MarshallController;
 use App\Http\Controllers\navigation\AdminController;
 use App\Http\Controllers\navigation\ClientController as NavigationClientController;
 use App\Http\Controllers\navigation\MarshallController as NavigationMarshallController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -129,6 +131,7 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
 Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
     // Route View
     Route::get('dashboard', [NavigationMarshallController::class, 'dashboards'])->name('marshall.dashboard');
+    Route::get('applicantList', [NavigationMarshallController::class, 'applicantList'])->name('applicant.list');
 });
 
 // Route Resource
@@ -138,6 +141,8 @@ Route::resource('inspectors', InspectorController::class);
 Route::resource('users', UserController::class);
 Route::resource('establishments', EstablishmentController::class);
 Route::resource('applications', ApplicationController::class);
+Route::resource('applicationsStatus', ApplicationStatusController::class);
+Route::resource('schedule', ScheduleController::class);
 
 // Log Map Route
 Route::get('/load-map-view', function (Request $request) {

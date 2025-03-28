@@ -58,4 +58,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->role === 'Marshall';
     }
+
+    public function getFullName(): string
+    {
+        if ($this->role === 'Client' && $this->client) {
+            return $this->client->getFullName();
+        }
+
+        if ($this->role === 'Inspector' && $this->inspector) {
+            return $this->inspector->getFullName();
+        }
+
+        if ($this->role === 'Marshall' && $this->marshall) {
+            return $this->marshall->getFullName();
+        }
+
+        return 'No Name Available';
+    }
 }

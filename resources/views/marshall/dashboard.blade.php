@@ -2,7 +2,7 @@
 @section('APP-TITLE')
     Dashboard
 @endsection
-@section('client-dashboard')
+@section('marshall-dashboard')
     active
 @endsection
 @section('APP-CONTENT')
@@ -121,16 +121,16 @@
                                     </div>
                                 </div>
                                 <div class="mb-2 d-flex align-items-center justify-content-between">
-                                    <p class="mb-0">Client Name</p>
+                                    <p class="mb-0">Marshall Name</p>
                                     <p class="mb-0">Date Created</p>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
                                     @php
                                         $user = auth()->user();
-                                        $firstName = optional($user->client)->first_name;
-                                        $middleName = optional($user->client)->middle_name;
-                                        $lastName = optional($user->client)->last_name;
-                                        $extensionName = optional($user->client)->extensionName;
+                                        $firstName = optional($user->marshall)->first_name;
+                                        $middleName = optional($user->marshall)->middle_name;
+                                        $lastName = optional($user->marshall)->last_name;
+                                        $extensionName = optional($user->marshall)->extensionName;
                                     @endphp
                                     <h6>{{ $firstName }} {{ $middleName ?? '' }} {{ $lastName }}</h6>
                                     <h6 class="ms-5">{{ $user->created_at->format('m/d/Y') }}</h6>

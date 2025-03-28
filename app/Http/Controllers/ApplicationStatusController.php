@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ApplicationStatusRequest;
 use App\Models\ApplicationStatus;
 use App\Models\Application;
 use Illuminate\Http\Request;
@@ -48,40 +49,27 @@ class ApplicationStatusController extends Controller
     /**
      * Update an Application Status.
      */
-    public function update(Request $request, $id)
+    public function update(ApplicationStatusRequest $request, $application_id)
     {
-        $validated = $request->validate([
-            'status' => 'required|string|max:50',
-            'remarks' => 'nullable|string|max:255',
-        ]);
-
-        DB::beginTransaction();
         try {
-            $applicationStatus = ApplicationStatus::findOrFail($id);
-            $applicationStatus->update($validated);
+            DB::beginTransaction();
 
-            // Get related client & establishment
-            $application = $applicationStatus->application;
-            $establishment = $application->establishment;
-            $client = $establishment->client;
+            $applicationStatus = ApplicationStatus::where('application_id', $application_id)
+                ->where('status', $request->status)
+                ->whereNull('remarks')->first();
 
-            // Format client name
-            $clientName = "{$client->last_name}, {$client->first_name}";
-            $establishmentName = $establishment->name;
-            $establishmentLocation = "{$establishment->address_brgy}, {$establishment->address_ex}";
+            $applicationStatus->remarks = $request->remarks;
+            $applicationStatus->save();
 
-            // Send email notification
-            Mail::to($client->email)->send(new ApplicationStatusNotification(
-                $clientName,
-                $establishmentName,
-                $establishmentLocation,
-                $validated['status']
-            ));
+            ApplicationStatus::create([
+                'application_id' => $application_id,
+                'status' => $request->status,
+            ]);
 
             DB::commit();
-            Log::info('Application Status updated and email sent', ['application_id' => $application->id]);
+            Log::info('Application Status updated', ['application_id' => $application_id]);
 
-            return response()->json(['message' => 'Application status updated and email sent'], 200);
+            return response()->json(['message' => 'Application status updated', 'applicationStatus' => $applicationStatus], 201);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error updating Application Status', ['error' => $e->getMessage()]);
