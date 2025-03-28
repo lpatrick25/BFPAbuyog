@@ -341,13 +341,16 @@
                                 return 'No Remarks';
                             }
 
-                            // Find the latest status update based on 'updated_at'
-                            let latestStatus = value.reduce((latest, status) => {
-                                return new Date(status.updated_at) > new Date(latest
-                                    .updated_at) ? status : latest;
-                            });
+                            // Sort the statuses by 'updated_at' in descending order (latest first)
+                            let sortedStatuses = value.sort((a, b) => new Date(b.updated_at) -
+                                new Date(a.updated_at));
 
-                            return latestStatus.remarks || 'No Remarks';
+                            // Check if there is a second-latest status
+                            if (sortedStatuses.length > 1) {
+                                return sortedStatuses[1].remarks || 'No Remarks';
+                            } else {
+                                return 'No Previous Remarks'; // If there's only one status, no previous remark exists
+                            }
                         }
                     },
                     {
@@ -360,35 +363,35 @@
 
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
-                // Check if "Under Review" exists in the application's statuses
-                let underReview = row.application_statuses.some(status => status.status === "Under Review");
+                // Check if there are statuses
+                if (!row.application_statuses || row.application_statuses.length === 0) {
+                    return ''; // No statuses, so no buttons
+                }
+
+                // Find the latest status (based on updated_at)
+                let latestStatus = row.application_statuses.reduce((latest, status) => {
+                    return new Date(status.updated_at) > new Date(latest.updated_at) ? status : latest;
+                });
 
                 // Default action buttons
                 let actionButtons = '';
 
-                if (underReview) {
+                if (latestStatus.status === "Under Review") {
                     // If "Under Review", add "Reupload Requirements" button
                     actionButtons += `
                         <button class="btn btn-sm btn-warning" onclick="reuploadFSICRequirements('${row.id}', '${row.fsic_type}')">
                             <i class="bi bi-upload"></i>
                         </button>`;
+                    actionButtons += `
+                        <button class="btn btn-sm btn-danger" onclick="deleteApplication('${row.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button> `;
                 }
-                // else {
-                //     // Otherwise, add "View Requirements" button
-                //     actionButtons += `
-            //         <button class="btn btn-sm btn-info" onclick="viewFSICRequirements('${row.id}')">
-            //             <i class="bi bi-eye"></i>
-            //         </button>`;
-                // }
 
                 actionButtons += `
-                        <button class="btn btn-sm btn-info" onclick="viewFSICRequirements('${row.id}')">
-                            <i class="bi bi-eye"></i>
-                        </button>`;
-                actionButtons += `
-                    <button class="btn btn-sm btn-danger" onclick="deleteApplication('${row.id}')">
-                        <i class="bi bi-trash"></i>
-                    </button> `;
+                    <button class="btn btn-sm btn-info" onclick="viewFSICRequirements('${row.id}')">
+                        <i class="bi bi-eye"></i>
+                    </button>`;
 
                 return actionButtons;
             }
@@ -405,17 +408,14 @@
                         // Open the modal
                         $('#applicationStatus').modal('show');
 
-                        // Sort statuses from latest to oldest
+                        // Sort statuses from OLDEST to NEWEST
                         let sortedStatuses = row.application_statuses.sort((a, b) =>
-                            new Date(b.updated_at) - new Date(a.updated_at)
+                            new Date(a.updated_at) - new Date(b.updated_at)
                         );
 
-                        // Find the date of "Under Review" status
-                        let underReviewStatus = sortedStatuses.find(status => status.status ===
-                            "Under Review");
-                        let submittedDate = underReviewStatus ?
-                            underReviewStatus.updated_at :
-                            sortedStatuses[sortedStatuses.length - 1]?.updated_at;
+                        // Find the earliest status date (if available) or use today's date for "Application Submitted"
+                        let submittedDate = sortedStatuses.length > 0 ? sortedStatuses[0]
+                            .updated_at : new Date();
 
                         // Clear previous content
                         let timelineContainer = $('#applicationStatus .iq-timeline0 ul');
@@ -441,37 +441,30 @@
                         };
 
                         // Add "Application Submitted" as the first timeline entry
-                        if (submittedDate) {
-                            let formattedSubmittedDate = new Date(submittedDate).toLocaleDateString(
-                                'en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                });
+                        let formattedSubmittedDate = new Date(submittedDate).toLocaleDateString(
+                            'en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            });
 
-                            let submittedColor = colors[Math.floor(Math.random() * colors
-                                .length)]; // Assign a random color
-                            let submittedIcon = statusIcons["Application Submitted"];
+                        let submittedHTML = `
+                <li>
+                    <div class="timeline-dots1 border-primary text-primary">
+                        <i class="icon-20 bi ${statusIcons["Application Submitted"]}"></i>
+                    </div>
+                    <h6 class="float-left mb-1">Application Submitted</h6>
+                    <small class="float-right mt-1">${formattedSubmittedDate}</small>
+                    <div class="d-inline-block w-100">
+                        <p>Initial submission of application.</p>
+                    </div>
+                </li>
+            `;
+                        timelineContainer.append(submittedHTML); // Ensure it's always first
 
-                            let submittedHTML = `
-                                <li>
-                                    <div class="timeline-dots1 border-primary ${submittedColor}">
-                                        <i class="icon-20 bi ${submittedIcon}"></i>
-                                    </div>
-                                    <h6 class="float-left mb-1">Application Submitted</h6>
-                                    <small class="float-right mt-1">${formattedSubmittedDate}</small>
-                                    <div class="d-inline-block w-100">
-                                        <p>Initial submission of application.</p>
-                                    </div>
-                                </li>
-                            `;
-
-                            timelineContainer.append(submittedHTML);
-                        }
-
-                        // Loop through sorted statuses and append them to the modal
-                        sortedStatuses.forEach(status => {
+                        // Loop through sorted statuses (from oldest to newest)
+                        sortedStatuses.forEach((status, index) => {
                             let remarksText = status.remarks ? `<p>${status.remarks}</p>` :
                                 '';
 
@@ -484,23 +477,23 @@
                                     day: 'numeric'
                                 });
 
-                            let randomColor = colors[Math.floor(Math.random() * colors
-                                .length)]; // Assign a new random color for each status
+                            let assignedColor = colors[index % colors
+                                .length]; // Assign colors sequentially
                             let statusIcon = statusIcons[status.status] ||
                                 "bi-question-circle"; // Default icon if not found
 
                             let statusHTML = `
-                                <li>
-                                    <div class="timeline-dots1 border-primary ${randomColor}">
-                                        <i class="icon-20 bi ${statusIcon}"></i>
-                                    </div>
-                                    <h6 class="float-left mb-1">${status.status}</h6>
-                                    <small class="float-right mt-1">${formattedDate}</small>
-                                    <div class="d-inline-block w-100">
-                                        ${remarksText}
-                                    </div>
-                                </li>
-                            `;
+                    <li>
+                        <div class="timeline-dots1 border-primary ${assignedColor}">
+                            <i class="icon-20 bi ${statusIcon}"></i>
+                        </div>
+                        <h6 class="float-left mb-1">${status.status}</h6>
+                        <small class="float-right mt-1">${formattedDate}</small>
+                        <div class="d-inline-block w-100">
+                            ${remarksText}
+                        </div>
+                    </li>
+                `;
 
                             timelineContainer.append(statusHTML);
                         });

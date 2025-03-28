@@ -24,6 +24,7 @@ class ApplicationStatusRequest extends FormRequest
         return [
             'status' => 'required|string|max:50',
             'remarks' => 'required|string|max:255',
+            'schedule_date' => 'nullable|date|after_or_equal:today',
         ];
     }
 }

@@ -4,12 +4,13 @@ namespace App\Providers;
 
 use App\Models\Application;
 use App\Models\ApplicationStatus;
+use App\Models\Schedule;
 use App\Models\User;
 use App\Observers\ApplicationObserver;
 use App\Observers\ApplicationStatusObserver;
+use App\Observers\ScheduleObserver;
 use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +30,6 @@ class AppServiceProvider extends ServiceProvider
         User::observe(UserObserver::class);
         Application::observe(ApplicationObserver::class);
         ApplicationStatus::observe(ApplicationStatusObserver::class);
+        Schedule::observe(ScheduleObserver::class);
     }
 }

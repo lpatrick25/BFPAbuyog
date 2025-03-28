@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EstablishmentStoreRequest;
 use App\Http\Requests\EstablishmentUpdateRequest;
+use App\Http\Resources\EstablishmentResource;
 use App\Models\Establishment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -113,17 +114,16 @@ class EstablishmentController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get pagination parameters from request
-            $limit = $request->get('limit', 10); // Default to 10 records per page
-            $page = $request->get('page', 1); // Default to page 1
+            $limit = $request->get('limit', 10);
+            $page = $request->get('page', 1);
 
-            // Fetch paginated establishments with client data
+            // Fetch paginated establishments with client relationship
             $establishments = Establishment::with('client')->paginate($limit, ['*'], 'page', $page);
 
-            // Format response for Bootstrap Table
+            // Use Resource for formatting
             return response()->json([
-                'total' => $establishments->total(),    // Total records
-                'rows' => $establishments->items(),     // Current page records
+                'total' => $establishments->total(),
+                'rows' => EstablishmentResource::collection($establishments->items()), // Apply resource
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error fetching Establishments', ['error' => $e->getMessage()]);

@@ -131,7 +131,8 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
 Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
     // Route View
     Route::get('dashboard', [NavigationMarshallController::class, 'dashboards'])->name('marshall.dashboard');
-    Route::get('applicantList', [NavigationMarshallController::class, 'applicantList'])->name('applicant.list');
+    Route::get('applicantList', [NavigationMarshallController::class, 'applicants'])->name('applicant.list');
+    Route::get('scheduleList', [NavigationMarshallController::class, 'schedule'])->name('schedule.list');
 });
 
 // Route Resource
@@ -142,7 +143,7 @@ Route::resource('users', UserController::class);
 Route::resource('establishments', EstablishmentController::class);
 Route::resource('applications', ApplicationController::class);
 Route::resource('applicationsStatus', ApplicationStatusController::class);
-Route::resource('schedule', ScheduleController::class);
+Route::resource('schedules', ScheduleController::class);
 
 // Log Map Route
 Route::get('/load-map-view', function (Request $request) {

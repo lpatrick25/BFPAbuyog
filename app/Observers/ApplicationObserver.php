@@ -19,7 +19,6 @@ class ApplicationObserver
         // Create application status
         ApplicationStatus::create([
             'application_id' => $application->id,
-            'application_number' => $application->application_number,
             'status' => 'Under Review',
         ]);
 

@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\ApplicationStatus;
+use App\Models\Schedule;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -48,6 +49,8 @@ class ApplicationStatusUpdated extends Mailable
                 break;
         }
 
+        $schedule = Schedule::where('application_id', $this->applicationStatus->application->id)->first();
+
         return $this->subject($subject)
             ->view('emails.application_status_updated')
             ->with([
@@ -57,6 +60,8 @@ class ApplicationStatusUpdated extends Mailable
                 'establishment' => $this->applicationStatus->application->establishment,
                 'subject' => $subject,
                 'remarksMessage' => $remarksMessage,
+                'scheduleDate' => $schedule->schedule_date,
+                'inspector' => $schedule->inspector,
             ]);
     }
 }

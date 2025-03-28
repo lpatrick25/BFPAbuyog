@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ApplicationStoreRequest;
 use App\Http\Requests\ApplicationUpdateRequest;
+use App\Http\Resources\ApplicationResource;
 use App\Models\Application;
 use App\Models\Establishment;
 use Illuminate\Http\Request;
@@ -129,35 +130,29 @@ class ApplicationController extends Controller
     public function index(Request $request)
     {
         try {
-            // Get pagination parameters from request
-            $limit = $request->get('limit', 10); // Default to 10 records per page
-            $page = $request->get('page', 1); // Default to page 1
+            $limit = $request->get('limit', 10);
+            $page = $request->get('page', 1);
 
             if (auth()->user()->role === 'Marshall') {
-                // Fetch paginated applications with relationships and media
                 $applications = Application::with(['establishment', 'applicationStatuses'])
                     ->paginate($limit, ['*'], 'page', $page);
             } else {
                 $client_id = optional(auth()->user())->client->id;
-
-                // Retrieve the establishment instance
                 $establishment = Establishment::where('client_id', $client_id)->first();
 
-                // Ensure establishment exists before querying applications
                 if (!$establishment) {
                     return response()->json(['error' => 'Establishment not found.'], 404);
                 }
 
-                // Fetch paginated applications with relationships and media
                 $applications = Application::with(['establishment', 'applicationStatuses'])
-                    ->where('establishment_id', $establishment->id) // Access 'id' safely
+                    ->where('establishment_id', $establishment->id)
                     ->paginate($limit, ['*'], 'page', $page);
             }
 
-            // Format response for Bootstrap Table
+            // Transform data using API Resource
             return response()->json([
-                'total' => $applications->total(), // Total number of records
-                'rows' => $applications->items(),  // Current page data
+                'total' => $applications->total(),
+                'rows' => ApplicationResource::collection($applications),
             ], 200);
         } catch (\Exception $e) {
             Log::error('Error fetching Applications', ['error' => $e->getMessage()]);
@@ -176,7 +171,6 @@ class ApplicationController extends Controller
             // Attach FSIC requirements
             $fsic_requirements = $application->getMedia('fsic_requirements')->map(function ($media) {
                 return [
-                    'id' => $media->id,
                     'name' => $media->name,
                     'url' => $media->getUrl(),
                     'thumbnail' => $media->getUrl('thumbnail'),
@@ -184,7 +178,6 @@ class ApplicationController extends Controller
             });
 
             return response()->json([
-                'application' => $application,
                 'fsic_requirements' => $fsic_requirements
             ], 200);
         } catch (\Exception $e) {

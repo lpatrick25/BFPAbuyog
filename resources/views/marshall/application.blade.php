@@ -56,13 +56,15 @@
                         <label for="inspector_id">Inspector Name: <span class="text-danger">*</span></label>
                         <select class="form-control" name="inspector_id" id="inspector_id">
                             @foreach ($inspectors as $inspector)
-                                <option value="{{ $inspector->id }}">{{ $inspector->inspector->getFullName() }}</option>
+                                <option value="{{ $inspector->inspector->id }}">{{ $inspector->inspector->getFullName() }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <label for="schedule_date">Schedule Date: <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control" id="schedule_date" name="schedule_date">
+                        <input type="date" class="form-control" id="schedule_date" name="schedule_date"
+                            min="{{ date('Y-m-d') }}">
                     </div>
                 </div>
                 <div class="modal-footer text-end">
@@ -89,6 +91,22 @@
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
+        </div>
+    </div>
+    <div class="modal fade" id="requirements" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="requirementsLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="requirementsLabel">Application Requiments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="requirementsContainer"></div>
+                </div>
+                <div class="modal-footer text-end">
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -150,12 +168,6 @@
         }
 
         $(document).ready(function() {
-
-            $('#add-btn').click(function(event) {
-                event.preventDefault();
-                window.location.href = '{{ route('application.add') }}';
-            });
-
             // $("select").select2({
             //     width: '100%'
             // });
@@ -251,15 +263,39 @@
 
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
+                // Check if there are statuses
+                if (!row.application_statuses || row.application_statuses.length === 0) {
+                    return ''; // No statuses, so no buttons
+                }
+
+                // Find the latest status (based on updated_at)
+                let latestStatus = row.application_statuses.reduce((latest, status) => {
+                    return new Date(status.updated_at) > new Date(latest.updated_at) ? status : latest;
+                });
+
                 // Default action buttons
-                let actionButtons = `
-                    <button class="btn btn-sm btn-info" onclick="applicationSchedule('${row.id}')">
-                        <i class="bi bi-calendar-check"></i>
-                    </button>
-                    <button class="btn btn-sm btn-success" onclick="applicationRemarks('${row.id}')">
-                        <i class="bi bi-card-checklist"></i>
-                    </button>
-                `;
+                let actionButtons = ``;
+
+                // If the latest status is NOT "Under Review", disable or hide the buttons
+                if (latestStatus.status === "Under Review") {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-info" onclick="applicationSchedule('${row.id}')">
+                            <i class="bi bi-calendar-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="applicationRemarks('${row.id}')">
+                            <i class="bi bi-card-checklist"></i>
+                        </button>
+                    `;
+                } else {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-info" disabled>
+                            <i class="bi bi-calendar-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" disabled>
+                            <i class="bi bi-card-checklist"></i>
+                        </button>
+                    `;
+                }
 
                 return actionButtons;
             }
@@ -287,7 +323,7 @@
             $('#remarksForm').submit(function(event) {
                 event.preventDefault();
 
-                let submitBtn = $('button[id="submit-btn"]');
+                let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
 
                 // Remove previous error messages and invalid classes
@@ -355,7 +391,7 @@
             $('#scheduleForm').submit(function(event) {
                 event.preventDefault();
 
-                let submitBtn = $('button[id="submit-btn"]');
+                let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
 
                 // Remove previous error messages and invalid classes
@@ -373,20 +409,12 @@
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
-                        // Scroll to the top of the page
-                        $('html, body').animate({
-                            scrollTop: 0
-                        }, 'slow');
-
                         showToast('success', response.message);
 
                         // Reset the form
-                        $('#addForm')[0].reset();
+                        $('#scheduleForm')[0].reset();
 
-                        // Reset the form
-                        setInterval(() => {
-                            goBack();
-                        }, 1000);
+                        $('#schedule').modal('hide');
                     },
                     error: function(xhr) {
                         if (xhr.status === 422 && xhr.responseJSON.errors) {

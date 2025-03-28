@@ -8,7 +8,7 @@
     <style>
         /* General Styles */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             color: #333;
             margin: 0;
             padding: 0;
@@ -17,10 +17,10 @@
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 700px;
             margin: 40px auto;
-            background: #fff;
-            padding: 25px;
+            background: #ffffff;
+            padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             border: 2px solid #b22222;
@@ -30,13 +30,14 @@
         .header {
             text-align: center;
             padding: 20px 0;
+            border-bottom: 5px solid #b22222;
             background: #b22222;
             border-top-left-radius: 6px;
             border-top-right-radius: 6px;
         }
 
         .header img {
-            max-width: 130px;
+            max-width: 120px;
         }
 
         /* Main Content */
@@ -48,7 +49,7 @@
         .content-header {
             background-color: #ffeeba;
             border-left: 6px solid #b22222;
-            padding: 18px;
+            padding: 20px;
             border-radius: 6px;
             margin-bottom: 20px;
         }
@@ -63,9 +64,10 @@
             margin: 12px 0;
             font-size: 16px;
             line-height: 1.6;
+            color: #333;
         }
 
-        /* Establishment Details */
+        /* Details Section */
         .details {
             background: #f9f9f9;
             padding: 18px;
@@ -83,7 +85,22 @@
             color: #b22222;
         }
 
-        /* CTA Button */
+        /* Reinspection Notice */
+        .inspector {
+            margin-top: 20px;
+            padding: 18px;
+            background: #fff3cd;
+            border-left: 6px solid #d9534f;
+            border-radius: 6px;
+        }
+
+        .inspector p {
+            margin: 0;
+            font-size: 15px;
+            color: #b22222;
+        }
+
+        /* Centered CTA Button */
         .button-container {
             text-align: center;
             margin: 25px 0;
@@ -93,7 +110,7 @@
             display: inline-block;
             padding: 12px 24px;
             background: #b22222;
-            color: rgb(255, 255, 255);
+            color: white;
             text-decoration: none;
             font-weight: bold;
             font-size: 15px;
@@ -172,22 +189,29 @@
                     Your application for the establishment
                     <strong>{{ $establishment->name }}</strong>,
                     located at <strong>{{ $establishment->address_brgy }}</strong>,
-                    has been reviewed.
+                    has been scheduled for a
+                    <strong>{{ strtolower($scheduleType) }}</strong>.
                 </p>
-                <p><strong>Remarks:</strong> {{ $remarks }}</p>
-                <p>{{ $remarksMessage }}</p>
             </div>
 
             <!-- Inspection Details -->
             <div class="details">
                 <p><strong>📅 Inspection Date:</strong> {{ date('F j, Y', strtotime($scheduleDate)) }}</p>
-                <p><strong>📝 Schedule Type:</strong> Reinspection</p>
+                <p><strong>📝 Schedule Type:</strong> {{ $scheduleType }}</p>
                 <p><strong>👨‍🚒 Inspector Assigned:</strong> {{ $inspector->getFullName() }}</p>
             </div>
 
+            <!-- Reinspection Notice -->
+            @if ($scheduleType == 'Reinspection')
+                <div class="inspector">
+                    <p><strong>⚠️ Important Notice:</strong> This is a reinspection due to previous remarks. Please
+                        ensure compliance before the scheduled date.</p>
+                </div>
+            @endif
+
             <!-- Contact Info -->
             <p>
-                If you have any questions or need assistance, please contact us at:
+                If you have any questions, feel free to contact us at:
                 <a href="mailto:{{ config('mail.from.address') }}">{{ config('mail.from.address') }}</a>
             </p>
 

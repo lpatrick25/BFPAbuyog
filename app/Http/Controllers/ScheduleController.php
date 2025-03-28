@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ScheduleStoreRequest;
+use App\Http\Resources\ScheduleResource;
 use App\Models\Schedule;
 use App\Models\Application;
 use App\Models\Inspector;
@@ -21,7 +22,7 @@ class ScheduleController extends Controller
             DB::beginTransaction();
 
             // Create Schedule
-            $schedule = Schedule::create($request);
+            $schedule = Schedule::create($request->all());
 
             DB::commit();
             Log::info('Schedule created successfully', ['schedule_id' => $schedule->id]);
@@ -93,13 +94,22 @@ class ScheduleController extends Controller
     /**
      * Get all Schedules.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $schedules = Schedule::with(['application', 'inspector'])->get();
-            return response()->json(['schedules' => $schedules], 200);
+            $limit = $request->get('limit', 10);
+            $page = $request->get('page', 1);
+
+            $clients = Schedule::with(['application.establishment', 'inspector'])
+                ->paginate($limit, ['*'], 'page', $page);
+
+            // Transform data using API Resource
+            return response()->json([
+                'total' => $clients->total(),
+                'rows' => ScheduleResource::collection($clients),
+            ], 200);
         } catch (\Exception $e) {
-            Log::error('Error fetching Schedules', ['error' => $e->getMessage()]);
+            Log::error('Error fetching Clients', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Something went wrong.'], 500);
         }
     }
