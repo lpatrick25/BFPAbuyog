@@ -226,11 +226,11 @@
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
-                    if (response.fsic_requirements && response.fsic_requirements.length > 0) {
+                    if (response && response.length > 0) {
                         let count = 1;
                         let html = '<ul class="list-group list-group-flush">';
 
-                        response.fsic_requirements.forEach((req, index) => {
+                        response.forEach((req, index) => {
                             let displayName = req.name.replace(/_/g,
                                 ' '); // Convert underscores to spaces
 

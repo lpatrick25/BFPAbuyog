@@ -8,7 +8,9 @@ use App\Http\Resources\Application\ApplicationResource;
 use App\Http\Resources\Application\PaginatedApplicationResource;
 use App\Models\Application;
 use App\Services\ApplicationService;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ApplicationController extends Controller
 {
@@ -19,32 +21,45 @@ class ApplicationController extends Controller
         $this->applicationService = $applicationService;
     }
 
-    public function store(ApplicationStoreRequest $request)
+    public function store(ApplicationStoreRequest $request): ApplicationResource
     {
         $application = $this->applicationService->store($request->validated());
 
         return new ApplicationResource($application);
     }
 
-    public function update(ApplicationUpdateRequest $request, $id)
+    public function update(ApplicationUpdateRequest $request, $id): ApplicationResource
     {
         $application = $this->applicationService->update($request->validated(), $id);
 
         return new ApplicationResource($application);
     }
 
-    public function destroy(Application $application)
+    public function destroy(Application $application): JsonResponse
     {
         $application->delete();
 
         return response()->json('', 200);
     }
 
-    public function index()
+    public function index(): PaginatedApplicationResource
     {
         $query = $this->applicationService->getAllApplications();
         $applications = $query->paginate($this->limit, ['*'], 'page', $this->page);
 
         return new PaginatedApplicationResource($applications);
+    }
+
+    public function show(Application $application): Collection|Media
+    {
+        $fsic_requirements = $application->getMedia('fsic_requirements')->map(function ($media) {
+            return [
+                'name' => $media->name,
+                'url' => $media->getUrl(),
+                'thumbnail' => $media->getUrl('thumbnail'),
+            ];
+        });
+
+        return $fsic_requirements;
     }
 }

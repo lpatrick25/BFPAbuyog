@@ -2,7 +2,7 @@
 @section('APP-TITLE')
     Dashboard
 @endsection
-@section('marshall-dashboard')
+@section('client-dashboard')
     active
 @endsection
 @section('APP-CONTENT')
@@ -121,7 +121,7 @@
                                     </div>
                                 </div>
                                 <div class="mb-2 d-flex align-items-center justify-content-between">
-                                    <p class="mb-0">Marshall Name</p>
+                                    <p class="mb-0">Inspector Name</p>
                                     <p class="mb-0">Date Created</p>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">

@@ -233,7 +233,7 @@
             @if ($scheduleDate)
                 <div class="details">
                     <p><strong>📅 Inspection Date:</strong> {{ date('F j, Y', strtotime($scheduleDate)) }}</p>
-                    <p><strong>📝 Schedule Type:</strong> Reinspection</p>
+                    <p><strong>📝 Schedule Type:</strong> {{ $inspectionType }}</p>
                     <p><strong>👨‍🚒 Inspector Assigned:</strong> {{ $inspector->getFullName() }}</p>
                 </div>
             @else

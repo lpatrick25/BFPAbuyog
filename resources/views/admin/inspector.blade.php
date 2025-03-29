@@ -2,6 +2,9 @@
 @section('APP-TITLE')
     Inspector
 @endsection
+@section('admin-inspector')
+    active
+@endsection
 @section('APP-CONTENT')
     <div class="row">
         <div class="col-lg-12">

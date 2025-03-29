@@ -9,7 +9,30 @@ class ScheduleService
 
     public function getAllSchedule()
     {
-        return Schedule::with(['application.establishment', 'inspector']);
+        $schedule = Schedule::with(['application.establishment', 'inspector']);
+
+        if (auth()->user()->role === 'Inspector') {
+            $inspector = auth()->user()->inspector;
+
+            if ($inspector) {
+                $schedule->where('inspector_id', $inspector->id)
+                    ->where('status', 'Ongoing');
+            }
+        }
+
+        if (auth()->user()->role === 'Client') {
+            $client = auth()->user()->client;
+
+            if ($client) {
+                $schedules = Schedule::whereHas('application', function ($query) use ($client) {
+                    $query->whereHas('establishment', function ($q) use ($client) {
+                        $q->where('client_id', $client->id);
+                    });
+                })->get();
+            }
+        }
+
+        return $schedule;
     }
 
     public function store(array $data)

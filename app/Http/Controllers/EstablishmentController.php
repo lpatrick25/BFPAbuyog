@@ -8,9 +8,6 @@ use App\Http\Resources\Establishment\EstablishmentResource;
 use App\Http\Resources\Establishment\PaginatedEstablishmentResource;
 use App\Models\Establishment;
 use App\Services\EstablishmentService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class EstablishmentController extends Controller
 {
@@ -22,39 +19,27 @@ class EstablishmentController extends Controller
         $this->establishmentService = $establishmentService;
     }
 
-    /**
-     * Store a new Establishment.
-     */
-    public function store(EstablishmentStoreRequest $request)
+    public function store(EstablishmentStoreRequest $request): EstablishmentResource
     {
         $establishment = $this->establishmentService->store($request->validated());
 
         return new EstablishmentResource($establishment);
     }
 
-    /**
-     * Update an Establishment.
-     */
-    public function update(EstablishmentUpdateRequest $request, $id)
+    public function update(EstablishmentUpdateRequest $request, $id): EstablishmentResource
     {
         $establishment = $this->establishmentService->update($request->validated(), $id);
 
         return new EstablishmentResource($establishment);
     }
 
-    /**
-     * Delete an Establishment.
-     */
     public function destroy(Establishment $establishment)
     {
         $establishment->delete();
         return response()->json('', 200);
     }
 
-    /**
-     * Get all Establishments.
-     */
-    public function index()
+    public function index(): PaginatedEstablishmentResource
     {
         $query = $this->establishmentService->getAllEstablishments();
         $establishments = $query->paginate($this->limit, ['*'], 'page', $this->page);
@@ -62,10 +47,7 @@ class EstablishmentController extends Controller
         return new PaginatedEstablishmentResource($establishments);
     }
 
-    /**
-     * Get a single Establishment.
-     */
-    public function show(Establishment $establishment)
+    public function show(Establishment $establishment): EstablishmentResource
     {
         return new EstablishmentResource($establishment);
     }

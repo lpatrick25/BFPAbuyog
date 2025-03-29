@@ -2,6 +2,9 @@
 @section('APP-TITLE')
     Client
 @endsection
+@section('admin-client')
+    active
+@endsection
 @section('APP-CONTENT')
     <div class="row">
         <div class="col-lg-12">

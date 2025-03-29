@@ -3,14 +3,8 @@
 namespace App\Http\Controllers\navigation;
 
 use App\Http\Controllers\Controller;
-use App\Mail\ScheduleNotification;
-use App\Models\ApplicationStatus;
-use App\Models\Schedule;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class MarshallController extends Controller
 {
@@ -26,6 +20,7 @@ class MarshallController extends Controller
             return response()->json(['error' => 'Dashboard View not found.'], 500);
         }
     }
+
     public function establishments()
     {
         try {
@@ -59,8 +54,8 @@ class MarshallController extends Controller
             // Pass the data to the view
             return view('marshall.schedule', compact('inspectors'));
         } catch (\Exception $e) {
-            Log::error('Error retrieving Application View', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Application View not found.'], 500);
+            Log::error('Error retrieving Schedule View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Schedule View not found.'], 500);
         }
     }
 }

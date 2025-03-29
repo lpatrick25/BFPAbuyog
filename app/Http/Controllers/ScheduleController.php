@@ -18,30 +18,21 @@ class ScheduleController extends Controller
         $this->scheduleService = $scheduleService;
     }
 
-    /**
-     * Store a new Schedule.
-     */
-    public function store(ScheduleStoreRequest $request)
+    public function store(ScheduleStoreRequest $request): ScheduleResource
     {
         $schedule = $this->scheduleService->store($request->validated());
 
         return new ScheduleResource($schedule);
     }
 
-    /**
-     * Update a Schedule.
-     */
-    public function update(ScheduleUpdateRequest $request, $application_id)
+    public function update(ScheduleUpdateRequest $request, $application_id): ScheduleResource
     {
         $schedule = $this->scheduleService->update($request->validated(), $application_id);
 
         return new ScheduleResource($schedule);
     }
 
-    /**
-     * Get all Schedules.
-     */
-    public function index()
+    public function index(): PaginatedScheduleResource
     {
         $query = $this->scheduleService->getAllSchedule();
         $schedules = $query->paginate($this->limit, ['*'], 'page', $this->page);

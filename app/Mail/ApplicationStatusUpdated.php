@@ -22,6 +22,7 @@ class ApplicationStatusUpdated extends Mailable
     public function build()
     {
         // Define subject and message content dynamically
+        $inspectionType = 'Reinspection';
         $remarks = $this->applicationStatus->remarks;
         $subject = 'Application Status Update';
         $remarksMessage = 'Please review the details below.';
@@ -43,7 +44,13 @@ class ApplicationStatusUpdated extends Mailable
                 $subject = 'Stoppage of Operation Issued';
                 $remarksMessage = 'A stoppage of operation has been enforced. Please resolve the issues immediately.';
                 break;
+            case 'Establishment Complied':
+                $inspectionType = 'Completed';
+                $subject = 'Establishment Complied';
+                $remarksMessage = 'Inspection completed: The establishment is now fully compliant.';
+                break;
             default:
+                $inspectionType = 'Pending';
                 $subject = 'Application Denied';
                 $remarksMessage = 'Your application has been denied. Please address the issues mentioned.';
                 break;
@@ -62,6 +69,7 @@ class ApplicationStatusUpdated extends Mailable
                 'remarksMessage' => $remarksMessage,
                 'scheduleDate' => $schedule?->schedule_date ?? '',
                 'inspector' => $schedule?->inspector,
+                'inspectionType' => $inspectionType,
             ]);
     }
 }

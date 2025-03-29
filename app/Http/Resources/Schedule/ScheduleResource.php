@@ -22,6 +22,7 @@ class ScheduleResource extends Resource
             'location_latitude' => $this->application->establishment->location_latitude,
             'location_longitude' => $this->application->establishment->location_longitude,
             'inspector' => $this->inspector->getFullName(),
+            'status' => $this->status,
         ];
     }
 }

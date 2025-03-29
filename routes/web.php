@@ -11,6 +11,7 @@ use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\MarshallController;
 use App\Http\Controllers\navigation\AdminController;
 use App\Http\Controllers\navigation\ClientController as NavigationClientController;
+use App\Http\Controllers\navigation\InspectorController as NavigationInspectorController;
 use App\Http\Controllers\navigation\MarshallController as NavigationMarshallController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
@@ -113,6 +114,7 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
     Route::get('dashboard', [NavigationClientController::class, 'dashboards'])->name('client.dashboard');
     Route::get('establishmentList', [NavigationClientController::class, 'establishments'])->name('establishment.list');
     Route::get('applicationList', [NavigationClientController::class, 'applications'])->name('application.list');
+    Route::get('scheduleList', [NavigationClientController::class, 'schedules'])->name('client.schedule');
 
     // Route Add Pages
     Route::get('addEstablishment', [NavigationClientController::class, 'addEstablishment'])->name('establishment.add');
@@ -134,9 +136,12 @@ Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
     Route::get('establishmentList', [NavigationMarshallController::class, 'establishments'])->name('marshall.establishments');
     Route::get('applicantList', [NavigationMarshallController::class, 'applicants'])->name('applicant.list');
     Route::get('scheduleList', [NavigationMarshallController::class, 'schedule'])->name('schedule.list');
+});
 
-    // Other Route
-    Route::put('changeSchedule/{applicationId}', [NavigationMarshallController::class, 'changeSchedule'])->name('schedule.change');
+Route::prefix('inspector')->middleware(['auth', 'guest'])->group(function () {
+    // Route View
+    Route::get('dashboard', [NavigationInspectorController::class, 'dashboards'])->name('inspector.dashboard');
+    Route::get('scheduleList', [NavigationInspectorController::class, 'schedule'])->name('schedule.inspection');
 });
 
 // Route Resource

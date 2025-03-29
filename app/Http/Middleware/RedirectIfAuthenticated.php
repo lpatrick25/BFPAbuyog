@@ -26,6 +26,11 @@ class RedirectIfAuthenticated
                 // Redirect based on user role
                 switch ($user->role) {
                     case 'Admin':
+
+                        if ($request->is('admin/*')) {
+                            return $next($request);
+                        }
+
                         return redirect('/admin/dashboard');
                     case 'Marshall':
 
@@ -35,6 +40,11 @@ class RedirectIfAuthenticated
 
                         return redirect('/marshall/dashboard');
                     case 'Inspector':
+
+                        if ($request->is('inspector/*')) {
+                            return $next($request);
+                        }
+
                         return redirect('/inspector/dashboard');
                     case 'Client':
 

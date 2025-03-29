@@ -73,6 +73,6 @@ class User extends Authenticatable implements MustVerifyEmail
             return $this->marshall->getFullName();
         }
 
-        return 'No Name Available';
+        return 'Administrator';
     }
 }

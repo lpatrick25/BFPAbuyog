@@ -2,6 +2,9 @@
 @section('APP-TITLE')
     Marshall
 @endsection
+@section('admin-marshall')
+    active
+@endsection
 @section('APP-CONTENT')
     <div class="row">
         <div class="col-lg-12">

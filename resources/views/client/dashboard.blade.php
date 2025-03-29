@@ -125,15 +125,8 @@
                                     <p class="mb-0">Date Created</p>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    @php
-                                        $user = auth()->user();
-                                        $firstName = optional($user->client)->first_name;
-                                        $middleName = optional($user->client)->middle_name;
-                                        $lastName = optional($user->client)->last_name;
-                                        $extensionName = optional($user->client)->extensionName;
-                                    @endphp
-                                    <h6>{{ $firstName }} {{ $middleName ?? '' }} {{ $lastName }}</h6>
-                                    <h6 class="ms-5">{{ $user->created_at->format('m/d/Y') }}</h6>
+                                    <h6>{{ optional(auth()->user())->getFullName() }}</h6>
+                                    <h6 class="ms-5">{{ date('m/d/Y', strtotime(optional(auth()->user())->created_at)) }}</h6>
                                 </div>
                             </div>
                         </div>

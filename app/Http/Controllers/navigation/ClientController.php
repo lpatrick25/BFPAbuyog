@@ -40,6 +40,16 @@ class ClientController extends Controller
         }
     }
 
+    public function schedules()
+    {
+        try {
+            return view('client.schedule');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Schedule View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Schedule View not found.'], 500);
+        }
+    }
+
     public function addEstablishment()
     {
         try {
