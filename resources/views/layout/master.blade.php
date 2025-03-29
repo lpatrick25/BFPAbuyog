@@ -154,12 +154,15 @@
     <!-- select2 JS -->
     <script src="{{ asset('js/select2/select2.full.min.js') }}"></script>
 
-    <!-- AOS Animation Plugin-->
+    <!-- Error Handler -->
+    <script src="{{ asset('js/error-handler.js') }}"></script>
 
     <!-- App Script -->
     <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
 
     <script type="text/javascript">
+        var timerInterval = null;
+
         function goBack() {
             if (document.referrer) {
                 window.history.back(); // Go to the previous page if available
@@ -170,7 +173,6 @@
 
         function showLoadingDialog(title) {
             const startTime = Date.now();
-            let timerInterval;
 
             Swal.fire({
                 title: title,

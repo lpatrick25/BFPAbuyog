@@ -35,7 +35,6 @@ return new class extends Migration
             $table->string('email', 255);
             $table->string('landline', 20)->nullable();
             $table->string('contact_number', 15);
-            $table->softDeletes();
             $table->timestamps();
         });
     }

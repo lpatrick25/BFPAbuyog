@@ -437,7 +437,7 @@
                             scrollTop: 0
                         }, 'slow');
 
-                        showToast('success', response.message);
+                        showToast('success', 'Success');
 
                         // Reset the form
                         $('#addForm')[0].reset();

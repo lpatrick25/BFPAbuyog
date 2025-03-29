@@ -73,14 +73,10 @@
                 success: function(response) {
                     clearInterval(timerInterval);
                     $('#table1').bootstrapTable('refresh');
-                    showToast('success', response.message);
+                    showToast('success', 'Success');
                     Swal.close();
                 },
-                error: function(xhr) {
-                    clearInterval(timerInterval);
-                    Swal.close();
-                    showToast('danger', xhr.responseJSON.message || 'Something went wrong.');
-                }
+                error: handleAjaxError
             });
         }
 
@@ -138,7 +134,7 @@
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total, // Set total count
+                        total: res.pagination.total, // Set total count
                         rows: res.rows // Set data rows
                     };
                 },

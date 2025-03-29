@@ -209,7 +209,7 @@
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total, // Set total count
+                        total: res.pagination.total, // Set total count
                         rows: res.rows // Set data rows
                     };
                 },
