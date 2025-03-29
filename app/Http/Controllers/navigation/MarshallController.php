@@ -63,33 +63,4 @@ class MarshallController extends Controller
             return response()->json(['error' => 'Application View not found.'], 500);
         }
     }
-
-    public function changeSchedule(Request $request, $application_id)
-    {
-        try {
-            $request->validate([
-                'reschedule_date' => 'nullable|date|after_or_equal:today',
-            ]);
-
-            $schedule = Schedule::where('application_id', $application_id)->first();
-            $schedule->schedule_date = $request->reschedule_date;
-            $schedule->save();
-
-            // Retrieve related models
-            $application = $schedule->application;
-            $establishment = $application->establishment ?? null;
-            $client = $establishment->client ?? null;
-
-            if ($client && $client->email) {
-                Mail::to($client->email)->send(new ScheduleNotification($schedule, 'Reschedule'));
-            }
-
-            Log::info('Inspection has been successfully rescheduled', ['schedule_id' => $schedule->id]);
-
-            return response()->json(['message' => 'Inspection has been successfully rescheduled'], 201);
-        } catch (\Exception $e) {
-            Log::error('Error changing the inspection date', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Error changing the inspection date'], 500);
-        }
-    }
 }

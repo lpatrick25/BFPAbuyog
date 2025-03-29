@@ -37,25 +37,9 @@ class EstablishmentController extends Controller
      */
     public function update(EstablishmentUpdateRequest $request, $id)
     {
-        try {
-            DB::beginTransaction();
+        $establishment = $this->establishmentService->update($request->validated(), $id);
 
-            // Find Establishment
-            $establishment = Establishment::findOrFail($id);
-
-            // Update Establishment
-            $establishment->update($request->all());
-
-            DB::commit();
-            Log::info('Establishment updated successfully', ['establishment_id' => $establishment->id]);
-
-            return response()->json(['message' => 'Establishment updated successfully', 'establishment' => $establishment], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating Establishment', ['error' => $e->getMessage()]);
-
-            return response()->json(['error' => 'Something went wrong.'], 500);
-        }
+        return new EstablishmentResource($establishment);
     }
 
     /**
@@ -64,12 +48,13 @@ class EstablishmentController extends Controller
     public function destroy(Establishment $establishment)
     {
         $establishment->delete();
+        return response()->json('', 200);
     }
 
     /**
      * Get all Establishments.
      */
-    public function index(Request $request)
+    public function index()
     {
         $query = $this->establishmentService->getAllEstablishments();
         $establishments = $query->paginate($this->limit, ['*'], 'page', $this->page);

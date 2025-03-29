@@ -116,26 +116,26 @@
             var $table1 = $('#table1');
 
             $table1.bootstrapTable({
-                url: '/establishments', // Laravel API endpoint
+                url: '/establishments',
                 method: 'GET',
                 pagination: true,
-                sidePagination: 'server', // Enable server-side pagination
-                pageSize: 10, // Default records per page
-                pageList: [5, 10, 25, 50, 100], // Page size options
-                search: true, // Enable search
+                sidePagination: 'server',
+                pageSize: 10,
+                pageList: [5, 10, 25, 50, 100],
+                search: true,
                 buttonsAlign: 'left',
                 searchAlign: 'left',
                 toolbarAlign: 'right',
                 queryParams: function(params) {
                     return {
-                        limit: params.limit, // Number of records per page
-                        page: params.offset / params.limit + 1 // Page number
+                        limit: params.limit,
+                        page: params.offset / params.limit + 1
                     };
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.pagination.total, // Set total count
-                        rows: res.rows // Set data rows
+                        total: res.pagination.total,
+                        rows: res.rows
                     };
                 },
                 columns: [{

@@ -1,18 +1,17 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Schedule;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Resource;
 
-class ScheduleResource extends JsonResource
+class ScheduleResource extends Resource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,

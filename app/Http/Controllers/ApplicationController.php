@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ApplicationStoreRequest;
 use App\Http\Requests\ApplicationUpdateRequest;
+use App\Http\Resources\Application\ApplicationResource;
+use App\Http\Resources\Application\PaginatedApplicationResource;
+use App\Models\Application;
 use App\Services\ApplicationService;
 use Illuminate\Http\Request;
 
@@ -18,26 +21,30 @@ class ApplicationController extends Controller
 
     public function store(ApplicationStoreRequest $request)
     {
-        return $this->applicationService->storeApplication($request);
+        $application = $this->applicationService->store($request->validated());
+
+        return new ApplicationResource($application);
     }
 
     public function update(ApplicationUpdateRequest $request, $id)
     {
-        return $this->applicationService->updateApplication($request, $id);
+        $application = $this->applicationService->update($request->validated(), $id);
+
+        return new ApplicationResource($application);
     }
 
-    public function destroy($id)
+    public function destroy(Application $application)
     {
-        return $this->applicationService->deleteApplication($id);
+        $application->delete();
+
+        return response()->json('', 200);
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        return $this->applicationService->getAllApplications($request);
-    }
+        $query = $this->applicationService->getAllApplications();
+        $applications = $query->paginate($this->limit, ['*'], 'page', $this->page);
 
-    public function show($id)
-    {
-        return $this->applicationService->getApplicationById($id);
+        return new PaginatedApplicationResource($applications);
     }
 }

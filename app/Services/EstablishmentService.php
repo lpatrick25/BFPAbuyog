@@ -18,4 +18,12 @@ class EstablishmentService
 
         return $establishment;
     }
+
+    public function update(array $data, $id)
+    {
+        $establishment = Establishment::find($id);
+        $establishment->update($data);
+
+        return $establishment;
+    }
 }

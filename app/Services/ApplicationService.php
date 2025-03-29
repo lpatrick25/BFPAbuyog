@@ -11,121 +11,55 @@ use Illuminate\Support\Str;
 
 class ApplicationService
 {
-    public function storeApplication(Request $request)
+    public function store(array $data)
     {
-        try {
-            DB::beginTransaction();
+        $applicationNumber = $this->generateUniqueApplicationNumber();
 
-            $applicationNumber = $this->generateUniqueApplicationNumber();
+        $data['application_number'] = $applicationNumber;
+        $data['application_date'] = now();
+        $application = Application::create($data);
 
-            $request->merge([
-                'application_number' => $applicationNumber,
-                'application_date' => now(),
-            ]);
+        $this->handleFsicRequirements($application);
 
-            $application = Application::create($request->all());
-
-            $this->handleFsicRequirements($application, $request);
-
-            DB::commit();
-            return response()->json(['message' => 'Application created successfully', 'application' => $application], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Something went wrong.', 'details' => $e->getMessage()], 500);
-        }
+        return $application;
     }
 
-    public function updateApplication(Request $request, $id)
+    public function update(array $array, $id)
     {
-        try {
-            DB::beginTransaction();
+        $application = Application::find($id);
+        $application->clearMediaCollection('fsic_requirements');
+        $this->handleFsicRequirements($application);
 
-            $application = Application::findOrFail($id);
-            $application->clearMediaCollection('fsic_requirements');
-
-            $this->handleFsicRequirements($application, $request);
-
-            DB::commit();
-            Log::info('Application updated successfully', ['application_id' => $application->id]);
-
-            return response()->json(['message' => 'Application updated successfully', 'application' => $application], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating Application', ['error' => $e->getMessage()]);
-
-            return response()->json(['error' => 'Something went wrong.', 'details' => $e->getMessage()], 500);
-        }
+        return $application;
     }
 
-    public function deleteApplication($id)
+    private function handleFsicRequirements(Application $application)
     {
-        try {
-            DB::beginTransaction();
+        $fsicType = $application->fsic_type;
+        $requirements = config("fsic_requirements.$fsicType", []);
 
-            $application = Application::findOrFail($id);
-            $application->delete();
+        foreach ($requirements as $requirement) {
+            $inputName = Str::snake(str_replace(['(', ')'], '', $requirement));
 
-            DB::commit();
-            Log::info('Application deleted successfully', ['application_id' => $id]);
-
-            return response()->json(['message' => 'Application deleted successfully'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error deleting Application', ['error' => $e->getMessage()]);
-
-            return response()->json(['error' => 'Something went wrong.'], 500);
-        }
-    }
-
-    public function getAllApplications(Request $request)
-    {
-        try {
-            $limit = $request->get('limit', 10);
-            $page = $request->get('page', 1);
-
-            if (auth()->user()->role === 'Marshall') {
-                $applications = Application::with(['establishment', 'applicationStatuses'])
-                    ->paginate($limit, ['*'], 'page', $page);
-            } else {
-                $client_id = optional(auth()->user())->client->id;
-                $establishment = Establishment::where('client_id', $client_id)->first();
-
-                if (!$establishment) {
-                    return response()->json(['error' => 'Establishment not found.'], 404);
-                }
-
-                $applications = Application::with(['establishment', 'applicationStatuses'])
-                    ->where('establishment_id', $establishment->id)
-                    ->paginate($limit, ['*'], 'page', $page);
+            // Use Laravel's global request() helper to check for files
+            if (request()->hasFile($inputName)) {
+                $application->addMedia(request()->file($inputName))
+                    ->usingName($requirement)
+                    ->toMediaCollection('fsic_requirements');
             }
-
-            return response()->json([
-                'total' => $applications->total(),
-                'rows' => $applications->items(),
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error fetching Applications', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Something went wrong.'], 500);
         }
     }
 
-    public function getApplicationById($id)
+    public function getAllApplications()
     {
-        try {
-            $application = Application::findOrFail($id);
+        if (auth()->user()->role === 'Marshall') {
+            return Application::with(['establishment', 'applicationStatuses']);
+        } else {
+            $client_id = optional(auth()->user())->client->id;
+            $establishment = Establishment::where('client_id', $client_id)->first();
 
-            $fsic_requirements = $application->getMedia('fsic_requirements')->map(function ($media) {
-                return [
-                    'name' => $media->name,
-                    'url' => $media->getUrl(),
-                    'thumbnail' => $media->getUrl('thumbnail'),
-                ];
-            });
-
-            return response()->json(['fsic_requirements' => $fsic_requirements], 200);
-        } catch (\Exception $e) {
-            Log::error('Error fetching Application', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Application not found.'], 404);
+            return Application::with(['establishment', 'applicationStatuses'])
+                ->where('establishment_id', $establishment->id);
         }
     }
 
@@ -136,21 +70,5 @@ class ApplicationService
         } while (Application::where('application_number', $applicationNumber)->exists());
 
         return $applicationNumber;
-    }
-
-    private function handleFsicRequirements(Application $application, Request $request)
-    {
-        $fsicType = $application->fsic_type;
-        $requirements = config("fsic_requirements.$fsicType", []);
-
-        foreach ($requirements as $requirement) {
-            $inputName = Str::snake(str_replace(['(', ')'], '', $requirement));
-
-            if ($request->hasFile($inputName)) {
-                $application->addMedia($request->file($inputName))
-                    ->usingName($requirement)
-                    ->toMediaCollection('fsic_requirements');
-            }
-        }
     }
 }

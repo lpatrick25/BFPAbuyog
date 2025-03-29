@@ -60,8 +60,8 @@ class ApplicationStatusUpdated extends Mailable
                 'establishment' => $this->applicationStatus->application->establishment,
                 'subject' => $subject,
                 'remarksMessage' => $remarksMessage,
-                'scheduleDate' => $schedule->schedule_date,
-                'inspector' => $schedule->inspector,
+                'scheduleDate' => $schedule?->schedule_date ?? '',
+                'inspector' => $schedule?->inspector,
             ]);
     }
 }

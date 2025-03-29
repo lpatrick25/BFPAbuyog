@@ -85,6 +85,22 @@
             color: #b22222;
         }
 
+        /* Reinspection Notice */
+        .inspector {
+            margin-top: 20px;
+            padding: 18px;
+            background: #fff3cd;
+            border-left: 6px solid #d9534f;
+            border-right: 6px solid #d9534f;
+            border-radius: 6px;
+        }
+
+        .inspector p {
+            margin: 0;
+            font-size: 15px;
+            color: #b22222;
+        }
+
         /* CTA Button */
         .button-container {
             text-align: center;
@@ -214,11 +230,18 @@
             </div>
 
             <!-- Inspection Details -->
-            <div class="details">
-                <p><strong>📅 Inspection Date:</strong> {{ date('F j, Y', strtotime($scheduleDate)) }}</p>
-                <p><strong>📝 Schedule Type:</strong> Reinspection</p>
-                <p><strong>👨‍🚒 Inspector Assigned:</strong> {{ $inspector->getFullName() }}</p>
-            </div>
+            @if ($scheduleDate)
+                <div class="details">
+                    <p><strong>📅 Inspection Date:</strong> {{ date('F j, Y', strtotime($scheduleDate)) }}</p>
+                    <p><strong>📝 Schedule Type:</strong> Reinspection</p>
+                    <p><strong>👨‍🚒 Inspector Assigned:</strong> {{ $inspector->getFullName() }}</p>
+                </div>
+            @else
+                <div class="inspector">
+                    <p><strong>⚠️ Important Notice:</strong> Compliance is required to proceed. Please address the
+                        specified issues to meet the necessary standards.</p>
+                </div>
+            @endif
 
             <!-- Contact Info -->
             <p>

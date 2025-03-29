@@ -193,7 +193,7 @@
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total,
+                        total: res.pagination.total,
                         rows: res.rows
                     };
                 },
@@ -209,7 +209,7 @@
                         field: 'application_date',
                         title: 'Application Date',
                         formatter: function(value, row, index) {
-                            if (!value) return 'N/A'; // Handle empty values
+                            if (!value) return 'N/A';
 
                             let date = new Date(value);
                             return date.toLocaleDateString('en-US', {
@@ -370,43 +370,7 @@
                         $('#remarks').modal('hide');
                         Swal.close();
                     },
-                    error: function(xhr) {
-                        clearInterval(timerInterval);
-                        Swal.close();
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    // Add 'is-invalid' class to highlight error
-                                    inputElement.addClass('is-invalid');
-
-                                    // Create the error message div
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-
-                                    // Append error message after the input field
-                                    inputElement.after(errorContainer);
-                                }
-
-                                // Remove error on input change
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-
-                        } else {
-                            // Handle non-validation errors
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('Save');
                     }
@@ -436,7 +400,7 @@
                     cache: false,
                     success: function(response) {
                         clearInterval(timerInterval);
-                        showToast('success', response.message);
+                        showToast('success', 'Success');
 
                         // Reset the form
                         $('#scheduleForm')[0].reset();
@@ -444,43 +408,7 @@
                         $('#schedule').modal('hide');
                         Swal.close();
                     },
-                    error: function(xhr) {
-                        clearInterval(timerInterval);
-                        Swal.close();
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    // Add 'is-invalid' class to highlight error
-                                    inputElement.addClass('is-invalid');
-
-                                    // Create the error message div
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-
-                                    // Append error message after the input field
-                                    inputElement.after(errorContainer);
-                                }
-
-                                // Remove error on input change
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-
-                        } else {
-                            // Handle non-validation errors
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('Save');
                     }
