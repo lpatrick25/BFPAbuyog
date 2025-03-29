@@ -67,9 +67,3 @@ class Application extends Model implements HasMedia
             ->performOnCollections('fsic_requirements');
     }
 }
-
-// @foreach($application->getMedia('fsic_requirements') as $media)
-//     <img src="{{ $media->getFullUrl('thumbnail') }}" class="img-fluid" alt="Application Thumbnail">
-// @endforeach
-
-// <img src="{{ $application->optimized_image }}" class="img-fluid" alt="Optimized Image">

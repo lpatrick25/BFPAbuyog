@@ -99,23 +99,7 @@
         }
 
         if (currentTab === 3) {
-            const startTime = Date.now();
-            let timerInterval;
-
-            Swal.fire({
-                title: 'Submitting Application',
-                html: 'Please wait... Time Taken: <b>0</b> seconds',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            timerInterval = setInterval(() => {
-                const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-                const timerElement = Swal.getHtmlContainer().querySelector('b');
-                if (timerElement) timerElement.textContent = timeTaken;
-            }, 1000);
+            let timerInterval = showLoadingDialog('Submitting Application');
 
             const formData = new FormData(document.getElementById('form-wizard1'));
 

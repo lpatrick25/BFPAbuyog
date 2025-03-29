@@ -43,15 +43,16 @@
         /* Main Content */
         .content {
             padding: 25px;
-            margin-top: 20px;
         }
 
         .content-header {
             background-color: #ffeeba;
             border-left: 6px solid #b22222;
+            border-right: 6px solid #b22222;
             padding: 20px;
             border-radius: 6px;
             margin-bottom: 20px;
+            margin-top: 20px;
         }
 
         .content-header h2 {
@@ -74,6 +75,7 @@
             border-radius: 6px;
             margin-bottom: 20px;
             border-left: 4px solid #b22222;
+            border-right: 4px solid #b22222;
         }
 
         .details p {
@@ -91,6 +93,7 @@
             padding: 18px;
             background: #fff3cd;
             border-left: 6px solid #d9534f;
+            border-right: 6px solid #d9534f;
             border-radius: 6px;
         }
 
@@ -124,29 +127,62 @@
 
         /* Footer */
         .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 13px;
-            color: #fff;
             padding: 15px;
-            background: #8b1a1a;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 14px;
+            color: #8b0000;
+            /* Darker red for better contrast */
+            background: #fff3cd;
+            border-radius: 6px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            /* Soft shadow for depth */
         }
 
+        /* Footer text */
         .footer p {
             margin: 5px 0;
-            color: #ffd700;
+            color: #8b0000;
         }
 
+        /* Footer links */
         .footer a {
-            color: #ffd700;
+            color: #8b0000;
             text-decoration: none;
             font-weight: bold;
+            transition: color 0.3s ease-in-out;
         }
 
         .footer a:hover {
             text-decoration: underline;
+            color: #ff4500;
+            /* Slightly brighter red on hover */
+        }
+
+        /* Flexbox for better layout */
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* Social Icons */
+        .footer-icons {
+            margin-top: 8px;
+        }
+
+        .footer-icons a {
+            display: inline-block;
+            margin: 0 8px;
+            font-size: 18px;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .footer-icons a:hover {
+            transform: scale(1.2);
+            /* Slight zoom effect */
         }
 
         /* Responsive Design */
@@ -229,9 +265,10 @@
 
         <!-- Footer with Contact & Social Media -->
         <div class="footer">
-            <p>📞 Contact: (053) 555-1234</p>
+            <p>📞 Contact: (639) 16-908-5788</p>
+            <p>✉️ Email: <a href="mailto:xxxxxxx@gmail.com">abuyogfsnorthleyte@gmail.com</a></p>
             <p>📍 Address: Brgy. Loyonsawang, Abuyog, Leyte, 6510</p>
-            <p>🔗 Follow us on Facebook: <a href="https://www.facebook.com/AbuyogFireDepartment" target="_blank">Abuyog
+            <p>🔗 Follow us on Facebook: <a href="https://www.facebook.com/AbuyogPIS" target="_blank">Abuyog
                     Fire Department</a></p>
         </div>
     </div>

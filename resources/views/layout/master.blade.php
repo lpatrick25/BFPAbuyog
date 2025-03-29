@@ -168,6 +168,40 @@
             }
         }
 
+        function showLoadingDialog(title) {
+            const startTime = Date.now();
+            let timerInterval;
+
+            Swal.fire({
+                title: title,
+                html: 'Please wait... Time Taken: <b>0</b> seconds',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    // Start timer
+                    timerInterval = setInterval(() => {
+                        const currentTime = Date.now();
+                        const timeTaken = ((currentTime - startTime) / 1000).toFixed(2);
+                        const swalContainer = Swal.getHtmlContainer();
+
+                        if (swalContainer) {
+                            const timerElement = swalContainer.querySelector('b');
+                            if (timerElement) {
+                                timerElement.textContent = timeTaken;
+                            }
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    // Stop the timer when modal is closed
+                    clearInterval(timerInterval);
+                }
+            });
+
+            return timerInterval;
+        }
+
         function showToast(type, message) {
             let toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
 
@@ -297,7 +331,7 @@
                 }
 
                 let applicationId = data.application.id;
-                alert("New application submitted: " + applicationId);
+                console.log("New application submitted: " + applicationId);
 
                 fetch(`/applications/${applicationId}`)
                     .then(response => {
@@ -313,8 +347,9 @@
                             let client = establishment.client;
 
                             if (client) {
-                                let client_name =
-                                    `${client.first_name} ${client.middle_name ? client.middle_name + ' ' : ''}${client.last_name}`;
+                                // let client_name =
+                                //     `${client.first_name} ${client.middle_name ? client.middle_name + ' ' : ''}${client.last_name}`;
+                                let client_name = `${client.getFullName()}`;
 
                                 let applicationTypeText = "";
                                 switch (application.fsic_type) {

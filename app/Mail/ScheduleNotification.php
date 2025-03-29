@@ -33,6 +33,8 @@ class ScheduleNotification extends Mailable
         $subject = '';
         if ($this->scheduleType == 'Reinspection') {
             $subject = 'Establishment Scheduled for Reinspection';
+        } else if ($this->scheduleType == 'Reschedule') {
+            $subject = 'Establishment Inspection Reschedule';
         } else {
             $subject = 'Establishment Scheduled for Inspection';
         }

@@ -41,7 +41,7 @@
     </a>
 </li>
 <li class="nav-item">
-    <a class="nav-link @yield('marshall-establishment')" aria-current="page" href="{{ route('establishment.list') }}">
+    <a class="nav-link @yield('marshall-establishment')" aria-current="page" href="{{ route('marshall.establishments') }}">
         <i class="icon">
             <svg width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="icon-20">
                 <path opacity="0.4"

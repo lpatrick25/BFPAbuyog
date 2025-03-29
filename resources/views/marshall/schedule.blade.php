@@ -32,7 +32,7 @@
         </div>
     </div>
     <div id="map-content"></div>
-    <div class="modal fade" id="remarks" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    <div class="modal fade" id="remark" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="remarksLabel" aria-modal="true" role="dialog">
         <div class="modal-dialog">
             <form id="remarksForm" class="modal-content">
@@ -42,8 +42,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="remarks_text">Remarks: <span class="text-danger">*</span></label>
-                        <select name="remarks_text" id="remarks_text" class="form-control">
+                        <label for="remarks">Remarks: <span class="text-danger">*</span></label>
+                        <select name="remarks" id="remarks" class="form-control">
                             <option value="disabled" selected disabled>Select Remarks</option>
                             <option value="Issue Notice to Comply">Issue Notice to Comply</option>
                             <option value="Issue Notice to Correct Violation">Issue Notice to Correct Violation</option>
@@ -63,12 +63,12 @@
             </form>
         </div>
     </div>
-    <div class="modal fade" id="remarks" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="remarksLabel" aria-modal="true" role="dialog">
+    <div class="modal fade" id="schedule" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="scheduleLabel" aria-modal="true" role="dialog">
         <div class="modal-dialog">
-            <form id="remarksForm" class="modal-content">
+            <form id="scheduleForm" class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="remarksLabel">Application Re-scheduled</h5>
+                    <h5 class="modal-title" id="scheduleLabel">Inspection Re-scheduled</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -92,24 +92,8 @@
 
         function locate(lat, lng) {
             $('#map-content').html("");
-            const startTime = Date.now();
-            let timerInterval;
 
-            Swal.fire({
-                title: 'Loading GIS Module',
-                html: 'Please wait... Time Taken: <b>0</b> seconds',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            timerInterval = setInterval(() => {
-                const currentTime = Date.now();
-                const timeTaken = ((currentTime - startTime) / 1000).toFixed(2);
-                const timerElement = Swal.getHtmlContainer().querySelector('b');
-                if (timerElement) timerElement.textContent = timeTaken;
-            }, 1000);
+            let timerInterval = showLoadingDialog('Loading GIS Module');
 
             $.ajax({
                 method: 'GET',
@@ -126,19 +110,35 @@
                 },
                 error: function(xhr) {
                     clearInterval(timerInterval);
+                    Swal.close();
                     console.error('Error:', xhr.responseText);
-                    alert('Failed to load the map view.');
+                    showToast('danger', 'Failed to load the map view.');
                 }
             });
         }
 
-        function applicationRemarks(applicationID) {
-            applicationId = applicationID;
-            $('#remarks').modal('show');
+        function addOneDayToDate(date) {
+            // Convert date to a Date object and add one day
+            let minDate = new Date(date);
+            minDate.setDate(minDate.getDate() + 1);
+
+            // Format it back to YYYY-MM-DD for the input field
+            let formattedMinDate = minDate.toISOString().split('T')[0];
+
+            return formattedMinDate
         }
 
-        function applicationSchedule(applicationID) {
+        function applicationRemarks(applicationID, scheduleDate) {
             applicationId = applicationID;
+
+            $('#schedule_date').attr('min', addOneDayToDate(scheduleDate));
+            $('#remark').modal('show');
+        }
+
+        function applicationSchedule(applicationID, scheduleDate) {
+            applicationId = applicationID;
+
+            $('#reschedule_date').attr('min', addOneDayToDate(scheduleDate));
             $('#schedule').modal('show');
         }
 
@@ -186,7 +186,17 @@
                     },
                     {
                         field: 'schedule_date',
-                        title: 'Schedule Date'
+                        title: 'Schedule Date',
+                        formatter: function(value, row, index) {
+                            if (!value) return 'N/A'; // Handle empty values
+
+                            let date = new Date(value);
+                            return date.toLocaleDateString('en-US', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric'
+                            });
+                        }
                     },
                     {
                         field: 'action',
@@ -199,8 +209,8 @@
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
                 return `
-                    <button class="btn btn-sm btn-info" onclick="applicationSchedule('${row.application_id}')"><i class="bi bi-calendar-check"></i></button>
-                    <button class="btn btn-sm btn-success" onclick="applicationRemarks('${row.application_id}')"><i class="bi bi-card-checklist"></i></button>`;
+                    <button class="btn btn-sm btn-info" onclick="applicationSchedule('${row.application_id}', '${row.schedule_date}')"><i class="bi bi-calendar-check"></i></button>
+                    <button class="btn btn-sm btn-success" onclick="applicationRemarks('${row.application_id}', '${row.schedule_date}')"><i class="bi bi-card-checklist"></i></button>`;
             }
 
             // Click event for the table rows
@@ -225,6 +235,99 @@
             $('#remarksForm').submit(function(event) {
                 event.preventDefault();
 
+                let timerInterval = showLoadingDialog('Notifying Establishment Owner');
+
+                let submitBtn = $('button[type="submit"]');
+                submitBtn.prop('disabled', true).text('Processing...');
+
+                // Remove previous error messages and invalid classes
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+
+                let scheduleInput = $('#schedule_date');
+                let scheduleDate = scheduleInput.val().trim();
+
+                if (!scheduleDate) {
+                    // Add 'is-invalid' class
+                    scheduleInput.addClass('is-invalid');
+
+                    // Check if error message already exists to prevent duplication
+                    if (scheduleInput.next('.invalid-feedback').length === 0) {
+                        let errorContainer = $(
+                            '<div class="invalid-feedback">The schedule date field is required.</div>');
+                        scheduleInput.after(errorContainer);
+                    }
+                }
+
+                $.ajax({
+                    method: 'PUT',
+                    url: `/applicationsStatus/${applicationId}`,
+                    data: {
+                        status: 'Scheduled for Inspection',
+                        remarks: $('#remarks').val(),
+                        schedule_date: $('#schedule_date').val(),
+                    },
+                    dataType: 'JSON',
+                    cache: false,
+                    success: function(response) {
+                        clearInterval(timerInterval);
+                        $table1.bootstrapTable('refresh');
+                        showToast('success', response.message);
+
+                        // Reset the form
+                        $('#remarksForm')[0].reset();
+
+                        $('#remark').modal('hide');
+                        Swal.close();
+                    },
+                    error: function(xhr) {
+                        clearInterval(timerInterval);
+                        Swal.close();
+                        if (xhr.status === 422 && xhr.responseJSON.errors) {
+                            var errors = xhr.responseJSON.errors;
+
+                            $.each(errors, function(field, messages) {
+                                var inputElement = $('[name="' + field + '"]');
+
+                                if (inputElement.length > 0) {
+                                    // Add 'is-invalid' class to highlight error
+                                    inputElement.addClass('is-invalid');
+
+                                    // Create the error message div
+                                    var errorContainer = $(
+                                        '<div class="invalid-feedback"></div>');
+                                    errorContainer.html(messages.join('<br>'));
+
+                                    // Append error message after the input field
+                                    inputElement.after(errorContainer);
+                                }
+
+                                // Remove error on input change
+                                inputElement.on('input', function() {
+                                    $(this).removeClass('is-invalid');
+                                    $(this).next('.invalid-feedback').remove();
+                                });
+                            });
+
+                            showToast('danger', 'Please check the form for errors.');
+
+                        } else {
+                            // Handle non-validation errors
+                            showToast('danger', xhr.responseJSON.message ||
+                                'Something went wrong.');
+                        }
+                    },
+                    complete: function() {
+                        submitBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+            $('#scheduleForm').submit(function(event) {
+                event.preventDefault();
+
+                let timerInterval = showLoadingDialog('Notifying Establishment Owner');
+
                 let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
 
@@ -234,23 +337,24 @@
 
                 $.ajax({
                     method: 'PUT',
-                    url: `/applicationsStatus/${applicationId}`,
-                    data: {
-                        status: 'Scheduled for Inspection',
-                        remarks: $('#remarks_text').val(),
-                        schedule_date: $('#schedule_date').val(),
-                    },
+                    url: `/marshall/changeSchedule/${applicationId}`,
+                    data: $('#scheduleForm').serialize(),
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
+                        clearInterval(timerInterval);
+                        $table1.bootstrapTable('refresh');
                         showToast('success', response.message);
 
                         // Reset the form
-                        $('#remarksForm')[0].reset();
+                        $('#scheduleForm')[0].reset();
 
-                        $('#remarks').modal('hide');
+                        $('#schedule').modal('hide');
+                        Swal.close();
                     },
                     error: function(xhr) {
+                        clearInterval(timerInterval);
+                        Swal.close();
                         if (xhr.status === 422 && xhr.responseJSON.errors) {
                             var errors = xhr.responseJSON.errors;
 

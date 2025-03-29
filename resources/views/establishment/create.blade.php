@@ -5,6 +5,52 @@
 @section('client-establishment')
     active
 @endsection
+@section('APP-CSS')
+    <style type="text/css">
+        /* Floating Action Button (FAB) */
+        .floating-save-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background-color: #007bff;
+            /* Bootstrap Primary Blue */
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            /* Fully circular */
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            /* Soft shadow */
+            border: none;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        /* Hover Effect */
+        .floating-save-btn:hover {
+            background-color: #0056b3;
+            /* Darker Blue on Hover */
+            transform: scale(1.1);
+            /* Slightly enlarge */
+        }
+
+        /* Responsive: Adjust size for mobile */
+        @media (max-width: 576px) {
+            .floating-save-btn {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+@endsection
 @section('APP-CONTENT')
     <form id="addForm" class="row">
         <div class="col-lg-4">
@@ -255,43 +301,20 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-12">
-            <div class="card rounded">
-                <div class="card-content">
-                    <div class="card-body text-end">
-                        <button type="button" id="submit-btn" class="btn btn-primary">Save</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Floating Save Button -->
+        <button type="button" id="submit-btn" class="btn btn-primary floating-save-btn">
+            💾
+        </button>
     </form>
     <div id="map-content"></div>
 @endsection
 @section('APP-SCRIPT')
     <script type="text/javascript">
-
         let adding = true;
 
         function locate(lat, lng) {
             $('#map-content').html("");
-            const startTime = Date.now();
-            let timerInterval;
-
-            Swal.fire({
-                title: 'Loading GIS Module',
-                html: 'Please wait... Time Taken: <b>0</b> seconds',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            timerInterval = setInterval(() => {
-                const currentTime = Date.now();
-                const timeTaken = ((currentTime - startTime) / 1000).toFixed(2);
-                const timerElement = Swal.getHtmlContainer().querySelector('b');
-                if (timerElement) timerElement.textContent = timeTaken;
-            }, 1000);
+            let timerInterval = showLoadingDialog('Loading GIS Module');
 
             $.ajax({
                 method: 'GET',
@@ -302,19 +325,13 @@
                 },
                 success: function(response) {
                     clearInterval(timerInterval);
-                    const totalTime = ((Date.now() - startTime) / 1000).toFixed(2); // Total time in seconds
-                    console.log(`Total time taken to load route: ${totalTime} seconds`);
-
-                    // Convert to minutes if needed
-                    const totalMinutes = (totalTime / 60).toFixed(2);
-                    console.log(`Total time taken: ${totalMinutes} minutes`);
-
                     $('#map-content').html(response);
                     $('#addForm').hide();
                     Swal.close();
                 },
                 error: function(xhr) {
                     clearInterval(timerInterval);
+                    Swal.close();
                     console.error('Error:', xhr.responseText);
                     alert('Failed to load the map view.');
                 }
@@ -367,9 +384,12 @@
 
             $('#submit-btn').click(function(event) {
                 event.preventDefault();
+                let timerInterval = showLoadingDialog('Saving Establishment Information');
 
                 let submitBtn = $('button[id="submit-btn"]');
-                submitBtn.prop('disabled', true).text('Processing...');
+                submitBtn.prop('disabled', true).html(
+                    '<i class="bi bi-arrow-repeat spin-animation"></i>'
+                );
 
                 // Remove previous error messages and invalid classes
                 $('.is-invalid').removeClass('is-invalid');
@@ -377,11 +397,12 @@
 
                 $.ajax({
                     method: 'POST',
-                    url: '/establishments', // Adjust URL if needed
+                    url: '/establishments',
                     data: $('#addForm').serialize(),
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
+                        clearInterval(timerInterval);
                         // Scroll to the top of the page
                         $('html, body').animate({
                             scrollTop: 0
@@ -392,13 +413,14 @@
                         // Reset the form
                         $('#addForm')[0].reset();
 
-                        // Reset the form
-                        setInterval(() => {
+                        // Redirect or go back
+                        setTimeout(() => {
                             goBack();
                         }, 1000);
                     },
                     error: function(xhr) {
-                        // Scroll to the top of the page
+                        clearInterval(timerInterval);
+                        Swal.close();
                         $('html, body').animate({
                             scrollTop: 0
                         }, 'slow');
@@ -410,15 +432,12 @@
                                 var inputElement = $('[name="' + field + '"]');
 
                                 if (inputElement.length > 0) {
-                                    // Add 'is-invalid' class to highlight error
                                     inputElement.addClass('is-invalid');
 
-                                    // Create the error message div
                                     var errorContainer = $(
                                         '<div class="invalid-feedback"></div>');
                                     errorContainer.html(messages.join('<br>'));
 
-                                    // Append error message after the input field
                                     inputElement.after(errorContainer);
                                 }
 
@@ -430,15 +449,13 @@
                             });
 
                             showToast('danger', 'Please check the form for errors.');
-
                         } else {
-                            // Handle non-validation errors
                             showToast('danger', xhr.responseJSON.message ||
                                 'Something went wrong.');
                         }
                     },
                     complete: function() {
-                        submitBtn.prop('disabled', false).text('Save');
+                        submitBtn.prop('disabled', false).text('💾');
                     }
                 });
             });

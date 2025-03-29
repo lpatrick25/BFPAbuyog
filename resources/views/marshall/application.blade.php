@@ -254,6 +254,26 @@
                         }
                     },
                     {
+                        field: 'application_statuses',
+                        title: 'Remarks',
+                        formatter: function(value, row, index) {
+                            if (!value || value.length === 0) {
+                                return 'No Remarks';
+                            }
+
+                            // Sort the statuses by 'updated_at' in descending order (latest first)
+                            let sortedStatuses = value.sort((a, b) => new Date(b.updated_at) -
+                                new Date(a.updated_at));
+
+                            // Check if there is a second-latest status
+                            if (sortedStatuses.length > 1) {
+                                return sortedStatuses[1].remarks || 'No Remarks';
+                            } else {
+                                return 'No Previous Remarks'; // If there's only one status, no previous remark exists
+                            }
+                        }
+                    },
+                    {
                         field: 'action',
                         title: 'Actions',
                         formatter: actionFormatter
@@ -322,6 +342,7 @@
 
             $('#remarksForm').submit(function(event) {
                 event.preventDefault();
+                let timerInterval = showLoadingDialog('Notifying Establishment Owner');
 
                 let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
@@ -340,14 +361,18 @@
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
+                        clearInterval(timerInterval);
                         showToast('success', response.message);
 
                         // Reset the form
                         $('#remarksForm')[0].reset();
 
                         $('#remarks').modal('hide');
+                        Swal.close();
                     },
                     error: function(xhr) {
+                        clearInterval(timerInterval);
+                        Swal.close();
                         if (xhr.status === 422 && xhr.responseJSON.errors) {
                             var errors = xhr.responseJSON.errors;
 
@@ -390,6 +415,7 @@
 
             $('#scheduleForm').submit(function(event) {
                 event.preventDefault();
+                let timerInterval = showLoadingDialog('Notifying Establishment Owner');
 
                 let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
@@ -409,14 +435,18 @@
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
+                        clearInterval(timerInterval);
                         showToast('success', response.message);
 
                         // Reset the form
                         $('#scheduleForm')[0].reset();
 
                         $('#schedule').modal('hide');
+                        Swal.close();
                     },
                     error: function(xhr) {
+                        clearInterval(timerInterval);
+                        Swal.close();
                         if (xhr.status === 422 && xhr.responseJSON.errors) {
                             var errors = xhr.responseJSON.errors;
 

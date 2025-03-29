@@ -23,4 +23,20 @@ class Establishment extends Model
     {
         return $this->hasMany(Application::class);
     }
+
+    public function latestApplicationStatus()
+    {
+        return $this->hasOne(ApplicationStatus::class, 'application_id', 'id')
+            ->latest('updated_at'); // Get the latest status based on update time
+    }
+
+    public function hasApplication(): bool
+    {
+        return $this->applications()->exists();
+    }
+
+    public function latestApplication()
+    {
+        return $this->hasOne(Application::class)->latestOfMany();
+    }
 }

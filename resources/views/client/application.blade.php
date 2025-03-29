@@ -15,6 +15,39 @@
             transform: scale(1.1);
             cursor: pointer;
         }
+
+        #applicationStatus .iq-timeline0 ul {
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 10px;
+            position: relative;
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: #d9534f #f8d7da;
+            /* Thumb (Red), Track (Light Red) */
+            perspective: 800px;
+            /* Parallax effect */
+        }
+
+        /* Webkit Scrollbar */
+        #applicationStatus .iq-timeline0 ul::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #applicationStatus .iq-timeline0 ul::-webkit-scrollbar-track {
+            background: #f8d7da;
+            border-radius: 4px;
+        }
+
+        #applicationStatus .iq-timeline0 ul::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #d9534f, #c9302c);
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        #applicationStatus .iq-timeline0 ul::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #c9302c, #a91d22);
+        }
     </style>
 @endsection
 @section('APP-CONTENT')
@@ -396,7 +429,6 @@
                 return actionButtons;
             }
 
-
             // Click event for the table rows
             $table1.on('click-row.bs.table', function(e, row, $element) {
                 // Prevent multiple event bindings
@@ -450,17 +482,17 @@
                             });
 
                         let submittedHTML = `
-                <li>
-                    <div class="timeline-dots1 border-primary text-primary">
-                        <i class="icon-20 bi ${statusIcons["Application Submitted"]}"></i>
-                    </div>
-                    <h6 class="float-left mb-1">Application Submitted</h6>
-                    <small class="float-right mt-1">${formattedSubmittedDate}</small>
-                    <div class="d-inline-block w-100">
-                        <p>Initial submission of application.</p>
-                    </div>
-                </li>
-            `;
+                            <li>
+                                <div class="timeline-dots1 border-primary text-primary">
+                                    <i class="icon-20 bi ${statusIcons["Application Submitted"]}"></i>
+                                </div>
+                                <h6 class="float-left mb-1">Application Submitted</h6>
+                                <small class="float-right mt-1">${formattedSubmittedDate}</small>
+                                <div class="d-inline-block w-100">
+                                    <p>Initial submission of application.</p>
+                                </div>
+                            </li>
+                        `;
                         timelineContainer.append(submittedHTML); // Ensure it's always first
 
                         // Loop through sorted statuses (from oldest to newest)
@@ -483,17 +515,17 @@
                                 "bi-question-circle"; // Default icon if not found
 
                             let statusHTML = `
-                    <li>
-                        <div class="timeline-dots1 border-primary ${assignedColor}">
-                            <i class="icon-20 bi ${statusIcon}"></i>
-                        </div>
-                        <h6 class="float-left mb-1">${status.status}</h6>
-                        <small class="float-right mt-1">${formattedDate}</small>
-                        <div class="d-inline-block w-100">
-                            ${remarksText}
-                        </div>
-                    </li>
-                `;
+                                <li>
+                                    <div class="timeline-dots1 border-primary ${assignedColor}">
+                                        <i class="icon-20 bi ${statusIcon}"></i>
+                                    </div>
+                                    <h6 class="float-left mb-1">${status.status}</h6>
+                                    <small class="float-right mt-1">${formattedDate}</small>
+                                    <div class="d-inline-block w-100">
+                                        ${remarksText}
+                                    </div>
+                                </li>
+                            `;
 
                             timelineContainer.append(statusHTML);
                         });
@@ -509,6 +541,7 @@
 
             $('#reUploadForm').submit(function(event) {
                 event.preventDefault();
+                let timerInterval = showLoadingDialog('Uploading FISC Requirements');
 
                 let submitBtn = $('button[id="submit-btn"]');
                 submitBtn.prop('disabled', true).text('Processing...');
@@ -523,7 +556,7 @@
                 formData.append('_method', 'PUT');
 
                 $.ajax({
-                    method: 'POST', // Still use POST, Laravel will interpret `_method: PUT`
+                    method: 'POST',
                     url: `/applications/${applicationId}`,
                     data: formData,
                     processData: false,
@@ -532,15 +565,15 @@
                     dataType: 'JSON',
                     enctype: "multipart/form-data",
                     success: function(response) {
+                        clearInterval(timerInterval);
                         $("#fileUploadContainer").html('');
                         showToast('success', response.message);
                         $('#reUploadRequirements').modal('hide');
+                        Swal.close();
                     },
                     error: function(xhr) {
-                        $('html, body').animate({
-                            scrollTop: 0
-                        }, 'slow');
-
+                        clearInterval(timerInterval);
+                        Swal.close();
                         if (xhr.status === 422 && xhr.responseJSON.errors) {
                             var errors = xhr.responseJSON.errors;
 

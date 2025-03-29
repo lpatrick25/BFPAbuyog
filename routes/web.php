@@ -131,8 +131,12 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
 Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
     // Route View
     Route::get('dashboard', [NavigationMarshallController::class, 'dashboards'])->name('marshall.dashboard');
+    Route::get('establishmentList', [NavigationMarshallController::class, 'establishments'])->name('marshall.establishments');
     Route::get('applicantList', [NavigationMarshallController::class, 'applicants'])->name('applicant.list');
     Route::get('scheduleList', [NavigationMarshallController::class, 'schedule'])->name('schedule.list');
+
+    // Other Route
+    Route::put('changeSchedule/{applicationId}', [NavigationMarshallController::class, 'changeSchedule'])->name('schedule.change');
 });
 
 // Route Resource

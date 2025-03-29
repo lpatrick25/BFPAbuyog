@@ -40,24 +40,7 @@
 
         // Redirect to the edit page with a session token
         function editEstablishment(establishmentId) {
-            const startTime = Date.now();
-            let timerInterval;
-
-            Swal.fire({
-                title: 'Loading GIS Module',
-                html: 'Please wait... Time Taken: <b>0</b> seconds',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            timerInterval = setInterval(() => {
-                const currentTime = Date.now();
-                const timeTaken = ((currentTime - startTime) / 1000).toFixed(2);
-                const timerElement = Swal.getHtmlContainer().querySelector('b');
-                if (timerElement) timerElement.textContent = timeTaken;
-            }, 1000);
+            let timerInterval = showLoadingDialog('Getting establishment information');
 
             $.ajax({
                 url: `/client/${establishmentId}/generate-session`, // Corrected URL
@@ -72,23 +55,30 @@
                     Swal.close();
                 },
                 error: function() {
+                    clearInterval(timerInterval);
+                    Swal.close();
                     showToast('danger', 'Error generating session token.');
                 }
             });
         }
 
-
         function deleteEstablishment(establishmentId) {
+            let timerInterval = showLoadingDialog('Removing establishment');
+
             $.ajax({
                 method: 'DELETE',
                 url: `/establishments/${establishmentId}`,
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
+                    clearInterval(timerInterval);
                     $('#table1').bootstrapTable('refresh');
                     showToast('success', response.message);
+                    Swal.close();
                 },
                 error: function(xhr) {
+                    clearInterval(timerInterval);
+                    Swal.close();
                     showToast('danger', xhr.responseJSON.message || 'Something went wrong.');
                 }
             });
@@ -96,24 +86,7 @@
 
         function locate(lat, lng) {
             $('#map-content').html("");
-            const startTime = Date.now();
-            let timerInterval;
-
-            Swal.fire({
-                title: 'Loading GIS Module',
-                html: 'Please wait... Time Taken: <b>0</b> seconds',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            timerInterval = setInterval(() => {
-                const currentTime = Date.now();
-                const timeTaken = ((currentTime - startTime) / 1000).toFixed(2);
-                const timerElement = Swal.getHtmlContainer().querySelector('b');
-                if (timerElement) timerElement.textContent = timeTaken;
-            }, 1000);
+            let timerInterval = showLoadingDialog('Loading GIS Module');
 
             $.ajax({
                 method: 'GET',
@@ -131,7 +104,8 @@
                 error: function(xhr) {
                     clearInterval(timerInterval);
                     console.error('Error:', xhr.responseText);
-                    alert('Failed to load the map view.');
+                    showToast('danger', xhr.responseText || 'Something went wrong.');
+                    Swal.close();
                 }
             });
         }
@@ -202,8 +176,19 @@
 
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
-                return `<button class="btn btn-sm btn-primary" onclick="editEstablishment('${row.id}')"><i class="bi bi-pencil-square"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="deleteEstablishment('${row.id}')"><i class="bi bi-trash"></i></button>`;
+                let actionButton = '';
+                let hasApplication = row.has_application;
+
+                if (hasApplication) {
+                    actionButton =
+                        `<button class="btn btn-sm btn-primary" disabled><i class="bi bi-pencil-square"></i></button>
+                    <button class="btn btn-sm btn-danger" disabled><i class="bi bi-trash"></i></button>`;
+                } else {
+                    actionButton =
+                        `<button class="btn btn-sm btn-primary" onclick="editEstablishment('${row.id}')"><i class="bi bi-pencil-square"></i></button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteEstablishment('${row.id}')"><i class="bi bi-trash"></i></button>`;
+                }
+                return actionButton;
             }
 
             // Click event for the table rows

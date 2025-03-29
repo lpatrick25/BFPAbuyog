@@ -24,7 +24,14 @@ class ApplicationResource extends JsonResource
             'latest_status' => $this->applicationStatuses
                 ? $this->applicationStatuses->sortByDesc('updated_at')->first()->status ?? 'No Status'
                 : 'No Status',
-            'application_statuses' => $this->applicationStatuses,
+            'application_statuses' => $this->applicationStatuses->map(function ($status) {
+                return [
+                    'status' => $status->status,
+                    'remarks' => $status->remarks,
+                    'created_at' => $status->created_at,
+                    'updated_at' => $status->updated_at,
+                ];
+            }),
         ];
     }
 }

@@ -117,8 +117,9 @@ class EstablishmentController extends Controller
             $limit = $request->get('limit', 10);
             $page = $request->get('page', 1);
 
-            // Fetch paginated establishments with client relationship
-            $establishments = Establishment::with('client')->paginate($limit, ['*'], 'page', $page);
+            // Fetch paginated establishments with relationships
+            $establishments = Establishment::with('client', 'latestApplication.applicationStatuses')
+                ->paginate($limit, ['*'], 'page', $page);
 
             // Use Resource for formatting
             return response()->json([
