@@ -75,7 +75,7 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
     Auth::login($user); // Log in the user before marking email as verified
     $user->markEmailAsVerified(); // Mark email as verified
 
-    return redirect('/home')->with('verified', true);
+    return redirect('/')->with('verified', true);
 })->middleware(['signed'])->name('verification.verify');
 
 Route::post('/email/verification-notification', function (Request $request) {

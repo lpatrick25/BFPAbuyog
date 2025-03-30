@@ -40,6 +40,8 @@ class RegistrationController extends Controller
                 'user_id' => $user->id,
             ]);
 
+            Auth::login($user);
+
             DB::commit();
             Log::info('Client created successfully', ['client_id' => $client->id]);
 
@@ -48,6 +50,16 @@ class RegistrationController extends Controller
             return response()->json(['message' => 'Account registration success', 'account' => $client], 201);
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Capture SQL error
+            if ($e instanceof \Illuminate\Database\QueryException) {
+                if ($e->getCode() == 23000) { // Integrity constraint violation
+                    return response()->json([
+                        'error' => 'The email or contact number already exists in our records.'
+                    ], 422);
+                }
+            }
+
             Log::error('Error creating Client', ['error' => $e->getMessage()]);
 
             return response()->json(['error' => 'Something went wrong.'], 500);
