@@ -37,6 +37,77 @@
 
     <script src="{{ asset('js/abuyog-map.js') }}" defer></script>
     <script type="text/javascript">
+        function showImagePopup(establishmentId) {
+            let timerInterval = showLoadingDialog('Getting establishment information');
+
+            $.ajax({
+                url: `/inspector/${establishmentId}/generate-session`,
+                method: 'POST',
+                success: function(response) {
+                    clearInterval(timerInterval);
+                    if (response.sessionID) {
+                        window.location.href = `/inspector/establishment/${response.sessionID}/show`;
+                    } else {
+                        showToast('danger', 'Failed to generate session.');
+                    }
+                    Swal.close();
+                },
+                error: function() {
+                    clearInterval(timerInterval);
+                    Swal.close();
+                    showToast('danger', 'Error generating session token.');
+                }
+            });
+        }
+
+        function showMapWithCoordinates(coordinates) {
+            if (!Array.isArray(coordinates) || coordinates.length === 0) {
+                console.warn("No markers found!");
+                return;
+            }
+
+            coordinates.forEach(function(coord) {
+                if (!coord || coord.length < 3 || isNaN(coord[0]) || isNaN(coord[1])) {
+                    console.warn("Invalid coordinate:", coord);
+                    return;
+                }
+
+                let iconUrl;
+
+                switch (coord[4]) {
+                    case 'Inspected':
+                        iconUrl = iconPaths.inspected;
+                        break;
+                    case 'Not Inspected':
+                        iconUrl = iconPaths.notInspected;
+                        break;
+                    case 'Not Applied':
+                        iconUrl = iconPaths.notApplied;
+                        break;
+                    default:
+                        iconUrl = iconPaths.default;
+                }
+
+                const customIcon = L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [0, -35],
+                });
+
+                const marker = L.marker([parseFloat(coord[0]), parseFloat(coord[1])], {
+                    icon: customIcon
+                }).addTo(map);
+
+                const popupContent = `<button type="button" class="btn btn-success btn-block"
+                                onclick="showImagePopup('${coord[2]}');">
+                                Show Establishment
+                              </button>`;
+
+                marker.bindPopup(L.popup().setContent(popupContent));
+            });
+        }
+
         $(document).ready(function() {
             let summary = @json($summary);
             let role = "{{ session('role') }}".toLowerCase();

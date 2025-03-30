@@ -184,14 +184,14 @@ class ClientController extends Controller
         }
     }
 
-    public function generateSessionToken($sessionID)
+    public function generateSessionToken($sessionId)
     {
         try {
             // Generate a unique session ID and cast it to a string
             $sessionID = (string) Str::uuid();
 
             // Store the session ID with expiration (1 hour)
-            session([$sessionID => $sessionID]);
+            session([$sessionID => $sessionId]);
             session()->put('session_expiry_' . $sessionID, now()->addHour());
 
             return response()->json(['sessionID' => $sessionID]);

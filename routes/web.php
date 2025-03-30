@@ -94,6 +94,7 @@ Route::prefix('admin')->middleware(['auth', 'guest'])->group(function () {
     Route::get('inspectorList', [AdminController::class, 'inspectors'])->name('inspector.list');
     Route::get('userList', [AdminController::class, 'users'])->name('user.list');
     Route::get('mapping', [AdminController::class, 'mapping'])->name('admin.mapping');
+    Route::get('establishment/{sessionID}/show', [NavigationMarshallController::class, 'showEstablishment'])->name('admin.establishmentMapping');
 
     // Route Add Pages
     Route::get('addClient', [AdminController::class, 'addClient'])->name('client.add');
@@ -142,6 +143,7 @@ Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
     // Route View
     Route::get('dashboard', [NavigationMarshallController::class, 'dashboards'])->name('marshall.dashboard');
     Route::get('mapping', [NavigationMarshallController::class, 'mapping'])->name('marshall.mapping');
+    Route::get('establishment/{sessionID}/show', [NavigationMarshallController::class, 'showEstablishment'])->name('marshall.establishmentMapping');
     Route::get('establishmentList', [NavigationMarshallController::class, 'establishments'])->name('marshall.establishments');
     Route::get('applicantList', [NavigationMarshallController::class, 'applicants'])->name('applicant.list');
     Route::get('scheduleList', [NavigationMarshallController::class, 'schedule'])->name('schedule.list');
@@ -156,6 +158,7 @@ Route::prefix('inspector')->middleware(['auth', 'guest'])->group(function () {
     Route::get('dashboard', [NavigationInspectorController::class, 'dashboards'])->name('inspector.dashboard');
     Route::get('scheduleList', [NavigationInspectorController::class, 'schedule'])->name('schedule.inspection');
     Route::get('mapping', [NavigationInspectorController::class, 'mapping'])->name('inspector.mapping');
+    Route::get('establishment/{sessionID}/show', [NavigationMarshallController::class, 'showEstablishment'])->name('inspector.establishmentMapping');
 
     // Route Session
     Route::post('{sessionID}/generate-session', [NavigationInspectorController::class, 'generateSessionToken'])->name('inspectorToken.session');
