@@ -39,7 +39,7 @@
         function editClient(clientId) {
             $.ajax({
                 url: `/admin/client/${clientId}/generate-session`,
-                method: 'GET',
+                method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
                         window.location.href = `/admin/client/${response.sessionID}/edit`;

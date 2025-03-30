@@ -8,8 +8,13 @@ class EstablishmentService
 {
     public function getAllEstablishments()
     {
+        $establishment = Establishment::with('client', 'latestApplication.applicationStatuses');
         $client = auth()->user()->client;
-        return Establishment::with('client', 'latestApplication.applicationStatuses')->where('client_id', $client->id);
+        if ($client) {
+            $establishment->where('client_id', $client->id);
+        }
+
+        return $establishment;
     }
 
     public function store(array $data)

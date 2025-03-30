@@ -39,7 +39,7 @@
         function editInspector(inspectorId) {
             $.ajax({
                 url: `/admin/inspector/${inspectorId}/generate-session`,
-                method: 'GET',
+                method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
                         window.location.href = `/admin/inspector/${response.sessionID}/edit`;

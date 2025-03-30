@@ -39,7 +39,7 @@
         function editMarshall(marshallId) {
             $.ajax({
                 url: `/admin/marshall/${marshallId}/generate-session`,
-                method: 'GET',
+                method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
                         window.location.href = `/admin/marshall/${response.sessionID}/edit`;

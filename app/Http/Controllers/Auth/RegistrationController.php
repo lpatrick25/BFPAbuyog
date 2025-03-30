@@ -45,7 +45,7 @@ class RegistrationController extends Controller
             DB::commit();
             Log::info('Client created successfully', ['client_id' => $client->id]);
 
-            event(new Registered($user)); // Trigger verification email
+            // event(new Registered($user));
 
             return response()->json(['message' => 'Account registration success', 'account' => $client], 201);
         } catch (\Exception $e) {

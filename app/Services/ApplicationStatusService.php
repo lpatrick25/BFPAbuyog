@@ -10,7 +10,7 @@ class ApplicationStatusService
 {
     public function updateApplicationStatus($request, $application_id)
     {
-        $schedule = Schedule::where('application_id', $application_id)->firstOrFail();
+        $schedule = Schedule::where('application_id', $application_id)->first();
 
         $applicationStatus = ApplicationStatus::where('application_id', $application_id)
             ->where('status', $request->status === 'Certificate Approval Pending' ? 'Scheduled for Inspection' : $request->status)
