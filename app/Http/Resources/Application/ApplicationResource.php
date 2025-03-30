@@ -16,10 +16,7 @@ class ApplicationResource extends Resource
             'application_number' => $this->application_number,
             'application_date' => $this->application_date,
             'fsic_type' => $this->fsic_type,
-            'establishment' => [
-                'id' => $this->establishment->id ?? null,
-                'name' => $this->establishment->name ?? 'N/A',
-            ],
+            'establishment_name' => $this->establishment->name ?? 'N/A',
             'latest_status' => $this->applicationStatuses
                 ? $this->applicationStatuses->sortByDesc('updated_at')->first()->status ?? 'No Status'
                 : 'No Status',

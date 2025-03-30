@@ -109,6 +109,34 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="payment" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="paymentLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <form id="paymentForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentLabel">Application Requiments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="amount">Amount: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="amount" name="amount">
+                    </div>
+                    <div class="form-group">
+                        <label for="or_number">OR Number: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="or_number" name="or_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment_date">Payment Date: <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="payment_date" name="payment_date">
+                    </div>
+                </div>
+                <div class="modal-footer text-end">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 @section('APP-SCRIPT')
     <script type="text/javascript">
@@ -121,20 +149,34 @@
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
-                    if (response.fsic_requirements && response.fsic_requirements.length > 0) {
+                    if (response && response.length > 0) {
                         let count = 1;
                         let html = '<ul class="list-group list-group-flush">';
 
-                        response.fsic_requirements.forEach((req, index) => {
-                            let displayName = req.name.replace(/_/g,
-                                ' '); // Convert underscores to spaces
+                        response.forEach((req) => {
+                            let displayName = req.name.replace(/_/g, ' ');
+                            let fileType = req.url.split('.').pop().toLowerCase();
+
+                            let linkTag = '';
+
+                            if (fileType === 'pdf') {
+                                // Handle PDFs (Open in new tab or FS Lightbox iframe)
+                                linkTag = `
+                                    <a href="${req.url}" data-fslightbox="fsic-gallery" data-type="iframe" class="thumbnail-link">
+                                        <img src="${req.thumbnail}" alt="Thumbnail" class="img-thumbnail shadow-sm rounded" width="60">
+                                    </a>`;
+                            } else {
+                                // Handle images
+                                linkTag = `
+                                    <a href="${req.url}" data-fslightbox="fsic-gallery" data-type="image" class="thumbnail-link">
+                                        <img src="${req.thumbnail}" alt="Thumbnail" class="img-thumbnail shadow-sm rounded" width="60">
+                                    </a>`;
+                            }
 
                             html += `
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <span class="text-capitalize fw-medium">${count}. ${displayName}</span>
-                                    <a href="${req.url}" data-fslightbox="fsic-gallery" data-type="image" class="thumbnail-link">
-                                        <img src="${req.thumbnail}" alt="Thumbnail" class="img-thumbnail shadow-sm rounded" width="60">
-                                    </a>
+                                    ${linkTag}
                                 </li>`;
                             count++;
                         });
@@ -146,7 +188,8 @@
                         refreshFsLightbox();
                     } else {
                         $('#requirementsContainer').html(
-                            '<p class="text-muted text-center">No requirements found.</p>');
+                            '<p class="text-muted text-center">No requirements found.</p>'
+                        );
                     }
 
                     $('#requirements').modal('show'); // Show the modal
@@ -167,10 +210,36 @@
             $('#schedule').modal('show');
         }
 
+        function generateFSIC(applicationID) {
+            applicationId = applicationID;
+            $('#payment').modal('show');
+        }
+
         $(document).ready(function() {
             // $("select").select2({
             //     width: '100%'
             // });
+
+            $("#amount").TouchSpin({
+                min: 0,
+                max: 9999999,
+                step: 0.1,
+                decimals: 2,
+                boostat: 5,
+                maxboostedstep: 10,
+                postfix: 'PHP',
+                verticalbuttons: true,
+                buttondown_class: 'btn btn-white',
+                buttonup_class: 'btn btn-white'
+            });
+
+            $("#or_number").TouchSpin({
+                min: 0,
+                max: 9999999999,
+                verticalbuttons: true,
+                buttondown_class: 'btn btn-white',
+                buttonup_class: 'btn btn-white'
+            });
 
             var $table1 = $('#table1');
 
@@ -220,7 +289,7 @@
                         }
                     },
                     {
-                        field: 'establishment.name',
+                        field: 'establishment_name',
                         title: 'Establishment Name'
                     },
                     {
@@ -306,6 +375,12 @@
                             <i class="bi bi-card-checklist"></i>
                         </button>
                     `;
+                } else if (latestStatus.status === "Certificate Approval Pending") {
+                    actionButtons += `
+                        <button class="btn btn-sm btn-success" onclick="generateFSIC('${row.id}')">
+                            <i class="bi bi-card-checklist"></i>
+                        </button>
+                    `;
                 } else {
                     actionButtons += `
                         <button class="btn btn-sm btn-info" disabled>
@@ -361,6 +436,7 @@
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
+                        $table1.bootstrapTable('refresh');
                         clearInterval(timerInterval);
                         showToast('success', response.message);
 
@@ -399,6 +475,7 @@
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
+                        $table1.bootstrapTable('refresh');
                         clearInterval(timerInterval);
                         showToast('success', 'Success');
 
@@ -406,6 +483,46 @@
                         $('#scheduleForm')[0].reset();
 
                         $('#schedule').modal('hide');
+                        Swal.close();
+                    },
+                    error: handleAjaxError,
+                    complete: function() {
+                        submitBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
+
+            $('#paymentForm').submit(function(event) {
+                event.preventDefault();
+                let timerInterval = showLoadingDialog('Generating FSIC');
+
+                let submitBtn = $('button[type="submit"]');
+                submitBtn.prop('disabled', true).text('Processing...');
+
+                // Remove previous error messages and invalid classes
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+
+                $.ajax({
+                    method: 'POST',
+                    url: '/fsics',
+                    data: {
+                        application_id: applicationId,
+                        amount: $('#amount').val(),
+                        or_number: $('#or_number').val(),
+                        payment_date: $('#payment_date').val(),
+                    },
+                    dataType: 'JSON',
+                    cache: false,
+                    success: function(response) {
+                        $table1.bootstrapTable('refresh');
+                        clearInterval(timerInterval);
+                        showToast('success', 'Success');
+
+                        // Reset the form
+                        $('#paymentForm')[0].reset();
+
+                        $('#payment').modal('hide');
                         Swal.close();
                     },
                     error: handleAjaxError,

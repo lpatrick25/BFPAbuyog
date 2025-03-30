@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EstablishmentController;
+use App\Http\Controllers\FsicController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\MarshallController;
 use App\Http\Controllers\navigation\AdminController;
@@ -92,6 +93,7 @@ Route::prefix('admin')->middleware(['auth', 'guest'])->group(function () {
     Route::get('marshallList', [AdminController::class, 'marshalls'])->name('marshall.list');
     Route::get('inspectorList', [AdminController::class, 'inspectors'])->name('inspector.list');
     Route::get('userList', [AdminController::class, 'users'])->name('user.list');
+    Route::get('mapping', [AdminController::class, 'mapping'])->name('admin.mapping');
 
     // Route Add Pages
     Route::get('addClient', [AdminController::class, 'addClient'])->name('client.add');
@@ -107,6 +109,7 @@ Route::prefix('admin')->middleware(['auth', 'guest'])->group(function () {
     Route::post('client/{clientId}/generate-session', [AdminController::class, 'generateSessionToken'])->name('client.session');
     Route::post('marshall/{marshallId}/generate-session', [AdminController::class, 'generateSessionToken'])->name('marshall.session');
     Route::post('inspector/{inspectorId}/generate-session', [AdminController::class, 'generateSessionToken'])->name('inspector.session');
+    Route::post('{sessionID}/generate-session', [AdminController::class, 'generateSessionToken'])->name('adminToken.session');
 });
 
 Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
@@ -115,6 +118,8 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
     Route::get('establishmentList', [NavigationClientController::class, 'establishments'])->name('establishment.list');
     Route::get('applicationList', [NavigationClientController::class, 'applications'])->name('application.list');
     Route::get('scheduleList', [NavigationClientController::class, 'schedules'])->name('client.schedule');
+    Route::get('mapping', [NavigationClientController::class, 'mapping'])->name('client.mapping');
+    Route::get('fsicList', [NavigationClientController::class, 'fsic'])->name('client.fsic');
 
     // Route Add Pages
     Route::get('addEstablishment', [NavigationClientController::class, 'addEstablishment'])->name('establishment.add');
@@ -123,8 +128,11 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
     // Route Edit Pages
     Route::get('establishment/{sessionID}/edit', [NavigationClientController::class, 'editEstablishment'])->name('establishment.edit');
 
+    // Route Show Pages
+    Route::get('establishment/{sessionID}/show', [NavigationClientController::class, 'showEstablishment'])->name('establishment.show');
+
     // Route Session
-    Route::post('{establishmentId}/generate-session', [NavigationClientController::class, 'generateSessionToken'])->name('establishment.session');
+    Route::post('{sessionID}/generate-session', [NavigationClientController::class, 'generateSessionToken'])->name('clientToken.session');
 
     // Other Route
     Route::get('getEstablishmentApplication/{establishmentId}', [NavigationClientController::class, 'getEstablishmentApplication'])->name('establishment.application');
@@ -133,15 +141,24 @@ Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
 Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
     // Route View
     Route::get('dashboard', [NavigationMarshallController::class, 'dashboards'])->name('marshall.dashboard');
+    Route::get('mapping', [NavigationMarshallController::class, 'mapping'])->name('marshall.mapping');
     Route::get('establishmentList', [NavigationMarshallController::class, 'establishments'])->name('marshall.establishments');
     Route::get('applicantList', [NavigationMarshallController::class, 'applicants'])->name('applicant.list');
     Route::get('scheduleList', [NavigationMarshallController::class, 'schedule'])->name('schedule.list');
+    Route::get('fsicList', [NavigationMarshallController::class, 'fsic'])->name('fsic.list');
+
+    // Route Session
+    Route::post('{sessionID}/generate-session', [NavigationMarshallController::class, 'generateSessionToken'])->name('marshallToken.session');
 });
 
 Route::prefix('inspector')->middleware(['auth', 'guest'])->group(function () {
     // Route View
     Route::get('dashboard', [NavigationInspectorController::class, 'dashboards'])->name('inspector.dashboard');
     Route::get('scheduleList', [NavigationInspectorController::class, 'schedule'])->name('schedule.inspection');
+    Route::get('mapping', [NavigationInspectorController::class, 'mapping'])->name('inspector.mapping');
+
+    // Route Session
+    Route::post('{sessionID}/generate-session', [NavigationInspectorController::class, 'generateSessionToken'])->name('inspectorToken.session');
 });
 
 // Route Resource
@@ -153,6 +170,7 @@ Route::resource('establishments', EstablishmentController::class);
 Route::resource('applications', ApplicationController::class);
 Route::resource('applicationsStatus', ApplicationStatusController::class);
 Route::resource('schedules', ScheduleController::class);
+Route::resource('fsics', FsicController::class);
 
 // Log Map Route
 Route::get('/load-map-view', function (Request $request) {

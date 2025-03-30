@@ -51,7 +51,7 @@
     </style>
 @endsection
 @section('APP-CONTENT')
-    <div class="row" id="addForm">
+    <div class="row">
         <div class="col-lg-12">
             <div class="card rounded">
                 <div class="card-content">
@@ -334,7 +334,7 @@
                         }
                     },
                     {
-                        field: 'establishment.name',
+                        field: 'establishment_name',
                         title: 'Establishment Name'
                     },
                     {

@@ -24,11 +24,11 @@ class ScheduleService
             $client = auth()->user()->client;
 
             if ($client) {
-                $schedules = Schedule::whereHas('application', function ($query) use ($client) {
+                $schedule = Schedule::whereHas('application', function ($query) use ($client) {
                     $query->whereHas('establishment', function ($q) use ($client) {
                         $q->where('client_id', $client->id);
                     });
-                })->get();
+                });
             }
         }
 

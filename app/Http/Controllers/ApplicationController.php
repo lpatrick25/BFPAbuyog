@@ -50,16 +50,16 @@ class ApplicationController extends Controller
         return new PaginatedApplicationResource($applications);
     }
 
-    public function show(Application $application): Collection|Media
+    public function show(Application $application): Collection
     {
-        $fsic_requirements = $application->getMedia('fsic_requirements')->map(function ($media) {
+        return $application->getMedia('fsic_requirements')->map(function (Media $media) {
             return [
                 'name' => $media->name,
                 'url' => $media->getUrl(),
-                'thumbnail' => $media->getUrl('thumbnail'),
+                'thumbnail' => $media->hasGeneratedConversion('thumbnail')
+                    ? $media->getUrl('thumbnail')
+                    : asset('img/bfp.svg'),
             ];
         });
-
-        return $fsic_requirements;
     }
 }

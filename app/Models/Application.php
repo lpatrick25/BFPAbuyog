@@ -65,5 +65,14 @@ class Application extends Model implements HasMedia
             ->withResponsiveImages()
             ->optimize()
             ->performOnCollections('fsic_requirements');
+
+        if ($media->mime_type === 'application/pdf') {
+            $this->addMediaConversion('thumbnail')
+                ->setManipulations(['format' => 'jpg'])
+                ->page(1)
+                ->width(300)
+                ->height(400)
+                ->performOnCollections('fsic_requirements');
+        }
     }
 }

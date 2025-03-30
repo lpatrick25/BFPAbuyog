@@ -128,11 +128,11 @@
                 <tr>
                     <td style="width: 50%; text-align: center; vertical-align: top;">
                         <span class="bold" style="color: red;">FSIC NO.:</span>
-                        <p style="border-bottom: 3px solid red;">{{ $fsicData['fsic_no'] }}</p>
+                        <span style="border-bottom: 3px solid red;">{{ $fsic->fsic_no }}</span>
                     </td>
                     <td style="width: 50%; text-align: center; vertical-align: top;">
                         <p style="display: inline-block; border-bottom: 1px solid black; padding: 0 15px;">
-                            {{ date('F j, Y', strtotime($fsicData['issue_date'])) }}
+                            {{ date('F j, Y', strtotime($fsic->issue_date)) }}
                         </p>
                         <p>Date</p>
                     </td>
@@ -148,7 +148,7 @@
             <table style="margin: auto;">
                 <tr>
                     <td style="padding-right: 10px;">
-                        <input type="checkbox" @if ($applicationData['fsic_type'] == 'occupancy') checked @endif>
+                        <input type="checkbox" @if ($fsic->application->fsic_type == 0) checked @endif>
                     </td>
                     <td style="text-align: left; color: blue;">
                         FOR CERTIFICATE OF OCCUPANCY
@@ -156,7 +156,7 @@
                 </tr>
                 <tr>
                     <td style="padding-right: 10px;">
-                        <input type="checkbox" @if ($applicationData['fsic_type'] == 'business_permit') checked @endif>
+                        <input type="checkbox" @if ($fsic->application->fsic_type >= 0) checked @endif>
                     </td>
                     <td style="text-align: left; color: blue;">
                         FOR BUSINESS PERMIT (NEW/RENEWAL)
@@ -164,7 +164,7 @@
                 </tr>
                 <tr>
                     <td style="padding-right: 10px;">
-                        <input type="checkbox" @if ($applicationData['fsic_type'] == 'others') checked @endif>
+                        <input type="checkbox" @if ($fsic->application->fsic_type < 0) checked @endif>
                     </td>
                     <td style="text-align: left; color: blue;">
                         OTHERS
@@ -182,14 +182,14 @@
                 <span style="display: inline-block; width: 100%;"></span>
             </p>
             <p style="width: 100%; text-align: center; border-bottom: 1px solid black; margin-top: -25px;">
-                {{ $applicationData['name'] }}
+                {{ $fsic->application->establishment->name }}
             </p>
             <p style="width: 100%; text-align: center; margin: 0; padding: 0;">
                 (Name of Establishment)
             </p>
             <p style="text-align: justify; margin-top: -1px; margin-bottom: -25px;">
                 owned and managed by <span class="bold"
-                    style="border-bottom: 1px solid black; padding: 0 50px;">{{ $applicationData['client_name'] }}</span>
+                    style="border-bottom: 1px solid black; padding: 0 50px;">{{ $fsic->application->establishment->client->getFullName() }}</span>
                 with
                 postal address
                 at &nbsp;
@@ -199,7 +199,7 @@
                 (Name of Owner/Representative)
             </p>
             <p style="text-align: center; border-bottom: 1px solid black;">
-                {{ ucwords(strtolower($applicationData['address_brgy'])) }}, Abuyog, Leyte
+                {{ ucwords(strtolower($fsic->application->establishment->address_brgy)) }}, Abuyog, Leyte
             </p>
             <p style="width: 100%; text-align: center; margin: 0; padding: 0;">
                 (Address)
@@ -214,7 +214,7 @@
                 <span class="bold" style="border-bottom: 1px solid black; padding: 0 50px;">Business Permit</span>
                 valid until
                 <span class="bold"
-                    style="border-bottom: 1px solid black; padding: 0 50px;">{{ date('F j, Y', strtotime($fsicData['expiration_date'])) }}</span>
+                    style="border-bottom: 1px solid black; padding: 0 50px;">{{ date('F j, Y', strtotime($fsic->expiration_date)) }}</span>
             </p>
             <p style="text-indent: 45px; text-align: justify;; margin-top: 30px;">
                 Violation of Fire Code provisions shall cause this certificate <span class="bold">null and void</span>
@@ -227,10 +227,10 @@
                 <!-- Left Column: Fire Code Fees -->
                 <td style="width: 50%; text-align: left; vertical-align: top;">
                     <p><b>Fire Code Fees:</b></p>
-                    <p>Amount Paid: <b>{{ $fsicData['amount'] }}</b></p>
-                    <p>O.R. Number: <b>{{ $fsicData['or_number'] }}</b></p>
-                    <p>Date: <b>{{ date('F j, Y', strtotime($fsicData['payment_date'])) }}</b></p>
-                    <img src="{{ storage_path('app/' . $fsicData['filePath']) }}" alt="QR Code"
+                    <p>Amount Paid: <b>{{ $fsic->amount }}</b></p>
+                    <p>O.R. Number: <b>{{ $fsic->or_number }}</b></p>
+                    <p>Date: <b>{{ date('F j, Y', strtotime($fsic->payment_date)) }}</b></p>
+                    <img src="{{ $fsic->fsicQrCode }}" alt="QR Code"
                         style="height: 130px; width: 130px;">
                 </td>
 
@@ -238,11 +238,11 @@
                 <td style="width: 50%; vertical-align: top;">
                     <p style="text-align: left;"><b>RECOMMEND APPROVAL:</b></p>
                     <p style="text-align: center; border-bottom: 1px solid black; margin: 0; width: 80%;">
-                        {{ $application->inspector_name }}</p>
+                        {{ $fsic->inspector->getFullName() }}</p>
                     <p style="text-align: center; margin: 0; width: 80%;">CHIEF, Fire Safety Enforcement Section</p>
                     <p style="text-align: left; margin-top: 30px;"><b>APPROVED:</b></p>
                     <p style="text-align: center; border-bottom: 1px solid black; margin: 0; width: 80%;">
-                        {{ $application->marshall_name }}</p>
+                        {{ $fsic->marshall->getFullName() }}</p>
                     <p style="text-align: center; margin: 0; width: 80%;">CITY/MUNICIPAL FIRE MARSHAL</p>
                 </td>
             </tr>

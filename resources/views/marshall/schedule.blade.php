@@ -199,6 +199,10 @@
                         }
                     },
                     {
+                        field: 'status',
+                        title: 'Status'
+                    },
+                    {
                         field: 'action',
                         title: 'Actions',
                         formatter: actionFormatter
@@ -208,6 +212,11 @@
 
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
+                if (row.status === 'Completed') {
+                    return `
+                    <button class="btn btn-sm btn-info" disabled><i class="bi bi-calendar-check"></i></button>
+                    <button class="btn btn-sm btn-success" disabled><i class="bi bi-card-checklist"></i></button>`;
+                }
                 return `
                     <button class="btn btn-sm btn-info" onclick="applicationSchedule('${row.application_id}', '${row.schedule_date}')"><i class="bi bi-calendar-check"></i></button>
                     <button class="btn btn-sm btn-success" onclick="applicationRemarks('${row.application_id}', '${row.schedule_date}')"><i class="bi bi-card-checklist"></i></button>`;
