@@ -2,7 +2,7 @@
 @section('APP-TITLE')
     Dashboard
 @endsection
-@section('client-dashboard')
+@section('inspector-dashboard')
     active
 @endsection
 @section('APP-CONTENT')

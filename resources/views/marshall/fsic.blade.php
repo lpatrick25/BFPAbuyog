@@ -40,7 +40,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="fsicContent"></div>
+                    <!-- Normal PDF View for Desktop -->
+                    <div id="pdf-desktop">
+                    </div>
+
+                    <!-- PDF.js Canvas for Mobile -->
+                    <div id="pdf-mobile" style="display: none;">
+                        <canvas id="pdf-render"></canvas>
+                    </div>
                 </div>
                 <div class="modal-footer text-end">
                 </div>
@@ -49,6 +56,7 @@
     </div>
 @endsection
 @section('APP-SCRIPT')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script type="text/javascript">
         function viewFSIC(fsicId) {
             let timerInterval = showLoadingDialog('Retrieving FSIC');
@@ -62,18 +70,58 @@
                     clearInterval(timerInterval);
                     showToast('success', 'Success');
 
-                    // Filter to get the first PDF file
-                    let pdfFile = response.find(file => file.url.endsWith('.pdf'));
-
-                    if (pdfFile) {
-                        const pdfEmbed =
-                            `<iframe src="${pdfFile.url}" width="100%" height="500px" style="border: none;"></iframe>`;
-                        $('#fsicContent').html(pdfEmbed);
-                        $('#fsic').modal('show');
-                    } else {
-                        showToast('warning', 'No PDF found.');
+                    function isMobileDevice() {
+                        return /Mobi|Android/i.test(navigator.userAgent);
                     }
 
+                    // Debugging: Log the response to check the structure
+                    console.log("FSIC Response:", response);
+
+                    // Ensure a PDF file is found
+                    let pdfFile = response.find(file => file.url.endsWith('.pdf'));
+
+                    if (!pdfFile) {
+                        showToast('error', 'No FSIC PDF found.');
+                        return;
+                    }
+
+                    const pdfUrl = pdfFile.url.replace(/([^:]\/)\/+/g, "$1");
+                    console.log("PDF URL:", pdfUrl); // Debugging
+
+                    if (isMobileDevice()) {
+                        $('#pdf-desktop').hide();
+                        $('#pdf-mobile').show();
+
+                        pdfjsLib.getDocument(pdfUrl).promise.then(pdfDoc => {
+                            pdfDoc.getPage(1).then(page => {
+                                let canvas = document.getElementById('pdf-render');
+                                let ctx = canvas.getContext('2d');
+
+                                let viewport = page.getViewport({
+                                    scale: 1.5
+                                });
+                                canvas.height = viewport.height;
+                                canvas.width = viewport.width;
+
+                                let renderContext = {
+                                    canvasContext: ctx,
+                                    viewport: viewport
+                                };
+                                page.render(renderContext);
+                            });
+                        }).catch(err => {
+                            console.error("PDF.js Error:", err);
+                            showToast('error', 'Failed to load PDF.');
+                        });
+                    } else {
+                        $('#pdf-desktop').show();
+                        $('#pdf-mobile').hide();
+                        $('#pdf-desktop').html(
+                            `<iframe src="${pdfUrl}" width="100%" height="600px" style="border: none;"></iframe>`
+                            );
+                    }
+
+                    $('#fsic').modal('show');
                     Swal.close();
                 },
                 error: handleAjaxError

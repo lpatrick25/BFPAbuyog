@@ -35,10 +35,9 @@
 @endsection
 @section('APP-SCRIPT')
     <script type="text/javascript">
-        // Redirect to the edit page with a session token
         function editInspector(inspectorId) {
             $.ajax({
-                url: `/admin/inspector/${inspectorId}/generate-session`,
+                url: `/admin/${inspectorId}/generate-session`,
                 method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
@@ -61,7 +60,7 @@
                 cache: false,
                 success: function(response) {
                     $('#table1').bootstrapTable('refresh');
-                    showToast('success', response.message);
+                    showToast('success', 'Success');
                 },
                 error: function(xhr) {
                     showToast('danger', xhr.responseJSON.message || 'Something went wrong.');
@@ -79,26 +78,26 @@
             var $table1 = $('#table1');
 
             $table1.bootstrapTable({
-                url: '/inspectors', // Laravel API endpoint
+                url: '/inspectors',
                 method: 'GET',
                 pagination: true,
-                sidePagination: 'server', // Enable server-side pagination
-                pageSize: 10, // Default records per page
-                pageList: [5, 10, 25, 50, 100], // Page size options
-                search: true, // Enable search
+                sidePagination: 'server',
+                pageSize: 10,
+                pageList: [5, 10, 25, 50, 100],
+                search: true,
                 buttonsAlign: 'left',
                 searchAlign: 'left',
                 toolbarAlign: 'right',
                 queryParams: function(params) {
                     return {
-                        limit: params.limit, // Number of records per page
-                        page: params.offset / params.limit + 1 // Page number
+                        limit: params.limit,
+                        page: params.offset / params.limit + 1
                     };
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total, // Set total count
-                        rows: res.rows // Set data rows
+                        total: res.pagination.total,
+                        rows: res.rows
                     };
                 },
                 columns: [{
@@ -107,12 +106,7 @@
                     },
                     {
                         field: 'full_name',
-                        title: 'Name',
-                        formatter: function(value, row, index) {
-                            let middleName = row.middle_name ? ` ${row.middle_name}` : '';
-                            let extensionName = row.extension_name ? ` ${row.extension_name}` : '';
-                            return `${row.first_name}${middleName} ${row.last_name}${extensionName}`;
-                        }
+                        title: 'Name'
                     },
                     {
                         field: 'contact_number',
@@ -130,10 +124,9 @@
                 ]
             });
 
-            // Format the "Actions" column
             function actionFormatter(value, row, index) {
-                return `<button class="btn btn-sm btn-primary" onclick="editInspector('${row.id}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteInspector('${row.id}')">Delete</button>`;
+                return `<button class="btn btn-sm btn-primary" onclick="editInspector('${row.id}')"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteInspector('${row.id}')"><i class="bi bi-trash-fill"></i></button>`;
             }
 
         });

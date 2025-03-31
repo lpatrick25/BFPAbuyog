@@ -106,6 +106,29 @@
             });
         }
 
+        function showEstablishment(establishmentId) {
+            let timerInterval = showLoadingDialog('Getting establishment information');
+
+            $.ajax({
+                url: `/client/${establishmentId}/generate-session`,
+                method: 'POST',
+                success: function(response) {
+                    clearInterval(timerInterval);
+                    if (response.sessionID) {
+                        window.location.href = `/client/establishment/${response.sessionID}/show`;
+                    } else {
+                        showToast('danger', 'Failed to generate session.');
+                    }
+                    Swal.close();
+                },
+                error: function() {
+                    clearInterval(timerInterval);
+                    Swal.close();
+                    showToast('danger', 'Error generating session token.');
+                }
+            });
+        }
+
         $(document).ready(function() {
 
             $('#add-btn').click(function(event) {
@@ -177,8 +200,7 @@
 
                 if (hasApplication) {
                     actionButton =
-                        `<button class="btn btn-sm btn-primary" disabled><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-sm btn-danger" disabled><i class="bi bi-trash"></i></button>`;
+                        `<button class="btn btn-sm btn-primary" onclick="showEstablishment('${row.id}')"><i class="bi bi-eye"></i></button>`;
                 } else {
                     actionButton =
                         `<button class="btn btn-sm btn-primary" onclick="editEstablishment('${row.id}')"><i class="bi bi-pencil-square"></i></button>

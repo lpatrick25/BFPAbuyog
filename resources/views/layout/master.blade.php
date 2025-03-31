@@ -8,7 +8,7 @@
     <title>{{ env('APP_NAME') }} | @yield('APP-TITLE')</title>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}" />
+    <link rel="shortcut icon" href="{{ asset('img/bfp.webp') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!-- Library / Plugin Css Build -->

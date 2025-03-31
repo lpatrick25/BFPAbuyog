@@ -16,10 +16,10 @@ trait HasFullName
         return trim(
             sprintf(
                 '%s %s %s %s',
-                $this->first_name,
-                $middleInitial,  // Use the middle initial
-                $this->last_name,
-                $this->extension_name ?? ''
+                ucfirst($this->first_name),
+                ucfirst($middleInitial),  // Use the middle initial
+                ucfirst($this->last_name),
+                ucfirst($this->extension_name) ?? ''
             )
         );
     }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Events\NewApplication;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationStatusController;
 use App\Http\Controllers\Auth\LoginController;
@@ -16,166 +15,166 @@ use App\Http\Controllers\navigation\InspectorController as NavigationInspectorCo
 use App\Http\Controllers\navigation\MarshallController as NavigationMarshallController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
+use App\Models\Fsic;
 use App\Models\User;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
-Route::get('/', function () {
-    return view('signin');
-})->name('signin')->middleware('guest');
+// =============================
+// AUTHENTICATION ROUTES
+// =============================
+Route::middleware('guest')->group(function () {
+    Route::view('/', 'signin')->name('signin');
+    Route::view('/signup', 'signup')->name('signup');
+    Route::post('/login', [LoginController::class, 'login'])->name('login');
+    Route::post('/register', [RegistrationController::class, 'register'])->name('register');
+});
 
-Route::get('/signup', function () {
-    return view('signup');
-})->name('signup')->middleware('guest');
+Route::middleware('auth')->group(function () {
+    Route::get('/logout', function (Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/')->with('success', 'You have been logged out.');
+    })->name('logout');
+});
 
-Route::post('/login', [LoginController::class, 'login'])->name('login');
+// =============================
+// EMAIL VERIFICATION ROUTES
+// =============================
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verification', function () {
+        $user = Auth::user();
 
-Route::get('/logout', function (Request $request) {
-    Auth::logout(); // Logout the user
+        if ($user && $user->email_verified_at) {
+            return redirect()->route('signin');
+        }
 
-    // Invalidate the session and regenerate the CSRF token
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+        return view('verification');
+    })->name('verification.view');
 
-    // Redirect to the login page or home page
-    return redirect('/')->with('success', 'You have been logged out.');
-})->name('logout');
+    Route::view('/email/verified', 'verified')->name('verified.view');
 
-Route::post('/register', [RegistrationController::class, 'register'])->name('register');
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $user = User::findOrFail($request->id);
 
-Route::get('/email/verification', function () {
-    return view('verification');
-})->name('verification.view');
+        if (!hash_equals((string) $request->hash, sha1($user->getEmailForVerification()))) {
+            abort(403, 'Invalid verification link.');
+        }
 
-Route::get('/email/verified', function () {
-    return view('verified');
-})->name('verified.view');
+        if (!$user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
 
-Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
-    $user = User::findOrFail($id);
+        Auth::login($user);
+        return redirect('/')->with('verified', true);
+    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 
-    if (!hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
-        abort(403, 'Invalid verification link.');
-    }
-
-    Auth::login($user); // Log in the user before marking email as verified
-    $user->markEmailAsVerified(); // Mark email as verified
-
-    return redirect('/')->with('verified', true);
-})->middleware(['signed'])->name('verification.verify');
-
-Route::post('/email/verification-notification', function (Request $request) {
-    if ($request->user()) {
+    Route::post('/email/verification-notification', function (Request $request) {
         $request->user()->sendEmailVerificationNotification();
         return response()->json(['message' => 'Verification email sent!'], 200);
-    }
-    return response()->json(['error' => 'Unauthorized'], 401);
-})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+    })->middleware(['throttle:6,1'])->name('verification.send');
+});
 
-Route::prefix('admin')->middleware(['auth', 'guest'])->group(function () {
-    // Route View
-    Route::get('dashboard', [AdminController::class, 'dashboards'])->name('admin.dashboard');
-    Route::get('clientList', [AdminController::class, 'clients'])->name('client.list');
-    Route::get('marshallList', [AdminController::class, 'marshalls'])->name('marshall.list');
-    Route::get('inspectorList', [AdminController::class, 'inspectors'])->name('inspector.list');
-    Route::get('userList', [AdminController::class, 'users'])->name('user.list');
-    Route::get('mapping', [AdminController::class, 'mapping'])->name('admin.mapping');
+// =============================
+// ADMIN ROUTES
+// =============================
+Route::prefix('admin')->middleware('auth')->controller(AdminController::class)->group(function () {
+    Route::get('dashboard', 'dashboards')->name('admin.dashboard');
+    Route::get('clientList', 'clients')->name('client.list');
+    Route::get('marshallList', 'marshalls')->name('marshall.list');
+    Route::get('inspectorList', 'inspectors')->name('inspector.list');
+    Route::get('userList', 'users')->name('user.list');
+    Route::get('mapping', 'mapping')->name('admin.mapping');
     Route::get('establishment/{sessionID}/show', [NavigationMarshallController::class, 'showEstablishment'])->name('admin.establishmentMapping');
 
-    // Route Add Pages
-    Route::get('addClient', [AdminController::class, 'addClient'])->name('client.add');
-    Route::get('addMarshall', [AdminController::class, 'addMarshall'])->name('marshall.add');
-    Route::get('addInspector', [AdminController::class, 'addInspector'])->name('inspector.add');
+    Route::get('addClient', 'addClient')->name('client.add');
+    Route::get('addMarshall', 'addMarshall')->name('marshall.add');
+    Route::get('addInspector', 'addInspector')->name('inspector.add');
 
-    // Route Edit Pages
-    Route::get('client/{sessionID}/edit', [AdminController::class, 'editClient'])->name('client.edit');
-    Route::get('marshall/{sessionID}/edit', [AdminController::class, 'editMarshall'])->name('marshall.edit');
-    Route::get('inspector/{sessionID}/edit', [AdminController::class, 'editInspector'])->name('inspector.edit');
+    Route::get('client/{sessionID}/edit', 'editClient')->name('client.edit');
+    Route::get('marshall/{sessionID}/edit', 'editMarshall')->name('marshall.edit');
+    Route::get('inspector/{sessionID}/edit', 'editInspector')->name('inspector.edit');
 
-    // Route Session
-    Route::post('client/{clientId}/generate-session', [AdminController::class, 'generateSessionToken'])->name('client.session');
-    Route::post('marshall/{marshallId}/generate-session', [AdminController::class, 'generateSessionToken'])->name('marshall.session');
-    Route::post('inspector/{inspectorId}/generate-session', [AdminController::class, 'generateSessionToken'])->name('inspector.session');
-    Route::post('{sessionID}/generate-session', [AdminController::class, 'generateSessionToken'])->name('adminToken.session');
+    Route::post('{id}/generate-session', 'generateSessionToken')->name('adminToken.session');
 });
 
-Route::prefix('client')->middleware(['auth', 'guest'])->group(function () {
-    // Route View
-    Route::get('dashboard', [NavigationClientController::class, 'dashboards'])->name('client.dashboard');
-    Route::get('establishmentList', [NavigationClientController::class, 'establishments'])->name('establishment.list');
-    Route::get('applicationList', [NavigationClientController::class, 'applications'])->name('application.list');
-    Route::get('scheduleList', [NavigationClientController::class, 'schedules'])->name('client.schedule');
-    Route::get('mapping', [NavigationClientController::class, 'mapping'])->name('client.mapping');
-    Route::get('fsicList', [NavigationClientController::class, 'fsic'])->name('client.fsic');
+// =============================
+// CLIENT ROUTES
+// =============================
+Route::prefix('client')->middleware('auth')->controller(NavigationClientController::class)->group(function () {
+    Route::get('dashboard', 'dashboards')->name('client.dashboard');
+    Route::get('establishmentList', 'establishments')->name('establishment.list');
+    Route::get('applicationList', 'applications')->name('application.list');
+    Route::get('scheduleList', 'schedules')->name('client.schedule');
+    Route::get('mapping', 'mapping')->name('client.mapping');
+    Route::get('fsicList', 'fsic')->name('client.fsic');
 
-    // Route Add Pages
-    Route::get('addEstablishment', [NavigationClientController::class, 'addEstablishment'])->name('establishment.add');
-    Route::get('addApplication', [NavigationClientController::class, 'addApplication'])->name('application.add');
+    Route::get('addEstablishment', 'addEstablishment')->name('establishment.add');
+    Route::get('addApplication', 'addApplication')->name('application.add');
 
-    // Route Edit Pages
-    Route::get('establishment/{sessionID}/edit', [NavigationClientController::class, 'editEstablishment'])->name('establishment.edit');
+    Route::get('establishment/{sessionID}/edit', 'editEstablishment')->name('establishment.edit');
+    Route::get('establishment/{sessionID}/show', 'showEstablishment')->name('establishment.show');
 
-    // Route Show Pages
-    Route::get('establishment/{sessionID}/show', [NavigationClientController::class, 'showEstablishment'])->name('establishment.show');
+    Route::post('{sessionID}/generate-session', 'generateSessionToken')->name('clientToken.session');
 
-    // Route Session
-    Route::post('{sessionID}/generate-session', [NavigationClientController::class, 'generateSessionToken'])->name('clientToken.session');
-
-    // Other Route
-    Route::get('getEstablishmentApplication/{establishmentId}', [NavigationClientController::class, 'getEstablishmentApplication'])->name('establishment.application');
+    Route::get('getEstablishmentApplication/{establishmentId}', 'getEstablishmentApplication')->name('establishment.application');
 });
 
-Route::prefix('marshall')->middleware(['auth', 'guest'])->group(function () {
-    // Route View
-    Route::get('dashboard', [NavigationMarshallController::class, 'dashboards'])->name('marshall.dashboard');
-    Route::get('mapping', [NavigationMarshallController::class, 'mapping'])->name('marshall.mapping');
-    Route::get('establishment/{sessionID}/show', [NavigationMarshallController::class, 'showEstablishment'])->name('marshall.establishmentMapping');
-    Route::get('establishmentList', [NavigationMarshallController::class, 'establishments'])->name('marshall.establishments');
-    Route::get('applicantList', [NavigationMarshallController::class, 'applicants'])->name('applicant.list');
-    Route::get('scheduleList', [NavigationMarshallController::class, 'schedule'])->name('schedule.list');
-    Route::get('fsicList', [NavigationMarshallController::class, 'fsic'])->name('fsic.list');
+// =============================
+// MARSHALL ROUTES
+// =============================
+Route::prefix('marshall')->middleware('auth')->controller(NavigationMarshallController::class)->group(function () {
+    Route::get('dashboard', 'dashboards')->name('marshall.dashboard');
+    Route::get('mapping', 'mapping')->name('marshall.mapping');
+    Route::get('establishment/{sessionID}/show', 'showEstablishment')->name('marshall.establishmentMapping');
+    Route::get('establishmentList', 'establishments')->name('marshall.establishments');
+    Route::get('applicantList', 'applicants')->name('applicant.list');
+    Route::get('scheduleList', 'schedule')->name('schedule.list');
+    Route::get('fsicList', 'fsic')->name('fsic.list');
 
-    // Route Session
-    Route::post('{sessionID}/generate-session', [NavigationMarshallController::class, 'generateSessionToken'])->name('marshallToken.session');
+    Route::post('{sessionID}/generate-session', 'generateSessionToken')->name('marshallToken.session');
 });
 
-Route::prefix('inspector')->middleware(['auth', 'guest'])->group(function () {
-    // Route View
-    Route::get('dashboard', [NavigationInspectorController::class, 'dashboards'])->name('inspector.dashboard');
-    Route::get('scheduleList', [NavigationInspectorController::class, 'schedule'])->name('schedule.inspection');
-    Route::get('mapping', [NavigationInspectorController::class, 'mapping'])->name('inspector.mapping');
-    Route::get('establishment/{sessionID}/show', [NavigationMarshallController::class, 'showEstablishment'])->name('inspector.establishmentMapping');
+// =============================
+// INSPECTOR ROUTES
+// =============================
+Route::prefix('inspector')->middleware('auth')->controller(NavigationInspectorController::class)->group(function () {
+    Route::get('dashboard', 'dashboards')->name('inspector.dashboard');
+    Route::get('scheduleList', 'schedule')->name('schedule.inspection');
+    Route::get('mapping', 'mapping')->name('inspector.mapping');
+    Route::get('establishment/{sessionID}/show', 'showEstablishment')->name('inspector.establishmentMapping');
 
-    // Route Session
-    Route::post('{sessionID}/generate-session', [NavigationInspectorController::class, 'generateSessionToken'])->name('inspectorToken.session');
+    Route::post('{sessionID}/generate-session', 'generateSessionToken')->name('inspectorToken.session');
 });
 
-// Route Resource
-Route::resource('clients', ClientController::class);
-Route::resource('marshalls', MarshallController::class);
-Route::resource('inspectors', InspectorController::class);
-Route::resource('users', UserController::class);
-Route::resource('establishments', EstablishmentController::class);
-Route::resource('applications', ApplicationController::class);
-Route::resource('applicationsStatus', ApplicationStatusController::class);
-Route::resource('schedules', ScheduleController::class);
-Route::resource('fsics', FsicController::class);
+// =============================
+// RESOURCE ROUTES
+// =============================
+Route::resources([
+    'clients' => ClientController::class,
+    'marshalls' => MarshallController::class,
+    'inspectors' => InspectorController::class,
+    'users' => UserController::class,
+    'establishments' => EstablishmentController::class,
+    'applications' => ApplicationController::class,
+    'applicationsStatus' => ApplicationStatusController::class,
+    'schedules' => ScheduleController::class,
+    'fsics' => FsicController::class,
+]);
 
-// Log Map Route
+// =============================
+// MAP & FSIC ROUTES
+// =============================
 Route::get('/load-map-view', function (Request $request) {
     $validated = $request->validate([
         'latitude' => 'nullable|numeric',
@@ -189,3 +188,5 @@ Route::get('/load-map-view', function (Request $request) {
 
     return view('pages.map', compact('location'));
 })->name('loadMap');
+
+Route::get('fsic_no/{fsicNo}', fn($fsicNo) => view('fsic', ['fsic' => Fsic::with('application')->where('fsic_no', Crypt::decryptString($fsicNo))->first()]));
