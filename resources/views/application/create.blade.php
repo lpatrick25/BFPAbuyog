@@ -368,7 +368,7 @@
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
-                        let establishment = response.establishment;
+                        let establishment = response.data;
                         $('#type_of_building').text(establishment.type_of_building);
                         $('#nature_of_business').text(establishment.nature_of_business);
                         $('#type_of_occupancy').text(establishment.type_of_occupancy);

@@ -25,11 +25,6 @@
 
     <!-- Customizer Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
-
-    <!-- RTL Css -->
-    <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
-
-
 </head>
 
 <body class="theme-color-red light" data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0"
@@ -69,7 +64,7 @@
                                         <h4 class="logo-title ms-3">BFP - Abuyog</h4>
                                     </a>
                                     <h2 class="mb-2 text-center">Sign In</h2>
-                                    <form id="loginForm" class="needs-validation" novalidate>
+                                    <form id="loginForm">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="form-group">
@@ -107,8 +102,7 @@
                         </div>
                     </div>
                     <div class="sign-bg">
-                        <img src="{{ asset('img/bfp.svg') }}" height="330" alt="BFP Logo" style="opacity: 3%;">
-
+                        <img src="{{ asset('img/bfp.svg') }}" height="230" alt="BFP Logo" style="opacity: 3%;">
                     </div>
                 </div>
                 <div class="col-md-6 d-md-block d-none bg-primary p-0 mt-n1 vh-100 overflow-hidden">
@@ -126,27 +120,6 @@
 
     <!-- External Library Bundle Script -->
     <script src="{{ asset('assets/js/core/external.min.js') }}"></script>
-
-    <!-- Widgetchart Script -->
-    <script src="{{ asset('assets/js/charts/widgetcharts.js') }}"></script>
-
-    <!-- mapchart Script -->
-    <script src="{{ asset('assets/js/charts/vectore-chart.js') }}"></script>
-    <script src="{{ asset('assets/js/charts/dashboard.js') }}"></script>
-
-    <!-- fslightbox Script -->
-    <script src="{{ asset('assets/js/plugins/fslightbox.js') }}"></script>
-
-    <!-- Settings Script -->
-    <script src="{{ asset('assets/js/plugins/setting.js') }}"></script>
-
-    <!-- Slider-tab Script -->
-    <script src="{{ asset('assets/js/plugins/slider-tabs.js') }}"></script>
-
-    <!-- Form Wizard Script -->
-    <script src="{{ asset('assets/js/plugins/form-wizard.js') }}"></script>
-
-    <!-- AOS Animation Plugin-->
 
     <!-- App Script -->
     <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
@@ -166,9 +139,7 @@
                 let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
 
-                // Clear previous validation errors
-                $('.form-control').removeClass('is-invalid');
-                $('.text-danger').text('');
+                clearValidationErrors();
 
                 $.ajax({
                     method: 'POST',
@@ -176,64 +147,73 @@
                     data: $('#loginForm').serialize(),
                     dataType: 'JSON',
                     cache: false,
-                    success: function(response) {
-                        showToast('success', response.message);
-
-                        // Redirect to dashboard on success
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
-                            let errors = xhr.responseJSON.errors;
-
-                            // Loop through each error and display it
-                            $.each(errors, function(field, messages) {
-                                let inputField = $(`#loginForm [name="${field}"]`);
-                                inputField.addClass('is-invalid');
-                                $(`.error-${field}`).text(messages[0]);
-
-                                // Remove error when user types
-                                inputField.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(`.error-${field}`).text('');
-                                });
-                            });
-
-                            showToast('danger', 'Please correct the errors in the form.');
-                        } else if (xhr.status === 401) {
-                            // Display error below password field
-                            let emailField = $('#loginForm [name="email"]');
-                            emailField.addClass('is-invalid');
-                            $('.error-email').text('Invalid email.');
-
-                            // Display error below password field
-                            let passwordField = $('#loginForm [name="password"]');
-                            passwordField.addClass('is-invalid');
-                            $('.error-password').text('Invalid password.');
-
-                            showToast('danger', 'Invalid email or password.');
-                        } else {
-                            showToast('danger', 'Something went wrong. Please try again.');
-                        }
-                    },
-                    complete: function() {
-                        submitBtn.prop('disabled', false).text('Sign In');
-                    }
+                    success: handleSuccess,
+                    error: handleError,
+                    complete: () => submitBtn.prop('disabled', false).text('Sign In')
                 });
             });
+
+            function handleSuccess(response) {
+                showToast('success', response.message);
+                setTimeout(() => window.location.reload(), 1000);
+            }
+
+            function handleError(xhr) {
+                if (xhr.status === 422) {
+                    showValidationErrors(xhr.responseJSON.errors);
+                    showToast('danger', 'Please correct the errors in the form.');
+                } else if (xhr.status === 401) {
+                    showInvalidLoginError();
+                    showToast('danger', 'Invalid email or password.');
+                } else {
+                    showToast('danger', 'Something went wrong. Please try again.');
+                }
+            }
+
+            function showValidationErrors(errors) {
+                $.each(errors, function(field, messages) {
+                    let inputField = $(`#loginForm [name="${field}"]`);
+                    displayFieldError(inputField, messages[0]);
+                });
+            }
+
+            function showInvalidLoginError() {
+                let emailField = $('#loginForm [name="email"]');
+                let passwordField = $('#loginForm [name="password"]');
+
+                displayFieldError(emailField, 'Invalid email.');
+                displayFieldError(passwordField, 'Invalid password.');
+            }
+
+            function displayFieldError(inputField, message) {
+                inputField.addClass('is-invalid');
+                if (!inputField.next('.invalid-feedback').length) {
+                    inputField.after(`<div class="invalid-feedback">${message}</div>`);
+                } else {
+                    inputField.next('.invalid-feedback').text(message);
+                }
+
+                inputField.on('input', function() {
+                    $(this).removeClass('is-invalid');
+                    $(this).next('.invalid-feedback').remove();
+                });
+            }
+
+            function clearValidationErrors() {
+                $('.form-control').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+            }
 
             function showToast(type, message) {
                 let toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
 
                 let toastHtml = `
-                <div class="toast align-items-center text-white ${toastClass} border-0 show" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body text-center w-100">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>`;
+                    <div class="toast align-items-center text-white ${toastClass} border-0 show" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body text-center w-100">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>`;
 
                 $('.toast-container').html(toastHtml);
                 let toastElement = new bootstrap.Toast($('.toast')[0]);

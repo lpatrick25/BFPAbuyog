@@ -11,32 +11,31 @@ class LoginController extends Controller
 {
     public function login(Request $request)
     {
-        // Validation rules
+        // Validate input
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required|string|min:6',
+            'email' => 'required|email',
+            'password' => 'required'
         ]);
 
-        // Return validation errors
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'errors' => $validator->errors(),
+                'errors' => $validator->errors()
             ], 422);
         }
 
         // Attempt login
-        if (Auth::attempt($request->only('email', 'password'))) {
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'Login successful',
+                'message' => 'Login successful'
             ], 200);
         }
 
         // If login fails
         return response()->json([
             'status' => 'error',
-            'message' => 'Invalid email or password.',
+            'message' => 'Invalid email or password.'
         ], 401);
     }
 }

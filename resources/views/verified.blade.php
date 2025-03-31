@@ -168,13 +168,13 @@
                 if (progress >= 100) {
                     clearInterval(interval);
                     setTimeout(function () {
-                        window.location.href = "/dashboard";
+                        window.location.href = "/";
                     }, 1000);
                 }
             }, 800);
 
             $("#dashboard-btn").click(function () {
-                window.location.href = "/dashboard";
+                window.location.href = "/";
             });
         });
     </script>

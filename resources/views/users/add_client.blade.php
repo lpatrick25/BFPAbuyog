@@ -74,76 +74,36 @@
 
             $('#addForm').submit(function(event) {
                 event.preventDefault();
+                let timerInterval = showLoadingDialog('Creating User Account');
 
                 let submitBtn = $('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('Processing...');
 
-                // Remove previous error messages and invalid classes
                 $('.is-invalid').removeClass('is-invalid');
                 $('.invalid-feedback').remove();
 
                 $.ajax({
                     method: 'POST',
-                    url: '/clients', // Adjust URL if needed
+                    url: '/clients',
                     data: $(this).serialize(),
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
-                        // Scroll to the top of the page
+                        clearInterval(timerInterval);
+                        Swal.close();
                         $('html, body').animate({
                             scrollTop: 0
                         }, 'slow');
 
-                        showToast('success', response.message);
+                        showToast('success', 'Success');
 
-                        // Reset the form
                         $('#addForm')[0].reset();
 
-                        // Reset the form
                         setInterval(() => {
                             goBack();
                         }, 1000);
                     },
-                    error: function(xhr) {
-                        // Scroll to the top of the page
-                        $('html, body').animate({
-                            scrollTop: 0
-                        }, 'slow');
-
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    // Add 'is-invalid' class to highlight error
-                                    inputElement.addClass('is-invalid');
-
-                                    // Create the error message div
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-
-                                    // Append error message after the input field
-                                    inputElement.after(errorContainer);
-                                }
-
-                                // Remove error on input change
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-
-                        } else {
-                            // Handle non-validation errors
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('Save');
                     }

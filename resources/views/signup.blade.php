@@ -69,14 +69,14 @@
                                         <h4 class="logo-title ms-3">BFP - Abuyog</h4>
                                     </a>
                                     <h2 class="mb-2 text-center">Sign Up</h2>
-                                    <form class="needs-validation" novalidate id="signUpForm">
+                                    <form id="signUpForm">
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <div class="form-group">
                                                     <label for="first-name" class="form-label">First Name: <span
                                                             class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" id="first-name"
-                                                        name="first_name" placeholder=" " required>
+                                                        name="first_name" placeholder=" ">
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
@@ -91,7 +91,7 @@
                                                     <label for="last-name" class="form-label">Last Name: <span
                                                             class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" id="last-name"
-                                                        name="last_name" placeholder=" " required>
+                                                        name="last_name" placeholder=" ">
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
@@ -106,7 +106,7 @@
                                                     <label for="email" class="form-label">Email: <span
                                                             class="text-danger">*</span></label>
                                                     <input type="email" class="form-control" id="email"
-                                                        name="email" placeholder=" " required>
+                                                        name="email" placeholder=" ">
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
@@ -114,7 +114,7 @@
                                                     <label for="phone" class="form-label">Phone No.: <span
                                                             class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" id="phone"
-                                                        name="contact_number" placeholder=" " required>
+                                                        name="contact_number" placeholder=" ">
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
@@ -122,7 +122,7 @@
                                                     <label for="password" class="form-label">Password: <span
                                                             class="text-danger">*</span></label>
                                                     <input type="password" class="form-control" id="password"
-                                                        name="password" placeholder=" " required>
+                                                        name="password" placeholder=" ">
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
@@ -130,7 +130,7 @@
                                                     <label for="confirm-password" class="form-label">Confirm Password:
                                                         <span class="text-danger">*</span></label>
                                                     <input type="password" class="form-control" id="confirm-password"
-                                                        name="password_confirmation" placeholder=" " required>
+                                                        name="password_confirmation" placeholder=" ">
                                                 </div>
                                             </div>
                                         </div>
@@ -149,7 +149,7 @@
                         </div>
                     </div>
                     <div class="sign-bg sign-bg-right">
-                        <img src="{{ asset('img/bfp.svg') }}" height="330" alt="BFP Logo" style="opacity: 3%;">
+                        <img src="{{ asset('img/bfp.svg') }}" height="230" alt="BFP Logo" style="opacity: 3%;">
 
                     </div>
                 </div>
