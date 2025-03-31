@@ -1,0 +1,109 @@
+<?php
+
+namespace App\Http\Controllers\navigation;
+
+use App\Http\Controllers\Controller;
+use App\Models\Establishment;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
+class InspectorController extends Controller
+{
+    public function dashboards()
+    {
+        try {
+
+            return view('inspector.dashboard');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Dashboard View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Dashboard View not found.'], 500);
+        }
+    }
+
+    public function mapping()
+    {
+        try {
+            $role = session('role');
+            $response = [];
+            $summary = [
+                'inspected' => 0,
+                'not_inspected' => 0,
+                'not_applied' => 0,
+            ];
+
+            // Query establishments based on role
+            $establishmentsQuery = Establishment::query()->with(['applications.fsics']);
+
+            if ($role === 'client') {
+                $client = auth()->user()->client;
+                $establishmentsQuery->where('client_id', $client->id);
+            }
+
+            // Fetch establishments only once
+            $establishments = $establishmentsQuery->get();
+
+            if ($role === 'client' && $establishments->isEmpty()) {
+                throw new \Exception('Establishment not found.');
+            }
+
+            foreach ($establishments as $establishment) {
+                $application = $establishment->applications->first();
+                $inspected = $application && $application->fsics->isNotEmpty();
+
+                if (!$application) {
+                    if (!in_array($role, ['marshall', 'inspector'])) {
+                        $summary['not_applied']++;
+                        $response[] = [
+                            floatval($establishment->location_latitude),
+                            floatval($establishment->location_longitude),
+                            $establishment->id,
+                            false,
+                            'Not Applied'
+                        ];
+                    }
+                } else {
+                    $inspected ? $summary['inspected']++ : $summary['not_inspected']++;
+                    $response[] = [
+                        floatval($establishment->location_latitude),
+                        floatval($establishment->location_longitude),
+                        $establishment->id,
+                        $inspected,
+                        $inspected ? 'Inspected' : 'Not Inspected'
+                    ];
+                }
+            }
+
+            return view('marshall.mapping', compact('response', 'summary'));
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Mapping View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Mapping View not found.'], 500);
+        }
+    }
+
+    public function schedule()
+    {
+        try {
+            return view('inspector.schedule');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Schedule View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Schedule View not found.'], 500);
+        }
+    }
+
+    public function generateSessionToken($sessionID)
+    {
+        try {
+            // Generate a unique session ID and cast it to a string
+            $sessionID = (string) Str::uuid();
+
+            // Store the session ID with expiration (1 hour)
+            session([$sessionID => $sessionID]);
+            session()->put('session_expiry_' . $sessionID, now()->addHour());
+
+            return response()->json(['sessionID' => $sessionID]);
+        } catch (\Exception $e) {
+            Log::error('Error generating session token', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Failed to generate session token.'], 500);
+        }
+    }
+}
