@@ -113,7 +113,7 @@
 
         $(document).ready(function() {
             let summary = @json($summary);
-            let role = "{{ session('role') }}".toLowerCase();
+            let role = "{{ auth()->user()->role }}";
 
             var infoControl = L.control({
                 position: 'topright'
@@ -131,7 +131,7 @@
                     </p>
                 `;
 
-                if (role !== 'marshall' && role !== 'inspector') {
+                if (role !== 'Marshall' && role !== 'Inspector') {
                     summaryContent += `
                         <p class="text-left" style="font-size: 18px; color: #000;">
                             <strong>Not Applied:</strong> ${summary.not_applied}

@@ -37,7 +37,7 @@
     <script type="text/javascript">
         function editClient(clientId) {
             $.ajax({
-                url: `/admin/client/${clientId}/generate-session`,
+                url: `/admin/${clientId}/generate-session`,
                 method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
@@ -125,8 +125,8 @@
             });
 
             function actionFormatter(value, row, index) {
-                return `<button class="btn btn-sm btn-primary" onclick="editClient('${row.id}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteClient('${row.id}')">Delete</button>`;
+                return `<button class="btn btn-sm btn-primary" onclick="editClient('${row.id}')"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteClient('${row.id}')"><i class="bi bi-trash-fill"></i></button>`;
             }
 
         });

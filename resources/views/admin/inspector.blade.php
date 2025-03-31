@@ -37,7 +37,7 @@
     <script type="text/javascript">
         function editInspector(inspectorId) {
             $.ajax({
-                url: `/admin/inspector/${inspectorId}/generate-session`,
+                url: `/admin/${inspectorId}/generate-session`,
                 method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
@@ -125,8 +125,8 @@
             });
 
             function actionFormatter(value, row, index) {
-                return `<button class="btn btn-sm btn-primary" onclick="editInspector('${row.id}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteInspector('${row.id}')">Delete</button>`;
+                return `<button class="btn btn-sm btn-primary" onclick="editInspector('${row.id}')"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteInspector('${row.id}')"><i class="bi bi-trash-fill"></i></button>`;
             }
 
         });

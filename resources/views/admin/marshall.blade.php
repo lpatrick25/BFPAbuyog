@@ -37,7 +37,7 @@
     <script type="text/javascript">
         function editMarshall(marshallId) {
             $.ajax({
-                url: `/admin/marshall/${marshallId}/generate-session`,
+                url: `/admin/${marshallId}/generate-session`,
                 method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
@@ -125,8 +125,8 @@
             });
 
             function actionFormatter(value, row, index) {
-                return `<button class="btn btn-sm btn-primary" onclick="editMarshall('${row.id}')">Edit</button>
-                <button class="btn btn-sm btn-danger" onclick="deleteMarshall('${row.id}')">Delete</button>`;
+                return `<button class="btn btn-sm btn-primary" onclick="editMarshall('${row.id}')"><i class="bi bi-pencil-square"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="deleteMarshall('${row.id}')"><i class="bi bi-trash-fill"></i></button>`;
             }
 
         });

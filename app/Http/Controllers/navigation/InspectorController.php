@@ -73,10 +73,31 @@ class InspectorController extends Controller
                 }
             }
 
-            return view('marshall.mapping', compact('response', 'summary'));
+            return view('inspector.mapping', compact('response', 'summary'));
         } catch (\Exception $e) {
             Log::error('Error retrieving Mapping View', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Mapping View not found.'], 500);
+        }
+    }
+
+    public function showEstablishment($sessionID)
+    {
+        try {
+            // Check if session exists and is not expired
+            if (!session()->has($sessionID) || now()->greaterThan(session()->get('session_expiry_' . $sessionID))) {
+                return redirect()->route('inspector.mapping')->with('error', 'Session expired.');
+            }
+
+            // Retrieve the establishment ID from the session
+            $userId = session()->get($sessionID);
+
+            // Fetch the establishment data
+            $establishment = Establishment::findOrFail($userId);
+
+            return view('establishment.show', compact('establishment'));
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Establishment View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Establishment View not found.'], 500);
         }
     }
 
@@ -90,14 +111,14 @@ class InspectorController extends Controller
         }
     }
 
-    public function generateSessionToken($sessionID)
+    public function generateSessionToken($sessionId)
     {
         try {
             // Generate a unique session ID and cast it to a string
             $sessionID = (string) Str::uuid();
 
             // Store the session ID with expiration (1 hour)
-            session([$sessionID => $sessionID]);
+            session([$sessionID => $sessionId]);
             session()->put('session_expiry_' . $sessionID, now()->addHour());
 
             return response()->json(['sessionID' => $sessionID]);

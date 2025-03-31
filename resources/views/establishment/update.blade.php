@@ -446,6 +446,7 @@
                         setInterval(() => {
                             goBack();
                         }, 1000);
+                        Swal.close();
                     },
                     error: function(xhr) {
                         clearInterval(timerInterval);

@@ -426,6 +426,7 @@
                         setTimeout(() => {
                             goBack();
                         }, 1000);
+                        Swal.close();
                     },
                     error: handleAjaxError,
                     complete: function() {
