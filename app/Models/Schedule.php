@@ -10,7 +10,7 @@ class Schedule extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['application_id', 'inspector_id', 'schedule_date'];
+    protected $fillable = ['application_id', 'inspector_id', 'schedule_date', 'status'];
 
     public function application(): BelongsTo
     {

@@ -116,7 +116,7 @@
 
                 clearInterval(timerInterval);
                 Swal.close();
-                showToast('success', response.message);
+                showToast('success', 'Success');
 
                 // ✅ Show Progress Bar Animation
                 let progress = 0;

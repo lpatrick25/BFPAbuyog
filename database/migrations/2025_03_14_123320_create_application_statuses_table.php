@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('application_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('application_id')->constrained('applications')->onDelete('restrict');
+            $table->foreignId('application_id')->constrained('applications')->onDelete('cascade');
             $table->string('status', 50);
             $table->text('remarks')->nullable();
             $table->softDeletes();

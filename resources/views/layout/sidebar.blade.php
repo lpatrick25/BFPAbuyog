@@ -55,6 +55,9 @@
                 @if (auth()->user()->role === 'Marshall')
                     @include('sidebar.marshall')
                 @endif
+                @if (auth()->user()->role === 'Inspector')
+                    @include('sidebar.inspector')
+                @endif
             </ul>
         </div>
         <div class="sidebar-footer"></div>

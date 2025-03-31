@@ -2,6 +2,9 @@
 @section('APP-TITLE')
     Dashboard
 @endsection
+@section('admin-dashboard')
+    active
+@endsection
 @section('APP-CONTENT')
     <div class="row">
         <div class="col-md-12 col-lg-12">

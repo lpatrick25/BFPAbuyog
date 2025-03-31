@@ -146,26 +146,26 @@
             var $table1 = $('#table1');
 
             $table1.bootstrapTable({
-                url: '/schedules', // Laravel API endpoint
+                url: '/schedules',
                 method: 'GET',
                 pagination: true,
-                sidePagination: 'server', // Enable server-side pagination
-                pageSize: 10, // Default records per page
-                pageList: [5, 10, 25, 50, 100], // Page size options
-                search: true, // Enable search
+                sidePagination: 'server',
+                pageSize: 10,
+                pageList: [5, 10, 25, 50, 100],
+                search: true,
                 buttonsAlign: 'left',
                 searchAlign: 'left',
                 toolbarAlign: 'right',
                 queryParams: function(params) {
                     return {
-                        limit: params.limit, // Number of records per page
-                        page: params.offset / params.limit + 1 // Page number
+                        limit: params.limit,
+                        page: params.offset / params.limit + 1
                     };
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total, // Set total count
-                        rows: res.rows // Set data rows
+                        total: res.pagination.total,
+                        rows: res.rows
                     };
                 },
                 columns: [{
@@ -188,7 +188,7 @@
                         field: 'schedule_date',
                         title: 'Schedule Date',
                         formatter: function(value, row, index) {
-                            if (!value) return 'N/A'; // Handle empty values
+                            if (!value) return 'N/A';
 
                             let date = new Date(value);
                             return date.toLocaleDateString('en-US', {
@@ -197,6 +197,10 @@
                                 year: 'numeric'
                             });
                         }
+                    },
+                    {
+                        field: 'status',
+                        title: 'Status'
                     },
                     {
                         field: 'action',
@@ -208,6 +212,11 @@
 
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
+                if (row.status === 'Completed') {
+                    return `
+                    <button class="btn btn-sm btn-info" disabled><i class="bi bi-calendar-check"></i></button>
+                    <button class="btn btn-sm btn-success" disabled><i class="bi bi-card-checklist"></i></button>`;
+                }
                 return `
                     <button class="btn btn-sm btn-info" onclick="applicationSchedule('${row.application_id}', '${row.schedule_date}')"><i class="bi bi-calendar-check"></i></button>
                     <button class="btn btn-sm btn-success" onclick="applicationRemarks('${row.application_id}', '${row.schedule_date}')"><i class="bi bi-card-checklist"></i></button>`;
@@ -272,7 +281,7 @@
                     success: function(response) {
                         clearInterval(timerInterval);
                         $table1.bootstrapTable('refresh');
-                        showToast('success', response.message);
+                        showToast('success', 'Success');
 
                         // Reset the form
                         $('#remarksForm')[0].reset();
@@ -280,43 +289,7 @@
                         $('#remark').modal('hide');
                         Swal.close();
                     },
-                    error: function(xhr) {
-                        clearInterval(timerInterval);
-                        Swal.close();
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    // Add 'is-invalid' class to highlight error
-                                    inputElement.addClass('is-invalid');
-
-                                    // Create the error message div
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-
-                                    // Append error message after the input field
-                                    inputElement.after(errorContainer);
-                                }
-
-                                // Remove error on input change
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-
-                        } else {
-                            // Handle non-validation errors
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('Save');
                     }
@@ -337,14 +310,16 @@
 
                 $.ajax({
                     method: 'PUT',
-                    url: `/marshall/changeSchedule/${applicationId}`,
-                    data: $('#scheduleForm').serialize(),
+                    url: `/schedules/${applicationId}`,
+                    data: {
+                        schedule_date: $('#reschedule_date').val()
+                    },
                     dataType: 'JSON',
                     cache: false,
                     success: function(response) {
                         clearInterval(timerInterval);
                         $table1.bootstrapTable('refresh');
-                        showToast('success', response.message);
+                        showToast('success', 'Schedule');
 
                         // Reset the form
                         $('#scheduleForm')[0].reset();
@@ -352,43 +327,7 @@
                         $('#schedule').modal('hide');
                         Swal.close();
                     },
-                    error: function(xhr) {
-                        clearInterval(timerInterval);
-                        Swal.close();
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    // Add 'is-invalid' class to highlight error
-                                    inputElement.addClass('is-invalid');
-
-                                    // Create the error message div
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-
-                                    // Append error message after the input field
-                                    inputElement.after(errorContainer);
-                                }
-
-                                // Remove error on input change
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-
-                        } else {
-                            // Handle non-validation errors
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('Save');
                     }

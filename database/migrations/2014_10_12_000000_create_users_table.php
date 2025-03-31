@@ -14,8 +14,8 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->unique(); // Add email field
-            $table->timestamp('email_verified_at')->nullable(); // Email verification field
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
             $table->string('password', 100);
             $table->enum('role', ['Admin', 'Marshall', 'Inspector', 'Client', 'Chief']);
             $table->boolean('is_active')->default(true);

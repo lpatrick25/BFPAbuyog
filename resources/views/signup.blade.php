@@ -25,9 +25,6 @@
 
     <!-- Customizer Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
-
-    <!-- RTL Css -->
-    <link rel="stylesheet" href="{{ asset('assets/css/rtl.min.css') }}" />
 </head>
 
 <body class="theme-color-red light" data-bs-spy="scroll" data-bs-target="#elements-section" data-bs-offset="0"
@@ -142,7 +139,8 @@
                                                 Up</button>
                                         </div>
                                         <p class="mt-3 text-center">
-                                            Already have an Account <a href="{{ route('signin') }}" class="text-underline">Sign
+                                            Already have an Account <a href="{{ route('signin') }}"
+                                                class="text-underline">Sign
                                                 In</a>
                                         </p>
                                     </form>
@@ -167,26 +165,8 @@
     <!-- External Library Bundle Script -->
     <script src="{{ asset('assets/js/core/external.min.js') }}"></script>
 
-    <!-- Widgetchart Script -->
-    <script src="{{ asset('assets/js/charts/widgetcharts.js') }}"></script>
-
-    <!-- mapchart Script -->
-    <script src="{{ asset('assets/js/charts/vectore-chart.js') }}"></script>
-    <script src="{{ asset('assets/js/charts/dashboard.js') }}"></script>
-
-    <!-- fslightbox Script -->
-    <script src="{{ asset('assets/js/plugins/fslightbox.js') }}"></script>
-
-    <!-- Settings Script -->
-    <script src="{{ asset('assets/js/plugins/setting.js') }}"></script>
-
-    <!-- Slider-tab Script -->
-    <script src="{{ asset('assets/js/plugins/slider-tabs.js') }}"></script>
-
-    <!-- Form Wizard Script -->
-    <script src="{{ asset('assets/js/plugins/form-wizard.js') }}"></script>
-
-    <!-- AOS Animation Plugin-->
+    <!-- Error Handler -->
+    <script src="{{ asset('js/error-handler.js') }}"></script>
 
     <!-- App Script -->
     <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
@@ -234,10 +214,11 @@
                         location.href = '{{ route('verification.view') }}';
                     },
                     error: function(xhr) {
-                        if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.error) {
+                            showToast('danger', xhr.responseJSON.error);
+                        } else if (xhr.responseJSON && xhr.responseJSON.errors) {
                             let errors = xhr.responseJSON.errors;
 
-                            // Loop through each error and display in the corresponding input field
                             $.each(errors, function(field, messages) {
                                 let inputField = $(`#signUpForm [name="${field}"]`);
                                 inputField.addClass('is-invalid');

@@ -1,26 +1,22 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Application;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Resource;
 
-class ApplicationResource extends JsonResource
+class ApplicationResource extends Resource
 {
     /**
      * Transform the resource into an array.
      */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
             'application_number' => $this->application_number,
             'application_date' => $this->application_date,
             'fsic_type' => $this->fsic_type,
-            'establishment' => [
-                'id' => $this->establishment->id ?? null,
-                'name' => $this->establishment->name ?? 'N/A',
-            ],
+            'establishment_name' => $this->establishment->name ?? 'N/A',
             'latest_status' => $this->applicationStatuses
                 ? $this->applicationStatuses->sortByDesc('updated_at')->first()->status ?? 'No Status'
                 : 'No Status',

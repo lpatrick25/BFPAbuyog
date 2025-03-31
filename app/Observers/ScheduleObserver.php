@@ -38,7 +38,14 @@ class ScheduleObserver
      */
     public function updated(Schedule $schedule): void
     {
-        //
+        // Retrieve related models
+        $application = $schedule->application;
+        $establishment = $application->establishment ?? null;
+        $client = $establishment->client ?? null;
+
+        if ($client && $client->email) {
+            Mail::to($client->email)->send(new ScheduleNotification($schedule, 'Reschedule'));
+        }
     }
 
     /**

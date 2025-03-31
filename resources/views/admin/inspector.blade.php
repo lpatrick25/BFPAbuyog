@@ -2,6 +2,9 @@
 @section('APP-TITLE')
     Inspector
 @endsection
+@section('admin-inspector')
+    active
+@endsection
 @section('APP-CONTENT')
     <div class="row">
         <div class="col-lg-12">
@@ -36,7 +39,7 @@
         function editInspector(inspectorId) {
             $.ajax({
                 url: `/admin/inspector/${inspectorId}/generate-session`,
-                method: 'GET',
+                method: 'POST',
                 success: function(response) {
                     if (response.sessionID) {
                         window.location.href = `/admin/inspector/${response.sessionID}/edit`;

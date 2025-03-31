@@ -2,6 +2,9 @@
 @section('APP-TITLE')
     User Management
 @endsection
+@section('admin-user')
+    active
+@endsection
 @section('APP-CONTENT')
     <div class="row">
         <div class="col-lg-12">

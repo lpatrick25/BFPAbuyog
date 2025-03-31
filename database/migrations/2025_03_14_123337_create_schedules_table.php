@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('application_id')->constrained('applications')->onDelete('restrict');
             $table->foreignId('inspector_id')->constrained('inspectors')->onDelete('restrict');
             $table->date('schedule_date');
+            $table->enum('status', ['Ongoing', 'Completed'])->default('Ongoing');
             $table->softDeletes();
             $table->timestamps();
         });

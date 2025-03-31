@@ -51,7 +51,7 @@
     </style>
 @endsection
 @section('APP-CONTENT')
-    <div class="row" id="addForm">
+    <div class="row">
         <div class="col-lg-12">
             <div class="card rounded">
                 <div class="card-content">
@@ -226,11 +226,11 @@
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
-                    if (response.fsic_requirements && response.fsic_requirements.length > 0) {
+                    if (response && response.length > 0) {
                         let count = 1;
                         let html = '<ul class="list-group list-group-flush">';
 
-                        response.fsic_requirements.forEach((req, index) => {
+                        response.forEach((req, index) => {
                             let displayName = req.name.replace(/_/g,
                                 ' '); // Convert underscores to spaces
 
@@ -263,18 +263,19 @@
         }
 
         function deleteApplication(applicationId) {
+            let timerInterval = showLoadingDialog('Cancelling Application');
             $.ajax({
                 method: 'DELETE',
                 url: `/applications/${applicationId}`,
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
+                    clearInterval(timerInterval);
                     $('#table1').bootstrapTable('refresh');
-                    showToast('success', response.message);
+                    showToast('success', 'Success');
+                    Swal.close();
                 },
-                error: function(xhr) {
-                    showToast('danger', xhr.responseJSON.message || 'Something went wrong.');
-                }
+                error: handleAjaxError
             });
         }
 
@@ -306,7 +307,7 @@
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total,
+                        total: res.pagination.total,
                         rows: res.rows
                     };
                 },
@@ -333,7 +334,7 @@
                         }
                     },
                     {
-                        field: 'establishment.name',
+                        field: 'establishment_name',
                         title: 'Establishment Name'
                     },
                     {
@@ -455,8 +456,7 @@
 
                         // Define available colors
                         let colors = ['text-primary', 'text-success', 'text-danger',
-                            'text-warning'
-                        ];
+                        'text-warning'];
 
                         // Map statuses to Bootstrap Icons
                         let statusIcons = {
@@ -495,8 +495,44 @@
                         `;
                         timelineContainer.append(submittedHTML); // Ensure it's always first
 
-                        // Loop through sorted statuses (from oldest to newest)
-                        sortedStatuses.forEach((status, index) => {
+                        // Clone sorted statuses to avoid modifying the original array
+                        let augmentedStatuses = [...sortedStatuses];
+
+                        // Insert "Approved" if necessary
+                        if (
+                            sortedStatuses.length >= 2 &&
+                            sortedStatuses[sortedStatuses.length - 2].status ===
+                            "Scheduled for Inspection" &&
+                            sortedStatuses[sortedStatuses.length - 1].status ===
+                            "Certificate Approval Pending"
+                        ) {
+                            augmentedStatuses.splice(sortedStatuses.length - 1, 0, {
+                                status: "Approved",
+                                updated_at: new Date(sortedStatuses[sortedStatuses.length -
+                                    1].updated_at), // Use same date
+                                remarks: "Application has been reviewed and approved.",
+                            });
+                        }
+
+                        // Insert "Completed" and "Closed" if the latest status is "Certificate Issued"
+                        if (sortedStatuses.length > 0 && sortedStatuses[sortedStatuses.length - 1]
+                            .status === "Certificate Issued") {
+                            augmentedStatuses.push({
+                                status: "Completed",
+                                updated_at: new Date(sortedStatuses[sortedStatuses.length -
+                                    1].updated_at), // Use same date
+                                remarks: "Process completed successfully.",
+                            });
+                            augmentedStatuses.push({
+                                status: "Closed",
+                                updated_at: new Date(sortedStatuses[sortedStatuses.length -
+                                    1].updated_at), // Use same date
+                                remarks: "Application process is now closed.",
+                            });
+                        }
+
+                        // Loop through augmentedStatuses instead of sortedStatuses
+                        augmentedStatuses.forEach((status, index) => {
                             let remarksText = status.remarks ? `<p>${status.remarks}</p>` :
                                 '';
 
@@ -510,7 +546,7 @@
                                 });
 
                             let assignedColor = colors[index % colors
-                                .length]; // Assign colors sequentially
+                            .length]; // Assign colors sequentially
                             let statusIcon = statusIcons[status.status] ||
                                 "bi-question-circle"; // Default icon if not found
 
@@ -567,39 +603,11 @@
                     success: function(response) {
                         clearInterval(timerInterval);
                         $("#fileUploadContainer").html('');
-                        showToast('success', response.message);
+                        showToast('success', 'Success');
                         $('#reUploadRequirements').modal('hide');
                         Swal.close();
                     },
-                    error: function(xhr) {
-                        clearInterval(timerInterval);
-                        Swal.close();
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    inputElement.addClass('is-invalid');
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-                                    inputElement.after(errorContainer);
-                                }
-
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-                        } else {
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('Save');
                     }

@@ -178,33 +178,42 @@
                             <div class="col-lg-4">
                                 <div class="form-group">
                                     <label for="high_rise">High Rise: <span class="text-danger">*</span></label>
-                                    <div class="form-control">
+                                    <div class="form-check">
                                         <label for="high_rise1" class="form-check-label">
-                                            <input class="form-check-input" type="radio" checked="" value="1"
-                                                id="high_rise1" name="high_rise">
-                                            <i></i> Yes
+                                            <input class="form-check-input" type="radio" value="1"
+                                                id="high_rise1" name="high_rise"
+                                                {{ old('high_rise', $establishment->high_rise ?? '') == 1 ? 'checked' : '' }}>
+                                            Yes
                                         </label>
+                                    </div>
+                                    <div class="form-check">
                                         <label for="high_rise2" class="form-check-label">
                                             <input class="form-check-input" type="radio" value="0"
-                                                id="high_rise2" name="high_rise">
-                                            <i></i> No </label>
+                                                id="high_rise2" name="high_rise"
+                                                {{ old('high_rise', $establishment->high_rise ?? '') == 0 ? 'checked' : '' }}>
+                                            No
+                                        </label>
                                     </div>
                                 </div>
                             </div>
+
                             <div class="col-lg-4">
                                 <div class="form-group">
-                                    <label for="eminent_danger">In Eminent of Danger: <span
+                                    <label for="eminent_danger">In Eminent Danger: <span
                                             class="text-danger">*</span></label>
-                                    <div class="form-control">
+                                    <div class="form-check">
                                         <label for="eminent_danger1" class="form-check-label">
-                                            <input class="form-check-input" type="radio" checked="" value="1"
+                                            <input class="form-check-input" type="radio" value="1"
                                                 id="eminent_danger1" name="eminent_danger">
-                                            <i></i> Yes
+                                            Yes
                                         </label>
+                                    </div>
+                                    <div class="form-check">
                                         <label for="eminent_danger2" class="form-check-label">
                                             <input class="form-check-input" type="radio" value="0"
                                                 id="eminent_danger2" name="eminent_danger">
-                                            <i></i> No </label>
+                                            No
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -408,7 +417,7 @@
                             scrollTop: 0
                         }, 'slow');
 
-                        showToast('success', response.message);
+                        showToast('success', 'Success');
 
                         // Reset the form
                         $('#addForm')[0].reset();
@@ -418,42 +427,7 @@
                             goBack();
                         }, 1000);
                     },
-                    error: function(xhr) {
-                        clearInterval(timerInterval);
-                        Swal.close();
-                        $('html, body').animate({
-                            scrollTop: 0
-                        }, 'slow');
-
-                        if (xhr.status === 422 && xhr.responseJSON.errors) {
-                            var errors = xhr.responseJSON.errors;
-
-                            $.each(errors, function(field, messages) {
-                                var inputElement = $('[name="' + field + '"]');
-
-                                if (inputElement.length > 0) {
-                                    inputElement.addClass('is-invalid');
-
-                                    var errorContainer = $(
-                                        '<div class="invalid-feedback"></div>');
-                                    errorContainer.html(messages.join('<br>'));
-
-                                    inputElement.after(errorContainer);
-                                }
-
-                                // Remove error on input change
-                                inputElement.on('input', function() {
-                                    $(this).removeClass('is-invalid');
-                                    $(this).next('.invalid-feedback').remove();
-                                });
-                            });
-
-                            showToast('danger', 'Please check the form for errors.');
-                        } else {
-                            showToast('danger', xhr.responseJSON.message ||
-                                'Something went wrong.');
-                        }
-                    },
+                    error: handleAjaxError,
                     complete: function() {
                         submitBtn.prop('disabled', false).text('💾');
                     }

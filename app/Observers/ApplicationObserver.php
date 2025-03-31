@@ -25,36 +25,4 @@ class ApplicationObserver
         // Broadcast New Application
         broadcast(new NewApplication($application))->toOthers();
     }
-
-    /**
-     * Handle the Application "updated" event.
-     */
-    public function updated(Application $application): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Application "deleted" event.
-     */
-    public function deleted(Application $application): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Application "restored" event.
-     */
-    public function restored(Application $application): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Application "force deleted" event.
-     */
-    public function forceDeleted(Application $application): void
-    {
-        //
-    }
 }

@@ -10,7 +10,7 @@ class Fsic extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['application_id', 'issue_date', 'expiration_date', 'amount', 'or_number', 'inspector_id', 'marshall_id'];
+    protected $fillable = ['fsic_no', 'application_id', 'issue_date', 'expiration_date', 'amount', 'or_number', 'payment_date', 'inspector_id', 'marshall_id'];
 
     public function application(): BelongsTo
     {

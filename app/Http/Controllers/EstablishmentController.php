@@ -4,145 +4,51 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EstablishmentStoreRequest;
 use App\Http\Requests\EstablishmentUpdateRequest;
-use App\Http\Resources\EstablishmentResource;
+use App\Http\Resources\Establishment\EstablishmentResource;
+use App\Http\Resources\Establishment\PaginatedEstablishmentResource;
 use App\Models\Establishment;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use App\Services\EstablishmentService;
 
 class EstablishmentController extends Controller
 {
-    /**
-     * Store a new Establishment.
-     */
-    public function store(EstablishmentStoreRequest $request)
+
+    protected $establishmentService;
+
+    public function __construct(EstablishmentService $establishmentService)
     {
-        try {
-            DB::beginTransaction();
-
-            // Get authenticated user
-            $user = auth()->user();
-
-            if (!$user) {
-                return response()->json(['error' => 'Unauthorized access.'], 401);
-            }
-
-            // Ensure the user has a client record
-            if (!$user->client) {
-                return response()->json(['error' => 'Client record not found for this user.'], 400);
-            }
-
-            // Merge client_id into request
-            $request->merge(['client_id' => $user->client->id]);
-
-            // Log the client_id
-            Log::info('Creating Establishment for Client ID: ' . $user->client->id);
-
-            // Create the Establishment
-            $establishment = Establishment::create($request->all());
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Establishment created successfully',
-                'establishment' => $establishment
-            ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error creating Establishment', ['error' => $e->getMessage()]);
-
-            return response()->json([
-                'error' => config('app.debug') ? $e->getMessage() : 'Something went wrong.'
-            ], 500);
-        }
+        $this->establishmentService = $establishmentService;
     }
 
-    /**
-     * Update an Establishment.
-     */
-    public function update(EstablishmentUpdateRequest $request, $id)
+    public function store(EstablishmentStoreRequest $request): EstablishmentResource
     {
-        try {
-            DB::beginTransaction();
+        $establishment = $this->establishmentService->store($request->validated());
 
-            // Find Establishment
-            $establishment = Establishment::findOrFail($id);
-
-            // Update Establishment
-            $establishment->update($request->all());
-
-            DB::commit();
-            Log::info('Establishment updated successfully', ['establishment_id' => $establishment->id]);
-
-            return response()->json(['message' => 'Establishment updated successfully', 'establishment' => $establishment], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error updating Establishment', ['error' => $e->getMessage()]);
-
-            return response()->json(['error' => 'Something went wrong.'], 500);
-        }
+        return new EstablishmentResource($establishment);
     }
 
-    /**
-     * Delete an Establishment.
-     */
-    public function destroy($id)
+    public function update(EstablishmentUpdateRequest $request, $id): EstablishmentResource
     {
-        DB::beginTransaction();
-        try {
-            // Find Establishment
-            $establishment = Establishment::findOrFail($id);
+        $establishment = $this->establishmentService->update($request->validated(), $id);
 
-            // Delete Establishment
-            $establishment->delete();
-
-            DB::commit();
-            Log::info('Establishment deleted successfully', ['establishment_id' => $id]);
-
-            return response()->json(['message' => 'Establishment deleted successfully'], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error deleting Establishment', ['error' => $e->getMessage()]);
-
-            return response()->json(['error' => 'Something went wrong.'], 500);
-        }
+        return new EstablishmentResource($establishment);
     }
 
-    /**
-     * Get all Establishments.
-     */
-    public function index(Request $request)
+    public function destroy(Establishment $establishment)
     {
-        try {
-            $limit = $request->get('limit', 10);
-            $page = $request->get('page', 1);
-
-            // Fetch paginated establishments with relationships
-            $establishments = Establishment::with('client', 'latestApplication.applicationStatuses')
-                ->paginate($limit, ['*'], 'page', $page);
-
-            // Use Resource for formatting
-            return response()->json([
-                'total' => $establishments->total(),
-                'rows' => EstablishmentResource::collection($establishments->items()), // Apply resource
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error fetching Establishments', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Something went wrong.'], 500);
-        }
+        $establishment->delete();
+        return response()->json('', 200);
     }
 
-    /**
-     * Get a single Establishment.
-     */
-    public function show($id)
+    public function index(): PaginatedEstablishmentResource
     {
-        try {
-            $establishment = Establishment::with('client')->findOrFail($id);
-            return response()->json(['establishment' => $establishment], 200);
-        } catch (\Exception $e) {
-            Log::error('Error fetching Establishment', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Establishment not found.'], 404);
-        }
+        $query = $this->establishmentService->getAllEstablishments();
+        $establishments = $query->paginate($this->limit, ['*'], 'page', $this->page);
+
+        return new PaginatedEstablishmentResource($establishments);
+    }
+
+    public function show(Establishment $establishment): EstablishmentResource
+    {
+        return new EstablishmentResource($establishment);
     }
 }
