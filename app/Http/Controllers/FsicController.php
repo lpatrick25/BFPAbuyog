@@ -8,13 +8,18 @@ use App\Http\Resources\Fsic\PaginatedFsicResource;
 use App\Models\Fsic;
 use App\Services\FsicService;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Http\Request;
 
 class FsicController extends Controller
 {
     protected $fsicService;
+    protected $limit;
+    protected $page;
 
-    public function __construct(FsicService $fsicService)
+    public function __construct(FsicService $fsicService, Request $request)
     {
+        $this->limit = (int) $request->get('limit', 10);
+        $this->page = (int) $request->get('page', 1);
         $this->fsicService = $fsicService;
     }
 

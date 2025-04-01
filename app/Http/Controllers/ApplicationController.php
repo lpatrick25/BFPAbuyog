@@ -9,15 +9,20 @@ use App\Http\Resources\Application\PaginatedApplicationResource;
 use App\Models\Application;
 use App\Services\ApplicationService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ApplicationController extends Controller
 {
     protected $applicationService;
+    protected $limit;
+    protected $page;
 
-    public function __construct(ApplicationService $applicationService)
+    public function __construct(ApplicationService $applicationService, Request $request)
     {
+        $this->limit = (int) $request->get('limit', 10);
+        $this->page = (int) $request->get('page', 1);
         $this->applicationService = $applicationService;
     }
 

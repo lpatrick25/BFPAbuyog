@@ -7,14 +7,19 @@ use App\Http\Requests\ScheduleUpdateRequest;
 use App\Http\Resources\Schedule\PaginatedScheduleResource;
 use App\Http\Resources\Schedule\ScheduleResource;
 use App\Services\ScheduleService;
+use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
 
     protected $scheduleService;
+    protected $limit;
+    protected $page;
 
-    public function __construct(ScheduleService $scheduleService)
+    public function __construct(ScheduleService $scheduleService, Request $request)
     {
+        $this->limit = (int) $request->get('limit', 10);
+        $this->page = (int) $request->get('page', 1);
         $this->scheduleService = $scheduleService;
     }
 
