@@ -147,7 +147,7 @@
                                 <div class="form-group">
                                     <label for="total_building_area">Total Building Area: <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" id="total_building_area" name="total_building_area"
+                                    <input type="number" id="total_building_area" name="total_building_area"
                                         class="form-control" required>
                                 </div>
                             </div>
@@ -155,7 +155,7 @@
                                 <div class="form-group">
                                     <label for="number_of_occupant">Number of Occupant: <span
                                             class="text-danger">*</span></label>
-                                    <input type="text" id="number_of_occupant" name="number_of_occupant"
+                                    <input type="number" id="number_of_occupant" name="number_of_occupant"
                                         class="form-control" required>
                                 </div>
                             </div>
@@ -426,7 +426,6 @@
                         setTimeout(() => {
                             goBack();
                         }, 1000);
-                        Swal.close();
                     },
                     error: handleAjaxError,
                     complete: function() {

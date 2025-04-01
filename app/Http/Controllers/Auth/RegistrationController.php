@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Client;
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -42,10 +43,10 @@ class RegistrationController extends Controller
 
             Auth::login($user);
 
+            $user->notify(new VerifyEmailNotification());
+
             DB::commit();
             Log::info('Client created successfully', ['client_id' => $client->id]);
-
-            // event(new Registered($user));
 
             return response()->json(['message' => 'Account registration success', 'account' => $client], 201);
         } catch (\Exception $e) {

@@ -221,12 +221,69 @@
         }
 
         $(document).ready(function() {
+            // Setup CSRF Token for AJAX Requests
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
 
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('Service Worker registered with scope: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('Service Worker registration failed: ', error);
+                    });
+            }
+
+            // Request Notification Permission
+            if (Notification.permission === "default") {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === "granted") {
+                        console.log("Notification permission granted.");
+                    } else {
+                        console.log("Notification permission denied.");
+                    }
+                });
+            }
+
+            // Subscribe User to Push Notifications
+            function subscribeUserToPush() {
+                if (!('serviceWorker' in navigator)) {
+                    console.log('Service workers are not supported by your browser.');
+                    return;
+                }
+
+                navigator.serviceWorker.ready.then(function(registration) {
+                        return registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: '<Your VAPID Public Key>',
+                        });
+                    })
+                    .then(function(subscription) {
+                        // Send the subscription to your server to store it
+                        fetch('/store-subscription', {
+                                method: 'POST',
+                                body: JSON.stringify(subscription),
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Subscription stored:', data);
+                            })
+                            .catch(error => {
+                                console.error('Error storing subscription:', error);
+                            });
+                    });
+
+                // Call the function to subscribe the user
+                subscribeUserToPush();
+            }
         });
     </script>
     @yield('APP-SCRIPT')
@@ -335,7 +392,7 @@
                 let applicationId = data.application.id;
                 console.log("New application submitted: " + applicationId);
 
-                fetch(`/applications/${applicationId}`)
+                fetch(`/marshall/getApplication/${applicationId}`)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -349,20 +406,20 @@
                             let client = establishment.client;
 
                             if (client) {
-                                // let client_name =
-                                //     `${client.first_name} ${client.middle_name ? client.middle_name + ' ' : ''}${client.last_name}`;
-                                let client_name = `${client.getFullName()}`;
+                                let client_name =
+                                    `${client.first_name} ${client.middle_name ? client.middle_name + ' ' : ''}${client.last_name}`;
+                                // let client_name = `${client.getFullName()}`;
 
                                 let applicationTypeText = "";
                                 switch (application.fsic_type) {
-                                    case "New":
+                                    case 0:
+                                        applicationTypeText = "Application of Occupancy";
+                                        break;
+                                    case 1:
                                         applicationTypeText = "New Application for FSIC";
                                         break;
-                                    case "Renew":
+                                    case 2:
                                         applicationTypeText = "Renew Application for FSIC";
-                                        break;
-                                    case "Occupancy":
-                                        applicationTypeText = "Application of Occupancy";
                                         break;
                                     default:
                                         applicationTypeText = "Unknown Application Type";

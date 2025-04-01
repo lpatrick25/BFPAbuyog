@@ -13,10 +13,12 @@ use App\Http\Controllers\navigation\AdminController;
 use App\Http\Controllers\navigation\ClientController as NavigationClientController;
 use App\Http\Controllers\navigation\InspectorController as NavigationInspectorController;
 use App\Http\Controllers\navigation\MarshallController as NavigationMarshallController;
+use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Models\Fsic;
 use App\Models\User;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -80,7 +82,7 @@ Route::middleware('auth')->group(function () {
     })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 
     Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
+        $request->user()->notify(new VerifyEmailNotification());
         return response()->json(['message' => 'Verification email sent!'], 200);
     })->middleware(['throttle:6,1'])->name('verification.send');
 });
@@ -142,6 +144,8 @@ Route::prefix('marshall')->middleware('auth')->controller(NavigationMarshallCont
     Route::get('scheduleList', 'schedule')->name('schedule.list');
     Route::get('fsicList', 'fsic')->name('fsic.list');
 
+    Route::get('getApplication/{application}', 'getApplication')->name('getApplication.list');
+
     Route::post('{sessionID}/generate-session', 'generateSessionToken')->name('marshallToken.session');
 });
 
@@ -190,3 +194,5 @@ Route::get('/load-map-view', function (Request $request) {
 })->name('loadMap');
 
 Route::get('fsic_no/{fsicNo}', fn($fsicNo) => view('fsic', ['fsic' => Fsic::with('application')->where('fsic_no', Crypt::decryptString($fsicNo))->first()]));
+
+Route::post('/store-subscription', [PushNotificationController::class, 'storeSubscription']);

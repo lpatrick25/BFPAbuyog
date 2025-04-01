@@ -33,10 +33,10 @@ class EstablishmentStoreRequest extends FormRequest
             'type_of_building' => 'required|string|max:100',
             'nature_of_business' => 'required|string|max:100',
 
-            'BIN' => 'required|string|unique:establishments,BIN',
-            'TIN' => 'nullable|string|unique:establishments,TIN',
-            'DTI' => 'required|string|unique:establishments,DTI',
-            'SEC' => 'nullable|string|unique:establishments,SEC',
+            'BIN' => 'required|string|unique:establishments,BIN|regex:/^\d{5}-\d{5}$/',
+            'TIN' => 'nullable|string|unique:establishments,TIN|regex:/^\d{3}-\d{3}-\d{3}-\d{5}$/',
+            'DTI' => 'required|string|unique:establishments,DTI|regex:/^\d{8}$/',
+            'SEC' => 'nullable|string|unique:establishments,SEC|regex:/^PG\d{9}$/',
 
             'high_rise' => 'required|boolean|in:0,1',
             'eminent_danger' => 'required|boolean|in:0,1',
@@ -60,6 +60,12 @@ class EstablishmentStoreRequest extends FormRequest
     {
         return [
             'BIN.required' => 'Business Identification Number is required.',
+            'BIN.regex' => 'BIN format must be 99999-99999.',
+
+            'TIN.regex' => 'TIN format must be 999-999-999-99999.',
+            'DTI.regex' => 'DTI format must be exactly 8 digits (e.g., 12345678).',
+            'SEC.regex' => 'SEC format must start with "PG" followed by 9 digits (e.g., PG123456789).',
+
             'DTI.required' => 'Department of Trade and Industry Registration is required.',
 
             'high_rise.required' => 'Please specify if this is a high-rise building.',

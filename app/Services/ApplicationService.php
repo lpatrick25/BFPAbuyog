@@ -58,6 +58,10 @@ class ApplicationService
             $client_id = optional(auth()->user())->client->id;
             $establishment = Establishment::where('client_id', $client_id)->first();
 
+            if (!$establishment) {
+                return Application::whereNull('id');
+            }
+
             return Application::with(['establishment', 'applicationStatuses'])
                 ->where('establishment_id', $establishment->id);
         }
