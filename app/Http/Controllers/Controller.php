@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
@@ -18,5 +19,22 @@ class Controller extends BaseController
     {
         $this->limit = (int) $request->get('limit', 10);
         $this->page = (int) $request->get('page', 1);
+    }
+
+    final public function success($data, string $message = 'OK', int $code = Response::HTTP_OK)
+    {
+        return response()->json([
+            'code' => $code,
+            'message' => $message,
+            'content' => $data,
+        ], $code);
+    }
+
+    final public function denied(string $message = 'Forbidden', int $code = Response::HTTP_FORBIDDEN)
+    {
+        return [
+            'code' => $code,
+            'message' => $message,
+        ];
     }
 }

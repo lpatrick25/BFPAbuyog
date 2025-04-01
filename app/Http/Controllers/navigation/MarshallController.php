@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\navigation;
 
 use App\Http\Controllers\Controller;
+use App\Models\Application;
 use App\Models\Establishment;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
@@ -150,6 +151,22 @@ class MarshallController extends Controller
             Log::error('Error retrieving FSIC View', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'FSIC View not found.'], 500);
         }
+    }
+
+    public function getApplication($id)
+    {
+        // Retrieve the application with its related establishment and client
+        $application = Application::with(['establishment.client'])->find($id);
+
+        if (!$application) {
+            return response()->json([
+                'error' => 'Application not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'application' => $application
+        ]);
     }
 
     public function generateSessionToken($sessionId)

@@ -14,9 +14,13 @@ class InspectorController extends Controller
 {
 
     protected $userService;
+    protected $limit;
+    protected $page;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, Request $request)
     {
+        $this->limit = (int) $request->get('limit', 10);
+        $this->page = (int) $request->get('page', 1);
         $this->userService = $userService;
     }
 
@@ -34,7 +38,7 @@ class InspectorController extends Controller
         return new UserResource($user);
     }
 
-    public function index(Request $request)
+    public function index()
     {
         $query = $this->userService->getAllUser('Inspector');
         $users = $query->paginate($this->limit, ['*'], 'page', $this->page);

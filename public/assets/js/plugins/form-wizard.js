@@ -65,15 +65,19 @@
     const nextBtnFunction = async (n) => {
         if (n === 1 && !validateCurrentStep()) return;
 
+        const establishmentId = document.getElementById("establishment_id")?.value;
+        if (!establishmentId) {
+            showToast('danger', 'Please select an establishment first.')
+            return;
+        }
+
         fieldsets[currentTab].style.display = "none";
         currentTab += n;
 
-        if (currentTab >= steps.length) return; // Prevent overflow
+        if (currentTab >= steps.length) return;
 
-        if (currentTab === 1 && !isFSICChecked) {  // Ensure FSIC API is only called once
+        if (currentTab === 1 && !isFSICChecked) {
             isFSICChecked = true;
-            const establishmentId = document.getElementById("establishment_id")?.value;
-            if (!establishmentId) return;
 
             fetch(`/client/getEstablishmentApplication/${establishmentId}`)
                 .then(response => response.json())
@@ -118,19 +122,17 @@
                 Swal.close();
                 showToast('success', 'Success');
 
-                // ✅ Show Progress Bar Animation
                 let progress = 0;
                 const progressBar = document.getElementById("progress-bar");
 
                 const interval = setInterval(() => {
-                    progress += 2; // Increment by 2% every 100ms (5 seconds total)
+                    progress += 2;
                     progressBar.style.width = progress + "%";
                     progressBar.textContent = progress + "%";
 
                     if (progress >= 100) {
                         clearInterval(interval);
 
-                        // ✅ Redirect after Progress Bar completes
                         window.location.href = "/client/applicationList";
                     }
                 }, 100); // Runs every 100ms (100ms * 50 = 5000ms or 5 seconds)
@@ -141,9 +143,8 @@
                 nextBtnFunction(-1);
 
                 showToast('danger', error.responseJSON?.message || 'Something went wrong.');
-                return; // Stop further execution if an error occurs
+                return;
             }
-
         }
 
         showTab(currentTab);

@@ -24,5 +24,9 @@ class ApplicationObserver
 
         // Broadcast New Application
         broadcast(new NewApplication($application))->toOthers();
+
+        // Notify Marshall role users
+        $marshallUsers = User::where('role', 'Marshall')->get();
+        Notification::send($marshallUsers, new ApplicationNotification($application));
     }
 }

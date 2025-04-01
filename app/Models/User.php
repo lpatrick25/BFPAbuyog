@@ -8,10 +8,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, HasPushSubscriptions;
 
     protected $fillable = ['email', 'password', 'role', 'is_active', 'email_verified_at'];
 

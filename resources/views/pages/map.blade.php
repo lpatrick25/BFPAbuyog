@@ -7,6 +7,7 @@
 </div>
 <input type="hidden" id="locate-lat" value="{{ $location['latitude'] }}">
 <input type="hidden" id="locate-long" value="{{ $location['longitude'] }}">
+{{-- <script src="{{ asset('js/abuyog-map.js') }}" defer></script> --}}
 <script type="text/javascript">
     $(document).ready(function() {
 

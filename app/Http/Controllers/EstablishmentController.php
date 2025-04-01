@@ -8,14 +8,19 @@ use App\Http\Resources\Establishment\EstablishmentResource;
 use App\Http\Resources\Establishment\PaginatedEstablishmentResource;
 use App\Models\Establishment;
 use App\Services\EstablishmentService;
+use Illuminate\Http\Request;
 
 class EstablishmentController extends Controller
 {
 
     protected $establishmentService;
+    protected $limit;
+    protected $page;
 
-    public function __construct(EstablishmentService $establishmentService)
+    public function __construct(EstablishmentService $establishmentService, Request $request)
     {
+        $this->limit = (int) $request->get('limit', 10);
+        $this->page = (int) $request->get('page', 1);
         $this->establishmentService = $establishmentService;
     }
 
@@ -42,6 +47,8 @@ class EstablishmentController extends Controller
     public function index(): PaginatedEstablishmentResource
     {
         $query = $this->establishmentService->getAllEstablishments();
+
+        // Pagination must be done here directly
         $establishments = $query->paginate($this->limit, ['*'], 'page', $this->page);
 
         return new PaginatedEstablishmentResource($establishments);

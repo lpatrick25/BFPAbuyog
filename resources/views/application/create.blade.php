@@ -94,32 +94,31 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">Type of Building: </label>
-                                            <p class="form-control" id="type_of_building">S</p>
+                                            <p class="form-control" id="type_of_building">-</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">Nature of Business: </label>
-                                            <p class="form-control" id="nature_of_business">S</p>
+                                            <p class="form-control" id="nature_of_business">-</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">Type of Occupancy: </label>
-                                            <p class="form-control" id="type_of_occupancy">S</p>
+                                            <p class="form-control" id="type_of_occupancy">-</p>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label class="form-label">Number of Occupant: </label>
-                                            <p class="form-control" id="number_of_occupant">S</p>
+                                            <p class="form-control" id="number_of_occupant">-</p>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label class="form-label">Business Address: </label>
-                                            <p class="form-control">Brgy. <span id="address_brgy"></span>, Abuyog, Leyte
-                                            </p>
+                                            <p class="form-control" id="establishment_address">-</p>
                                         </div>
                                     </div>
                                 </div>
@@ -254,14 +253,12 @@
                                     </div>
                                 </div>
 
-                                <!-- ✅ Progress Bar -->
                                 <div class="progress mt-4">
                                     <div id="progress-bar" class="progress-bar bg-success" role="progressbar"
                                         style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                         0%
                                     </div>
                                 </div>
-
                             </div>
                         </fieldset>
                     </form>
@@ -373,7 +370,7 @@
                         $('#nature_of_business').text(establishment.nature_of_business);
                         $('#type_of_occupancy').text(establishment.type_of_occupancy);
                         $('#number_of_occupant').text(establishment.number_of_occupant);
-                        $('#address_brgy').text(establishment.address_brgy);
+                        $('#establishment_address').text(`Brgy. ${establishment.address_brgy}, Abuyog, Leyte`);
                     },
                     error: function(xhr) {
                         showToast('danger', xhr.responseJSON.message ||
@@ -382,8 +379,8 @@
                 });
             });
 
-            $('#establishment_id').click();
-            $('#establishment_id').trigger('change');
+            // $('#establishment_id').click();
+            // $('#establishment_id').trigger('change');
 
             $('#fsic_type').change(function() {
                 // Hide all elements first
@@ -397,6 +394,7 @@
             });
 
             $("select").select2({
+                placeholder: 'Select Establishment',
                 width: '100%'
             });
 

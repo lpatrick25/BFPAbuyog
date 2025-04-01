@@ -23,7 +23,6 @@ class EstablishmentUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Get the establishment ID from the route or request input
         $establishmentId = $this->route('establishment') ?? $this->input('id');
 
         Log::info('Establishment ID:', ['id' => $establishmentId]); // Debugging
@@ -44,24 +43,28 @@ class EstablishmentUpdateRequest extends FormRequest
                 'sometimes',
                 'required',
                 'string',
+                'regex:/^\d{5}-\d{5}$/',  // Enforces 99999-99999 format
                 Rule::unique('establishments', 'BIN')->ignore($establishmentId)
             ],
             'TIN' => [
                 'sometimes',
                 'nullable',
                 'string',
+                'regex:/^\d{3}-\d{3}-\d{3}-\d{5}$/', // Enforces 999-999-999-99999 format
                 Rule::unique('establishments', 'TIN')->ignore($establishmentId)
             ],
             'DTI' => [
                 'sometimes',
                 'required',
                 'string',
+                'regex:/^\d{8}$/', // Enforces exactly 8 digits
                 Rule::unique('establishments', 'DTI')->ignore($establishmentId)
             ],
             'SEC' => [
                 'sometimes',
                 'nullable',
                 'string',
+                'regex:/^PG\d{9}$/', // Enforces PG followed by 9 digits
                 Rule::unique('establishments', 'SEC')->ignore($establishmentId)
             ],
 
@@ -87,7 +90,14 @@ class EstablishmentUpdateRequest extends FormRequest
     {
         return [
             'BIN.required' => 'Business Identification Number is required.',
+            'BIN.regex' => 'BIN format must be 99999-99999.',
+
+            'TIN.regex' => 'TIN format must be 999-999-999-99999.',
+
             'DTI.required' => 'Department of Trade and Industry Registration is required.',
+            'DTI.regex' => 'DTI format must be exactly 8 digits (e.g., 12345678).',
+
+            'SEC.regex' => 'SEC format must start with "PG" followed by 9 digits (e.g., PG123456789).',
 
             'high_rise.required' => 'Please specify if this is a high-rise building.',
             'high_rise.in' => 'Invalid value for high-rise. Use 0 (No) or 1 (Yes).',

@@ -6,9 +6,10 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Messages\DatabaseMessage;
+use NotificationChannels\WebPush\WebPushMessage;
+use NotificationChannels\WebPush\WebPushChannel;
 
-class ApplicationNotification extends Notification implements ShouldQueue
+class ApplicationNotification extends Notification
 {
     use Queueable;
 
@@ -19,27 +20,33 @@ class ApplicationNotification extends Notification implements ShouldQueue
         $this->application = $application;
     }
 
-    // Choose notification channels (Database & Broadcasting)
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return [WebPushChannel::class];
     }
 
-    // Store in database
-    public function toDatabase($notifiable)
+    public function toWebPush($notifiable, $notification)
     {
-        return [
-            'message' => 'A new application has been submitted.',
-            'application_id' => $this->application->id
-        ];
+        return (new WebPushMessage)
+            ->title('New Application Submitted')
+            ->body("Application ID: {$this->application->id} is under review.")
+            ->action('View Application', url('/applications/' . $this->application->id))
+            ->icon('/images/logo.png');
     }
 
-    // Send real-time notification via Pusher
     public function toBroadcast($notifiable)
     {
         return new BroadcastMessage([
+            'application_id' => $this->application->id,
             'message' => 'A new application has been submitted.',
-            'application_id' => $this->application->id
         ]);
+    }
+
+    public function toArray($notifiable)
+    {
+        return [
+            'application_id' => $this->application->id,
+            'message' => 'A new application has been submitted.',
+        ];
     }
 }
