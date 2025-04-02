@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Fsic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Spatie\Browsershot\Browsershot;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AppController extends Controller
 {
@@ -20,7 +21,7 @@ class AppController extends Controller
             ->first();
 
         if (!$fsic) {
-            return response()->json(['message' => 'FSIC No not found'], 404);
+            return response()->json(['message' => 'FSIC No not found'], 200);
         }
 
         // Check if the image already exists in the Spatie Media Library
@@ -60,22 +61,33 @@ class AppController extends Controller
             File::makeDirectory($directory, 0755, true, true); // Create the directory if it doesn't exist
         }
 
-        // Generate and save the image using Browsershot
-        Browsershot::html($html)
-            ->windowSize(1920, 1080)
-            ->save($filePath);
-
-        // Store the generated certificate image in Spatie Media Library
-        $fsic->addMedia($filePath)
-            ->toMediaCollection('fsic_certificates');
-
-        // Delete the temporary image file after storing it
-        File::delete($filePath);
-
-        // Return the URL of the generated image
-        return response()->json([
-            'fsic_no' => $fsic->fsic_no,
-            'file_url' => $fsic->getFirstMediaUrl('fsic_certificates') // Return the generated image URL
+        // Send a request to Screenshotlayer API to generate the screenshot
+        // Send a request to Screenshotlayer API to generate the screenshot
+        $response = Http::asForm()->post('https://api.screenshotlayer.com/api/capture', [
+            'access_key' => env('SCREENSHOTLAYER_API_KEY'),
+            'html' => $html,  // Directly pass the HTML content
+            'fullpage' => true, // Capture the entire page (you can set this to false if you want just the visible part)
+            'format' => 'png', // Set the format to PNG
+            // You can remove width and height, and Screenshotlayer will use the actual size of the content
         ]);
+
+        if ($response->successful()) {
+            // Handle the screenshot saving logic
+            file_put_contents($filePath, $response->body());
+
+            $fsic->addMedia($filePath)->toMediaCollection('fsic_certificates');
+            File::delete($filePath);
+
+            return response()->json([
+                'fsic_no' => $fsic->fsic_no,
+                'file_url' => $fsic->getFirstMediaUrl('fsic_certificates')
+            ]);
+        } else {
+            Log::error('Screenshotlayer API error: ', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            return response()->json(['message' => 'Error generating screenshot'], 500);
+        }
     }
 }

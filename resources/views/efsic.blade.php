@@ -7,7 +7,7 @@
     <title>{{ env('APP_NAME') }} | Homepage</title>
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset('img/bfp.webp') }}" />
+    <link rel="icon" href="https://bfp.gov.ph/wp-content/themes/gwt-wordpress-25.3.3/favicon.ico">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!-- Library / Plugin Css Build -->
@@ -146,10 +146,91 @@
         }
 
         /* 📄 PDF Canvas */
-        #pdf-view {
+        <style>
+
+        /* 📄 PDF Canvas Styling */
+        .pdf-view-container {
             display: none;
             text-align: center;
             margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fafafa;
+            max-width: 100%;
+        }
+
+        /* Responsive image styling */
+        .pdf-view-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        /* Floating Search Input */
+        .floating-label {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .floating-label input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .floating-label input:focus {
+            border-color: #0056b3;
+        }
+
+        .floating-label label {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 14px;
+            color: #999;
+            transition: 0.2s ease;
+        }
+
+        .floating-label input:focus~label,
+        .floating-label input:not(:placeholder-shown)~label {
+            top: -8px;
+            font-size: 12px;
+            color: #0056b3;
+        }
+
+        /* Button Styling */
+        .btn-search {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-search:hover {
+            background-color: #00408f;
+        }
+
+        /* Loading Spinner */
+        .spinner-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Toast Notification Style */
+        .toast {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin-top: 10px;
         }
 
         /* 📱 Mobile Adjustments */
@@ -356,9 +437,16 @@
                                             <button type="button" class="btn btn-search" id="search-btn">Go</button>
                                         </div>
 
-                                        <!-- 📄 PDF.js Mobile Canvas -->
-                                        <div id="pdf-view">
+                                        <div id="pdf-view" class="pdf-view-container">
+                                            <!-- Image will be displayed here -->
                                         </div>
+                                    </div>
+                                </div>
+
+                                <!-- Add loading spinner -->
+                                <div id="loading-spinner" class="spinner-container" style="display: none;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
                             </div>
@@ -477,12 +565,13 @@
         <!-- Wrapper End-->
     </div>
 
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"></div>
+
     <!-- Library Bundle Script -->
     <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
 
     <!-- External Library Bundle Script -->
     <script src="{{ asset('assets/js/core/external.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 
     <!-- SweetAlert2 JS -->
     <script src="{{ asset('js/sweetalert2.js') }}"></script>
@@ -571,11 +660,12 @@
         }
 
         $(document).ready(function() {
-
             $('#search-btn').click(function(event) {
                 event.preventDefault();
 
-                let timerInterval = showLoadingDialog('Searching FSIC');
+                // Show loading spinner
+                $('#loading-spinner').show();
+                $('#pdf-view').hide();
 
                 $.ajax({
                     method: 'GET',
@@ -587,22 +677,43 @@
                     cache: false,
                     success: function(response) {
                         console.log(response);
-                        clearInterval(timerInterval);
-                        Swal.close();
+                        $('#loading-spinner').hide();
 
-                        if (!response.file_url) {
-                            showToast('danger', 'No PDF found for this FSIC number.');
+                        if (response.message) {
+                            showToast('danger', response.message);
                             return;
                         }
 
+                        if (!response.file_url) {
+                            showToast('danger', 'No image found for this FSIC number.');
+                            return;
+                        }
+
+                        // Fix the malformed URL by replacing \/\/ with /
+                        let fileUrl = response.file_url.replace(/\\\/\//g,
+                            '/'); // Remove escaped slashes and fix the URL
+
                         $('#pdf-view').show();
 
-                        var img = '<img src="' + response.file_url + '">';
+                        // Check if the response file is a valid image URL
+                        var img = '<img src="' + fileUrl + '" alt="FSIC Certificate Image">';
                         $('#pdf-view').html(img);
+
+                        clearInterval(timerInterval);
+                        Swal.close();
                     },
+
                     error: handleAjaxError,
                 });
             });
+
+            function handleAjaxError(jqXHR, textStatus, errorThrown) {
+                clearInterval(timerInterval);
+                Swal.close();
+
+                $('#loading-spinner').hide();
+                showToast('danger', 'An error occurred while processing your request.');
+            }
 
         });
     </script>
