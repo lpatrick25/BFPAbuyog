@@ -28,4 +28,26 @@ class Fsic extends Model implements HasMedia
     {
         return $this->belongsTo(Marshall::class);
     }
+
+    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    {
+        $this->addMediaConversion('thumbnail')
+            ->width(200)
+            ->height(200)
+            ->optimize()
+            ->performOnCollections('fsic_certificates');
+
+        $this->addMediaConversion('web_thumbnail')
+            ->width(360)
+            ->height(360)
+            ->optimize()
+            ->performOnCollections('fsic_certificates');
+
+        $this->addMediaConversion('responsive')
+            ->height(720)
+            ->width(720)
+            ->withResponsiveImages()
+            ->optimize()
+            ->performOnCollections('fsic_certificates');
+    }
 }
