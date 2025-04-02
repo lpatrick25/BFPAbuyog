@@ -37,9 +37,16 @@ Route::get('/', function () {
     return view('index');
 });
 
-Route::get('/e-FSIC', function () {
-    return view('efsic');
+Route::get('/e-FSIC/{fsicNo?}', function ($fsicNo = null) {
+    return view('efsic', compact('fsicNo'));
 });
+
+Route::get('/fsic_no/{fsicNo}', function ($fsicNo) {
+    $fsicNo = Crypt::decryptString($fsicNo);  // Use consistent variable case
+    return redirect('/e-FSIC/' . $fsicNo);
+});
+
+Route::get('/establishment', [AppController::class, 'mapping']);
 
 // =============================
 // AUTHENTICATION ROUTES
@@ -203,7 +210,7 @@ Route::get('/load-map-view', function (Request $request) {
     return view('pages.map', compact('location'));
 })->name('loadMap');
 
-Route::get('fsic_no/{fsicNo}', fn($fsicNo) => view('fsic', ['fsic' => Fsic::with('application')->where('fsic_no', Crypt::decryptString($fsicNo))->first()]));
+
 
 Route::post('/store-subscription', [PushNotificationController::class, 'storeSubscription']);
 

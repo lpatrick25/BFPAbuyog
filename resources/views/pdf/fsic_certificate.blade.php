@@ -156,7 +156,7 @@
                 </tr>
                 <tr>
                     <td style="padding-right: 10px;">
-                        <input type="checkbox" @if ($fsic->application->fsic_type >= 0) checked @endif>
+                        <input type="checkbox" @if ($fsic->application->fsic_type >= 1) checked @endif>
                     </td>
                     <td style="text-align: left; color: blue;">
                         FOR BUSINESS PERMIT (NEW/RENEWAL)

@@ -7,7 +7,7 @@
     <title>{{ env('APP_NAME') }} | Homepage</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="https://bfp.gov.ph/wp-content/themes/gwt-wordpress-25.3.3/favicon.ico">
+    <link rel="shortcut icon" href="{{ asset('img/bfp.webp') }}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <!-- Library / Plugin Css Build -->
@@ -32,6 +32,12 @@
         .carousel-item img {
             height: 400px;
             object-fit: cover;
+        }
+
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+            width: 100%;
         }
     </style>
     <style>
@@ -282,9 +288,6 @@
                             <div class="offcanvas-header px-0">
                                 <div class="navbar-brand ms-3">
                                     <!--Logo start-->
-                                    <!--logo End-->
-
-                                    <!--Logo start-->
                                     <div class="logo-main">
                                         <div class="logo-normal">
                                             <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none"
@@ -321,7 +324,6 @@
                                             </svg>
                                         </div>
                                     </div>
-                                    <!--logo End-->
                                     <h4 class="logo-title">BFP - Abuyog</h4>
                                 </div>
                                 <button class="btn-close float-end"></button>
@@ -330,66 +332,59 @@
                                 <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                                 <li class="nav-item"><a class="nav-link " href="#">About Us</a></li>
                                 <li class="nav-item"><a class="nav-link " href="#">Contact Us</a></li>
-                                <li class="nav-item"><a class="nav-link active" href="e-FSIC">e-FSIC</a></li>
+                                <li class="nav-item"><a class="nav-link active" href="/e-FSIC">e-FSIC</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/establishment">Establishment</a></li>
                             </ul>
                         </div>
                     </nav>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon">
-                            <span class="navbar-toggler-bar bar1 mt-2"></span>
-                            <span class="navbar-toggler-bar bar2"></span>
-                            <span class="navbar-toggler-bar bar3"></span>
-                        </span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                            @auth
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link py-0 d-flex align-items-center" href="#" id="navbarDropdown"
-                                        role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <!-- User Avatar -->
-                                        <img src="{{ asset('assets/images/avatars/01.png') }}" alt="User-Profile"
-                                            class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded shadow-sm">
-
-                                        <!-- User Info -->
-                                        <div class="caption ms-2 d-none d-md-block">
-                                            <h6 class="mb-0 caption-title fw-semibold text-dark">
-                                                {{ auth()->user()->getFullName() }}</h6>
-                                            <p class="mb-0 caption-sub-title text-muted small">{{ auth()->user()->role }}
-                                            </p>
-                                        </div>
-                                    </a>
-
-                                    <!-- Dropdown Menu -->
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm"
-                                        aria-labelledby="navbarDropdown">
-                                        <li><a class="dropdown-item" href="#"><i
-                                                    class="bi bi-person-circle me-2"></i> Profile</a></li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" class="dropdown-item text-danger"><i
-                                                        class="bi bi-box-arrow-right me-2"></i> Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </li>
-                            @else
-                                <!-- Login Button -->
-                                <li class="nav-item">
-                                    <a href="{{ route('signin') }}"
-                                        class="nav-link btn btn-primary px-3 py-2 text-white fw-semibold rounded-pill shadow-sm">
-                                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
-                                    </a>
-                                </li>
-                            @endauth
-                        </ul>
-                    </div>
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        @auth
+                            <li class="nav-item dropdown">
+                                <a class="py-0 nav-link d-flex align-items-center" href="#" id="navbarDropdown"
+                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ asset('assets/images/avatars/01.png') }}" alt="User-Profile"
+                                        class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded"
+                                        style="width: 30px">
+                                    <img src="{{ asset('assets/images/avatars/avtar_1.png') }}" alt="User-Profile"
+                                        class="theme-color-purple-img img-fluid avatar avatar-50 avatar-rounded"
+                                        style="width: 30px">
+                                    <img src="{{ asset('assets/images/avatars/avtar_2.png') }}" alt="User-Profile"
+                                        class="theme-color-blue-img img-fluid avatar avatar-50 avatar-rounded"
+                                        style="width: 30px">
+                                    <img src="{{ asset('assets/images/avatars/avtar_4.png') }}" alt="User-Profile"
+                                        class="theme-color-green-img img-fluid avatar avatar-50 avatar-rounded"
+                                        style="width: 30px">
+                                    <img src="{{ asset('assets/images/avatars/avtar_5.png') }}" alt="User-Profile"
+                                        class="theme-color-yellow-img img-fluid avatar avatar-50 avatar-rounded"
+                                        style="width: 30px">
+                                    <img src="{{ asset('assets/images/avatars/avtar_3.png') }}" alt="User-Profile"
+                                        class="theme-color-pink-img img-fluid avatar avatar-50 avatar-rounded"
+                                        style="width: 30px">
+                                    <div class="caption ms-3 d-none d-md-block ">
+                                        <h6 class="mb-0 caption-title">{{ optional(auth()->user())->getFullName() }}
+                                        </h6>
+                                        <p class="mb-0 caption-sub-title">{{ auth()->user()->role }}</p>
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @else
+                            <!-- Login Button -->
+                            <li class="nav-item">
+                                <a href="{{ route('signin') }}"
+                                    class="nav-link btn btn-primary px-3 py-2 text-white fw-semibold rounded-pill shadow-sm">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                                </a>
+                            </li>
+                        @endauth
+                    </ul>
                 </div>
             </nav>
             <!-- Header Section -->
@@ -424,7 +419,7 @@
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between flex-wrap">
                                         <div class="header-title">
-                                            <h4 class="card-title mb-2">BFP: Fire Safety Inspection Certificate (FSIC)
+                                            <h4 class="card-title mb-2">BFP: E-Fire Safety Inspection Certificate (e-FSIC)
                                             </h4>
                                         </div>
                                     </div>
@@ -580,8 +575,8 @@
     <script src="{{ asset('js/error-handler.js') }}"></script>
 
     <!-- Load Facebook SDK -->
-    {{-- <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"
-        nonce="your-nonce"></script> --}}
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"
+        nonce="your-nonce"></script>
 
     <!-- AOS Animation Plugin-->
 
@@ -647,12 +642,12 @@
             let toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
 
             let toastHtml = `
-        <div class="toast align-items-center text-white ${toastClass} border-0 show" role="alert">
-            <div class="d-flex">
-                <div class="toast-body text-center w-100">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        </div>`;
+                <div class="toast align-items-center text-white ${toastClass} border-0 show" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body text-center w-100">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>`;
 
             $('.toast-container').html(toastHtml);
             let toastElement = new bootstrap.Toast($('.toast')[0]);
@@ -660,6 +655,7 @@
         }
 
         $(document).ready(function() {
+
             $('#search-btn').click(function(event) {
                 event.preventDefault();
 
@@ -685,7 +681,7 @@
                         }
 
                         if (!response.file_url) {
-                            showToast('danger', 'No image found for this FSIC number.');
+                            $('#search-btn').trigger('click');
                             return;
                         }
 
@@ -713,6 +709,17 @@
 
                 $('#loading-spinner').hide();
                 showToast('danger', 'An error occurred while processing your request.');
+            }
+
+            var fsicNo = {!! json_encode($fsicNo) !!};
+
+            if (fsicNo) {
+                $('#search').val(fsicNo);
+
+                // Delay click event slightly
+                setTimeout(function() {
+                    $('#search-btn').trigger('click');
+                }, 500);
             }
 
         });

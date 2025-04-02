@@ -25,10 +25,23 @@
     <!-- Customizer Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
 
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="{{ asset('css/sweetalert2.css') }}">
+
+    <!-- leaflet CSS  -->
+    <link rel="stylesheet" href="{{ asset('css/leaflet/leaflet.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/leaflet/Control.Geocoder.css') }}">
+
     <style>
         .carousel-item img {
             height: 400px;
             object-fit: cover;
+        }
+
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+            width: 100%;
         }
     </style>
     <style>
@@ -83,72 +96,164 @@
             font-weight: bold;
         }
 
-
-        /* 🔥 Background Section */
-        .bfp-section {
+        /* 🔍 Floating Input Group */
+        .floating-label {
             position: relative;
-            background: url('https://bfp.gov.ph/wp-content/uploads/2022/03/bfp-firefighters.jpg') no-repeat center center;
-            background-size: cover;
-            height: auto;
-            padding: 60px 0;
             display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: white;
+            gap: 10px;
+            max-width: 500px;
+            margin: auto;
         }
 
-        /* 🔥 Overlay */
-        .bfp-overlay {
+        .floating-label .form-control {
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .floating-label .form-control:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+        }
+
+        .floating-label label {
             position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            padding: 0 5px;
+            font-size: 16px;
+            color: #6c757d;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        /* 🎭 Floating Effect */
+        .floating-label .form-control:focus~label,
+        .floating-label .form-control:not(:placeholder-shown)~label {
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            /* Dark overlay for readability */
+            font-size: 12px;
+            color: #dc3545;
         }
 
-        /* ✨ Vision & Mission Image */
-        .vision-mission img {
-            max-width: 1000px;
-            width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            z-index: 2;
-            position: relative;
+        /* 🔘 Elegant Button */
+        .btn-search {
+            background-color: #dc3545;
+            color: white;
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-size: 16px;
+            transition: 0.3s;
+            border: none;
         }
 
-        /* Mobile Responsiveness */
-        @media (max-width: 768px) {
-            .bfp-header {
-                text-align: center;
-                height: auto;
-            }
-
-            .bfp-section {
-                padding: 40px 10px;
-            }
-
-            .logo-container {
-                justify-content: center;
-                /* Centers logo on small screens */
-                margin-bottom: 10px;
-            }
-
-            .time-container {
-                text-align: center;
-                margin-top: 5px;
-            }
+        .btn-search:hover {
+            background-color: #a71d2a;
         }
 
-        .img-fluid {
+        /* 📄 PDF Canvas */
+        <style>
+
+        /* 📄 PDF Canvas Styling */
+        .pdf-view-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fafafa;
+            max-width: 100%;
+        }
+
+        /* Responsive image styling */
+        .pdf-view-container img {
             max-width: 100%;
             height: auto;
-            width: 100%;
+            border-radius: 8px;
         }
 
+        /* Floating Search Input */
+        .floating-label {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .floating-label input {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .floating-label input:focus {
+            border-color: #0056b3;
+        }
+
+        .floating-label label {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            font-size: 14px;
+            color: #999;
+            transition: 0.2s ease;
+        }
+
+        .floating-label input:focus~label,
+        .floating-label input:not(:placeholder-shown)~label {
+            top: -8px;
+            font-size: 12px;
+            color: #0056b3;
+        }
+
+        /* Button Styling */
+        .btn-search {
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-search:hover {
+            background-color: #00408f;
+        }
+
+        /* Loading Spinner */
+        .spinner-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Toast Notification Style */
+        .toast {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 4px;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        /* 📱 Mobile Adjustments */
+        @media (max-width: 576px) {
+            .floating-label {
+                flex-direction: column;
+            }
+
+            .floating-label .btn-search {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
     </style>
 </head>
 
@@ -231,8 +336,8 @@
                                 <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                                 <li class="nav-item"><a class="nav-link " href="#">About Us</a></li>
                                 <li class="nav-item"><a class="nav-link " href="#">Contact Us</a></li>
-                                <li class="nav-item"><a class="nav-link active" href="/e-FSIC">e-FSIC</a></li>
-                                <li class="nav-item"><a class="nav-link" href="/establishment">Establishment</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/e-FSIC">e-FSIC</a></li>
+                                <li class="nav-item"><a class="nav-link active" href="/establishment">Establishment</a></li>
                             </ul>
                         </div>
                     </nav>
@@ -316,91 +421,21 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="card">
-                                    <div class="card-body">
-                                        <div id="hopeUICarousel" class="carousel slide" data-bs-ride="carousel">
-                                            <div class="carousel-indicators">
-                                                <button type="button" data-bs-target="#hopeUICarousel"
-                                                    data-bs-slide-to="0" class="active"></button>
-                                                <button type="button" data-bs-target="#hopeUICarousel"
-                                                    data-bs-slide-to="1"></button>
-                                                <button type="button" data-bs-target="#hopeUICarousel"
-                                                    data-bs-slide-to="2"></button>
-                                            </div>
+                                    <div class="card-header d-flex justify-content-between flex-wrap">
+                                        <div class="header-title">
+                                            <h4 class="card-title mb-2">Abuyog Municipality
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div id="map" class="shadow-reset" style="height: 700px;"></div>
+                                    </div>
+                                </div>
 
-                                            <div class="carousel-inner">
-                                                <div class="carousel-item active">
-                                                    <img src="https://ncr.bfp.gov.ph/wp-content/uploads/slider/cache/196addee76de6708aef257fcbd2231cf/FPM-2025.png"
-                                                        class="d-block w-100" alt="Slide 1">
-                                                </div>
-                                                <div class="carousel-item">
-                                                    <img src="https://ncr.bfp.gov.ph/wp-content/uploads/slider/cache/16aaf8c1912e86496539d63502cff535/ncr-website-hero.png"
-                                                        class="d-block w-100" alt="Slide 2">
-                                                </div>
-                                                <div class="carousel-item">
-                                                    <img src="https://ncr.bfp.gov.ph/wp-content/uploads/slider/cache/9d95267d436329b079ba5e24a62bc760/Planning-implementation-and-management-if-uct-system.png"
-                                                        class="d-block w-100" alt="Slide 3">
-                                                </div>
-                                            </div>
-
-                                            <button class="carousel-control-prev" type="button"
-                                                data-bs-target="#hopeUICarousel" data-bs-slide="prev">
-                                                <span class="carousel-control-prev-icon"></span>
-                                            </button>
-                                            <button class="carousel-control-next" type="button"
-                                                data-bs-target="#hopeUICarousel" data-bs-slide="next">
-                                                <span class="carousel-control-next-icon"></span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-xl-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="user-post">
-                                            <a href="https://bfp.gov.ph/official-transparency-seal/"><img
-                                                    src="https://bfp.gov.ph/wp-content/uploads/2019/05/transparency_seal_2019-500x231.jpg"
-                                                    alt="post-image" class="img-fluid"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-xl-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="user-post">
-                                            <a href="https://www.foi.gov.ph/requests?agency=BFP"><img
-                                                    src="https://bfp.gov.ph/wp-content/uploads/2018/09/FOI.jpg"
-                                                    alt="post-image" class="img-fluid"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-xl-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="user-post">
-                                            <a href="https://bfp.gov.ph/bfp-citizens-charter/"><img
-                                                    src="https://csc.gov.ph/images/widgets/2023/citizens-charter.png"
-                                                    alt="post-image" class="img-fluid"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-lg-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <section class="bfp-section">
-                                            <div class="bfp-overlay"></div> <!-- Background Overlay -->
-                                            <div class="container position-relative">
-                                                <div class="row justify-content-center">
-                                                    <div class="col-lg-12 text-center vision-mission">
-                                                        <img src="https://bfp.gov.ph/wp-content/uploads/2022/03/vision-mission.png"
-                                                            alt="Vision & Mission">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </section>
+                                <!-- Add loading spinner -->
+                                <div id="loading-spinner" class="spinner-container" style="display: none;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
                                     </div>
                                 </div>
                             </div>
@@ -415,7 +450,7 @@
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <h5 class="font-weight-bold">ABUYOG </h5>
-                                                    <P class="mb-0 text-dark">Fire Station North Leyte</P>
+                                                    <P class="mb-0">Fire Station North Leyte</P>
                                                 </div>
                                                 <div class="master-card-content">
                                                     <img src="{{ asset('img/bfp.webp') }}" alt="BFP Abuyog"
@@ -440,10 +475,10 @@
                                                 </div>
                                             </div>
                                             <div class="d-flex align-items-center mb-2 justify-content-between">
-                                                <p class="mb-0 text-dark" style="font-weight: bolder;">Email</p>
+                                                <p class="mb-0">Email</p>
                                             </div>
                                             <div class="d-flex align-items-center justify-content-between">
-                                                <h6 class="text-dark">abuyogfsnorthleyte@gmail.com</h6>
+                                                <h6>abuyogfsnorthleyte@gmail.com</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -482,10 +517,6 @@
                                             data-small-header="false" data-adapt-container-width="true"
                                             data-hide-cover="false" data-show-facepile="true">
                                         </div>
-
-                                        <!-- Load Facebook SDK -->
-                                        <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"
-                                            nonce="your-nonce"></script>
                                     </div>
                                 </div>
                             </div>
@@ -523,11 +554,29 @@
         <!-- Wrapper End-->
     </div>
 
+    <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"></div>
+
     <!-- Library Bundle Script -->
     <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
 
     <!-- External Library Bundle Script -->
     <script src="{{ asset('assets/js/core/external.min.js') }}"></script>
+
+    <!-- SweetAlert2 JS -->
+    <script src="{{ asset('js/sweetalert2.js') }}"></script>
+
+    <!-- Error Handler -->
+    <script src="{{ asset('js/error-handler.js') }}"></script>
+
+    <!-- leaflet JS -->
+    <script src="{{ asset('js/leaflet/leaflet.js') }}"></script>
+    <script src="{{ asset('js/leaflet/Control.Geocoder.js') }}"></script>
+
+    <script src="{{ asset('js/abuyog-map.js') }}" defer></script>
+
+    <!-- Load Facebook SDK -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"
+        nonce="your-nonce"></script>
 
     <!-- AOS Animation Plugin-->
 
@@ -553,6 +602,119 @@
         }
         setInterval(updateTime, 1000);
         updateTime();
+
+        var timerInterval = null;
+
+        function showLoadingDialog(title) {
+            const startTime = Date.now();
+
+            Swal.fire({
+                title: title,
+                html: 'Please wait... Time Taken: <b>0</b> seconds',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+
+                    // Start timer
+                    timerInterval = setInterval(() => {
+                        const currentTime = Date.now();
+                        const timeTaken = ((currentTime - startTime) / 1000).toFixed(2);
+                        const swalContainer = Swal.getHtmlContainer();
+
+                        if (swalContainer) {
+                            const timerElement = swalContainer.querySelector('b');
+                            if (timerElement) {
+                                timerElement.textContent = timeTaken;
+                            }
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    // Stop the timer when modal is closed
+                    clearInterval(timerInterval);
+                }
+            });
+
+            return timerInterval;
+        }
+
+        function showToast(type, message) {
+            let toastClass = type === 'success' ? 'bg-success' : 'bg-danger';
+
+            let toastHtml = `
+                <div class="toast align-items-center text-white ${toastClass} border-0 show" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body text-center w-100">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>`;
+
+            $('.toast-container').html(toastHtml);
+            let toastElement = new bootstrap.Toast($('.toast')[0]);
+            toastElement.show();
+        }
+
+        function showImagePopup(establishmentId) {
+            let timerInterval = showLoadingDialog('Getting establishment information');
+
+            $.ajax({
+                url: `/admin/${establishmentId}/generate-session`,
+                method: 'POST',
+                success: function(response) {
+                    clearInterval(timerInterval);
+                    if (response.sessionID) {
+                        window.location.href = `/admin/establishment/${response.sessionID}/show`;
+                    } else {
+                        showToast('danger', 'Failed to generate session.');
+                    }
+                    Swal.close();
+                },
+                error: function() {
+                    clearInterval(timerInterval);
+                    Swal.close();
+                    showToast('danger', 'Error generating session token.');
+                }
+            });
+        }
+
+        function showMapWithCoordinates(coordinates) {
+            if (!Array.isArray(coordinates) || coordinates.length === 0) {
+                console.warn("No markers found!");
+                return;
+            }
+
+            coordinates.forEach(function(coord) {
+                if (!coord || coord.length < 3 || isNaN(coord[0]) || isNaN(coord[1])) {
+                    console.warn("Invalid coordinate:", coord);
+                    return;
+                }
+
+                const customIcon = L.icon({
+                    iconUrl: "{{ asset('css/leaflet/images/marker-icon.png') }}",
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [0, -35],
+                });
+
+                const marker = L.marker([parseFloat(coord[0]), parseFloat(coord[1])], {
+                    icon: customIcon
+                }).addTo(map);
+
+                const popupContent = `<button type="button" class="btn btn-success btn-block"
+                                onclick="showImagePopup('${coord[2]}');">
+                                Show Establishment
+                              </button>`;
+
+                marker.bindPopup(L.popup().setContent(popupContent));
+            });
+        }
+
+        $(document).ready(function() {
+
+            let markers = @json($response);
+            showMapWithCoordinates(markers);
+
+        });
     </script>
 
 </body>
