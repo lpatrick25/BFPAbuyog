@@ -77,7 +77,10 @@ class AppController extends Controller
 
                 file_put_contents($imageFilePath, $response->getBody());
 
-                $fsic->addMedia($imageFilePath)->toMediaCollection('fsic_certificates');
+                $fsic->addMedia($imageFilePath)
+                    ->preservingOriginal()
+                    ->usingName('FSIC Certificate')
+                    ->toMediaCollection('fsic_certificates');
 
                 File::delete($filePath);
                 File::delete($imageFilePath);

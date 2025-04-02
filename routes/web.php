@@ -5,6 +5,7 @@ use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationStatusController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegistrationController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EstablishmentController;
 use App\Http\Controllers\FsicController;
@@ -17,8 +18,6 @@ use App\Http\Controllers\navigation\MarshallController as NavigationMarshallCont
 use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
-use App\Models\Application;
-use App\Models\Fsic;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
 use Illuminate\Support\Facades\Route;
@@ -54,8 +53,14 @@ Route::get('/establishment', [AppController::class, 'mapping']);
 Route::middleware('guest')->group(function () {
     Route::view('/signin', 'signin')->name('signin');
     Route::view('/signup', 'signup')->name('signup');
+    Route::view('/recover', 'recover')->name('recover');
     Route::post('/login', [LoginController::class, 'login'])->name('login');
     Route::post('/register', [RegistrationController::class, 'register'])->name('register');
+    Route::post('/password/email', [ResetPasswordController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/password/reset/{token}', function ($token) {
+        return view('password-reset', ['token' => $token]);
+    })->name('password.reset');
+    Route::post('/password/reset', [ResetPasswordController::class, 'resetPassword'])->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {

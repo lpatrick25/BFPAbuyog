@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ env('APP_NAME') }} | Sign-in</title>
+    <title>{{ env('APP_NAME') }} | Forgot Password</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('img/bfp.webp') }}" />
@@ -40,6 +40,10 @@
     <div class="wrapper">
         <section class="login-content">
             <div class="row m-0 align-items-center bg-white vh-100">
+                <div class="col-md-6 d-md-block d-none bg-primary p-0 mt-n1 vh-100 overflow-hidden">
+                    <img src="{{ asset('img/background.webp') }}" class="img-fluid gradient-main animated-scaleX"
+                        alt="images">
+                </div>
                 <div class="col-md-6">
                     <div class="row justify-content-center">
                         <div class="col-md-10">
@@ -63,8 +67,10 @@
                                         <!--logo End-->
                                         <h4 class="logo-title ms-3">BFP - Abuyog</h4>
                                     </a>
-                                    <h2 class="mb-2 text-center">Sign In</h2>
-                                    <form id="loginForm">
+                                    <h2 class="mb-2 text-center">Reset Password</h2>
+                                    <p>Enter your email address and we'll send you an email with instructions to reset
+                                        your password.</p>
+                                    <form id="resetForm">
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="form-group">
@@ -73,24 +79,9 @@
                                                         name="email" aria-describedby="email" placeholder="" required>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-12">
-                                                <div class="form-group">
-                                                    <label for="password" class="form-label">Password</label>
-                                                    <input type="password" class="form-control" id="password"
-                                                        name="password" aria-describedby="password" placeholder=" ">
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-12 d-flex justify-content-between">
-                                                <div class="form-check mb-3">
-                                                    <input type="checkbox" class="form-check-input" id="customCheck1">
-                                                    <label class="form-check-label" for="customCheck1">Remember
-                                                        Me</label>
-                                                </div>
-                                                <a href="/recover">Forgot Password?</a>
-                                            </div>
                                         </div>
                                         <div class="d-flex justify-content-center">
-                                            <button type="submit" class="btn btn-primary">Sign In</button>
+                                            <button type="submit" class="btn btn-primary">Reset</button>
                                         </div>
                                         <p class="mt-3 text-center">
                                             Don’t have an account? <a href="/signup" class="text-underline">Click
@@ -104,10 +95,6 @@
                     <div class="sign-bg">
                         <img src="{{ asset('img/bfp.svg') }}" height="230" alt="BFP Logo" style="opacity: 3%;">
                     </div>
-                </div>
-                <div class="col-md-6 d-md-block d-none bg-primary p-0 mt-n1 vh-100 overflow-hidden">
-                    <img src="{{ asset('img/background.webp') }}" class="img-fluid gradient-main animated-scaleX"
-                        alt="images">
                 </div>
             </div>
         </section>
@@ -126,14 +113,13 @@
 
     <script>
         $(document).ready(function() {
-            // Set CSRF token for all AJAX requests
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
 
-            $('#loginForm').submit(function(event) {
+            $('#resetForm').submit(function(event) {
                 event.preventDefault();
 
                 let submitBtn = $('button[type="submit"]');
@@ -143,46 +129,33 @@
 
                 $.ajax({
                     method: 'POST',
-                    url: '{{ route('login') }}',
-                    data: $('#loginForm').serialize(),
+                    url: '{{ route('password.email') }}', // Correct Laravel route
+                    data: $('#resetForm').serialize(),
                     dataType: 'JSON',
                     cache: false,
-                    success: handleSuccess,
-                    error: handleError,
-                    complete: () => submitBtn.prop('disabled', false).text('Sign In')
+                    success: function(response) {
+                        showToast('success', response.message);
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            showValidationErrors(xhr.responseJSON.errors);
+                            showToast('danger', 'Please correct the errors in the form.');
+                        } else if (xhr.status === 400) {
+                            showToast('danger',
+                            'Unable to send reset email. Please try again.');
+                        } else {
+                            showToast('danger', 'Something went wrong. Please try again.');
+                        }
+                    },
+                    complete: () => submitBtn.prop('disabled', false).text('Reset')
                 });
             });
 
-            function handleSuccess(response) {
-                showToast('success', response.message);
-                setTimeout(() => window.location.reload(), 1000);
-            }
-
-            function handleError(xhr) {
-                if (xhr.status === 422) {
-                    showValidationErrors(xhr.responseJSON.errors);
-                    showToast('danger', 'Please correct the errors in the form.');
-                } else if (xhr.status === 401) {
-                    showInvalidLoginError();
-                    showToast('danger', 'Invalid email or password.');
-                } else {
-                    showToast('danger', 'Something went wrong. Please try again.');
-                }
-            }
-
             function showValidationErrors(errors) {
                 $.each(errors, function(field, messages) {
-                    let inputField = $(`#loginForm [name="${field}"]`);
+                    let inputField = $(`#resetForm [name="${field}"]`);
                     displayFieldError(inputField, messages[0]);
                 });
-            }
-
-            function showInvalidLoginError() {
-                let emailField = $('#loginForm [name="email"]');
-                let passwordField = $('#loginForm [name="password"]');
-
-                displayFieldError(emailField, 'Invalid email.');
-                displayFieldError(passwordField, 'Invalid password.');
             }
 
             function displayFieldError(inputField, message) {

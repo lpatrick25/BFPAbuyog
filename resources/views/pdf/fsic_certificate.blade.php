@@ -211,7 +211,7 @@
             </p>
             <p style="text-indent: 45px; text-align: justify;; margin-top: 10px;">
                 This certification is valid for
-                <span class="bold" style="border-bottom: 1px solid black; padding: 0 50px;">Business Permit</span>
+                <span class="bold" style="border-bottom: 1px solid black; padding: 0 50px;">@if ($fsic->application->fsic_type != 0) Business Permit @else Certificate of Occupancy @endif</span>
                 valid until
                 <span class="bold"
                     style="border-bottom: 1px solid black; padding: 0 50px;">{{ date('F j, Y', strtotime($fsic->expiration_date)) }}</span>

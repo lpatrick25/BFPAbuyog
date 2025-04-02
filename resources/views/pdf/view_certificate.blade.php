@@ -22,6 +22,14 @@
             margin: 0;
             line-height: 1.5;
             padding: 20px;
+            width: 816px;
+            /* 8.5 inches */
+            height: 1344px;
+            /* 14 inches */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
         }
 
         .certificate {

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ env('APP_NAME') }} | Sign-in</title>
+    <title>{{ env('APP_NAME') }} | Password Reset</title>
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ asset('img/bfp.webp') }}" />
@@ -63,39 +63,38 @@
                                         <!--logo End-->
                                         <h4 class="logo-title ms-3">BFP - Abuyog</h4>
                                     </a>
-                                    <h2 class="mb-2 text-center">Sign In</h2>
-                                    <form id="loginForm">
+                                    <h2 class="mb-2 text-center">Password Reset</h2>
+                                    <form id="resetPasswordForm">
+                                        <input type="hidden" name="token" value="{{ request()->route('token') }}">
+
                                         <div class="row">
                                             <div class="col-lg-12">
                                                 <div class="form-group">
                                                     <label for="email" class="form-label">Email</label>
                                                     <input type="email" class="form-control" id="email"
-                                                        name="email" aria-describedby="email" placeholder="" required>
+                                                        name="email" required>
                                                 </div>
                                             </div>
                                             <div class="col-lg-12">
                                                 <div class="form-group">
-                                                    <label for="password" class="form-label">Password</label>
+                                                    <label for="password" class="form-label">New Password</label>
                                                     <input type="password" class="form-control" id="password"
-                                                        name="password" aria-describedby="password" placeholder=" ">
+                                                        name="password" required>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-12 d-flex justify-content-between">
-                                                <div class="form-check mb-3">
-                                                    <input type="checkbox" class="form-check-input" id="customCheck1">
-                                                    <label class="form-check-label" for="customCheck1">Remember
-                                                        Me</label>
+                                            <div class="col-lg-12">
+                                                <div class="form-group">
+                                                    <label for="password_confirmation" class="form-label">Confirm
+                                                        Password</label>
+                                                    <input type="password" class="form-control"
+                                                        id="password_confirmation" name="password_confirmation"
+                                                        required>
                                                 </div>
-                                                <a href="/recover">Forgot Password?</a>
                                             </div>
                                         </div>
                                         <div class="d-flex justify-content-center">
-                                            <button type="submit" class="btn btn-primary">Sign In</button>
+                                            <button type="submit" class="btn btn-primary">Save</button>
                                         </div>
-                                        <p class="mt-3 text-center">
-                                            Don’t have an account? <a href="/signup" class="text-underline">Click
-                                                here to sign up.</a>
-                                        </p>
                                     </form>
                                 </div>
                             </div>
@@ -133,7 +132,7 @@
                 }
             });
 
-            $('#loginForm').submit(function(event) {
+            $('#resetPasswordForm').submit(function(event) {
                 event.preventDefault();
 
                 let submitBtn = $('button[type="submit"]');
@@ -143,8 +142,8 @@
 
                 $.ajax({
                     method: 'POST',
-                    url: '{{ route('login') }}',
-                    data: $('#loginForm').serialize(),
+                    url: '{{ route('password.update') }}',
+                    data: $('#resetPasswordForm').serialize(),
                     dataType: 'JSON',
                     cache: false,
                     success: handleSuccess,
@@ -154,6 +153,7 @@
             });
 
             function handleSuccess(response) {
+                window.location.href = '/';
                 showToast('success', response.message);
                 setTimeout(() => window.location.reload(), 1000);
             }
@@ -172,14 +172,14 @@
 
             function showValidationErrors(errors) {
                 $.each(errors, function(field, messages) {
-                    let inputField = $(`#loginForm [name="${field}"]`);
+                    let inputField = $(`#resetPasswordForm [name="${field}"]`);
                     displayFieldError(inputField, messages[0]);
                 });
             }
 
             function showInvalidLoginError() {
-                let emailField = $('#loginForm [name="email"]');
-                let passwordField = $('#loginForm [name="password"]');
+                let emailField = $('#resetPasswordForm [name="email"]');
+                let passwordField = $('#resetPasswordForm [name="password"]');
 
                 displayFieldError(emailField, 'Invalid email.');
                 displayFieldError(passwordField, 'Invalid password.');
