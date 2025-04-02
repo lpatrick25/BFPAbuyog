@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AppController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationStatusController;
 use App\Http\Controllers\Auth\LoginController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\navigation\MarshallController as NavigationMarshallCont
 use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
+use App\Models\Application;
 use App\Models\Fsic;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
@@ -31,11 +33,26 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 |--------------------------------------------------------------------------
 */
 
+Route::get('/', function () {
+    return view('index');
+});
+
+Route::get('/e-FSIC/{fsicNo?}', function ($fsicNo = null) {
+    return view('efsic', compact('fsicNo'));
+});
+
+Route::get('/fsic_no/{fsicNo}', function ($fsicNo) {
+    $fsicNo = Crypt::decryptString($fsicNo);  // Use consistent variable case
+    return redirect('/e-FSIC/' . $fsicNo);
+});
+
+Route::get('/establishment', [AppController::class, 'mapping']);
+
 // =============================
 // AUTHENTICATION ROUTES
 // =============================
 Route::middleware('guest')->group(function () {
-    Route::view('/', 'signin')->name('signin');
+    Route::view('/signin', 'signin')->name('signin');
     Route::view('/signup', 'signup')->name('signup');
     Route::post('/login', [LoginController::class, 'login'])->name('login');
     Route::post('/register', [RegistrationController::class, 'register'])->name('register');
@@ -193,6 +210,8 @@ Route::get('/load-map-view', function (Request $request) {
     return view('pages.map', compact('location'));
 })->name('loadMap');
 
-Route::get('fsic_no/{fsicNo}', fn($fsicNo) => view('fsic', ['fsic' => Fsic::with('application')->where('fsic_no', Crypt::decryptString($fsicNo))->first()]));
+
 
 Route::post('/store-subscription', [PushNotificationController::class, 'storeSubscription']);
+
+Route::get('search-FSIC', [AppController::class, 'searchFSIC']);

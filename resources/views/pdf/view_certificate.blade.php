@@ -96,8 +96,7 @@
             <table style="width: 100%; margin-bottom: 20px;">
                 <tr>
                     <td style="width: 20%; text-align: center;">
-                        <img src="{{ public_path('img/dilg.webp') }}" alt="DILG Logo"
-                            style="height: 120px; width: 120px;">
+                        <img src="{{ $fsic->dilgLogo }}" alt="DILG Logo" style="height: 120px; width: 120px;">
                     </td>
                     <td style="width: 60%; text-align: center;">
                         <p>Republic of the Philippines</p>
@@ -109,8 +108,7 @@
                         <p style="margin-top: -5px;">Brgy. Loyonsawang, Abuyog, Leyte</p>
                     </td>
                     <td style="width: 20%; text-align: center;">
-                        <img src="{{ public_path('img/bfp.webp') }}" alt="BFP Logo"
-                            style="height: 120px; width: 120px;">
+                        <img src="{{ $fsic->bfpLogo }}" alt="BFP Logo" style="height: 120px; width: 120px;">
                     </td>
                 </tr>
             </table>
@@ -156,7 +154,7 @@
                 </tr>
                 <tr>
                     <td style="padding-right: 10px;">
-                        <input type="checkbox" @if ($fsic->application->fsic_type >= 1) checked @endif>
+                        <input type="checkbox" @if ($fsic->application->fsic_type == 1 || $fsic->application->fsic_type == 2) checked @endif>
                     </td>
                     <td style="text-align: left; color: blue;">
                         FOR BUSINESS PERMIT (NEW/RENEWAL)
@@ -230,8 +228,7 @@
                     <p>Amount Paid: <b>{{ $fsic->amount }}</b></p>
                     <p>O.R. Number: <b>{{ $fsic->or_number }}</b></p>
                     <p>Date: <b>{{ date('F j, Y', strtotime($fsic->payment_date)) }}</b></p>
-                    <img src="{{ $fsic->fsicQrCode }}" alt="QR Code"
-                        style="height: 130px; width: 130px;">
+                    <img src="{{ $fsic->fsicQrCode }}" alt="QR Code" style="height: 130px; width: 130px;">
                 </td>
 
                 <!-- Right Column: Approval Section -->
