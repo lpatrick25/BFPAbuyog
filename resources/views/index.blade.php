@@ -228,10 +228,10 @@
                                 <button class="btn-close float-end"></button>
                             </div>
                             <ul class="navbar-nav">
-                                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                                <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
                                 <li class="nav-item"><a class="nav-link " href="#">About Us</a></li>
                                 <li class="nav-item"><a class="nav-link " href="#">Contact Us</a></li>
-                                <li class="nav-item"><a class="nav-link active" href="/e-FSIC">e-FSIC</a></li>
+                                <li class="nav-item"><a class="nav-link" href="/e-FSIC">e-FSIC</a></li>
                                 <li class="nav-item"><a class="nav-link" href="/establishment">Establishment</a></li>
                             </ul>
                         </div>

@@ -48,7 +48,6 @@ class EstablishmentController extends Controller
     {
         $query = $this->establishmentService->getAllEstablishments();
 
-        // Pagination must be done here directly
         $establishments = $query->paginate($this->limit, ['*'], 'page', $this->page);
 
         return new PaginatedEstablishmentResource($establishments);

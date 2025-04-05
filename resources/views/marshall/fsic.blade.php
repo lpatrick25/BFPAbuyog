@@ -5,6 +5,30 @@
 @section('marshall-fsic')
     active
 @endsection
+@section('APP-CSS')
+    <style type="text/css">
+
+        /* 📄 PDF Canvas Styling */
+        .pdf-view-container {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fafafa;
+            max-width: 100%;
+        }
+
+        /* Responsive image styling */
+        .pdf-view-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+@endsection
 @section('APP-CONTENT')
     <div class="row" id="addForm">
         <div class="col-lg-12">
@@ -41,13 +65,9 @@
                 </div>
                 <div class="modal-body">
                     <!-- Normal PDF View for Desktop -->
-                    <div id="pdf-desktop">
-                    </div>
-
-                    <!-- PDF.js Canvas for Mobile -->
-                    <div id="pdf-mobile" style="display: none;">
-                        <canvas id="pdf-render"></canvas>
-                    </div>
+                    <div id="pdf-view" class="pdf-view-container">
+                                            <!-- Image will be displayed here -->
+                                        </div>
                 </div>
                 <div class="modal-footer text-end">
                 </div>
@@ -58,71 +78,45 @@
 @section('APP-SCRIPT')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <script type="text/javascript">
-        function viewFSIC(fsicId) {
+        function viewFSIC(fsicNo) {
             let timerInterval = showLoadingDialog('Retrieving FSIC');
 
             $.ajax({
                 method: 'GET',
-                url: `/fsics/${fsicId}`,
+                url: `/search-FSIC`,
+                data: {
+                  fsic_no: fsicNo
+                },
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
-                    clearInterval(timerInterval);
+                    console.log(response);
+
+                        if (response.message) {
+                            showToast('danger', response.message);
+                            return;
+                        }
+
+                        if (!response.file_url) {
+                            viewFSIC(fsicNo);
+                            return;
+                        }
+
+                        // Fix the malformed URL by replacing \/\/ with /
+                        let fileUrl = response.file_url.replace(/\\\/\//g,
+                            '/'); // Remove escaped slashes and fix the URL
+
+                        $('#pdf-view').show();
+
+                        // Check if the response file is a valid image URL
+                        var img = '<img src="' + fileUrl + '" alt="FSIC Certificate Image">';
+                        $('#pdf-view').html(img);
+
+                        clearInterval(timerInterval);
+                        Swal.close();
                     showToast('success', 'Success');
 
-                    function isMobileDevice() {
-                        return /Mobi|Android/i.test(navigator.userAgent);
-                    }
-
-                    // Debugging: Log the response to check the structure
-                    console.log("FSIC Response:", response);
-
-                    // Ensure a PDF file is found
-                    let pdfFile = response.find(file => file.url.endsWith('.pdf'));
-
-                    if (!pdfFile) {
-                        showToast('error', 'No FSIC PDF found.');
-                        return;
-                    }
-
-                    const pdfUrl = pdfFile.url.replace(/([^:]\/)\/+/g, "$1");
-                    console.log("PDF URL:", pdfUrl); // Debugging
-
-                    if (isMobileDevice()) {
-                        $('#pdf-desktop').hide();
-                        $('#pdf-mobile').show();
-
-                        pdfjsLib.getDocument(pdfUrl).promise.then(pdfDoc => {
-                            pdfDoc.getPage(1).then(page => {
-                                let canvas = document.getElementById('pdf-render');
-                                let ctx = canvas.getContext('2d');
-
-                                let viewport = page.getViewport({
-                                    scale: 1.5
-                                });
-                                canvas.height = viewport.height;
-                                canvas.width = viewport.width;
-
-                                let renderContext = {
-                                    canvasContext: ctx,
-                                    viewport: viewport
-                                };
-                                page.render(renderContext);
-                            });
-                        }).catch(err => {
-                            console.error("PDF.js Error:", err);
-                            showToast('error', 'Failed to load PDF.');
-                        });
-                    } else {
-                        $('#pdf-desktop').show();
-                        $('#pdf-mobile').hide();
-                        $('#pdf-desktop').html(
-                            `<iframe src="${pdfUrl}" width="100%" height="600px" style="border: none;"></iframe>`
-                            );
-                    }
-
                     $('#fsic').modal('show');
-                    Swal.close();
                 },
                 error: handleAjaxError
             });
@@ -213,7 +207,7 @@
             // Format the "Actions" column
             function actionFormatter(value, row, index) {
                 return `
-                    <button class="btn btn-sm btn-info" onclick="viewFSIC('${row.id}')"><i class="bi bi-calendar-check"></i></button>`;
+                    <button class="btn btn-sm btn-info" onclick="viewFSIC('${row.fsic_no}')"><i class="bi bi-calendar-check"></i></button>`;
             }
 
         });

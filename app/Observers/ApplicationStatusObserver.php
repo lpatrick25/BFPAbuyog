@@ -2,28 +2,20 @@
 
 namespace App\Observers;
 
-use App\Mail\ApplicationStatusUpdated;
 use App\Models\ApplicationStatus;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use App\Services\NotificationService;
 
 class ApplicationStatusObserver
 {
-    /**
-     * Handle the ApplicationStatus "updated" event.
-     */
+    protected NotificationService $notifier;
+
+    public function __construct(NotificationService $notifier)
+    {
+        $this->notifier = $notifier;
+    }
+
     public function updated(ApplicationStatus $applicationStatus)
     {
-        // Retrieve related models
-        $application = $applicationStatus->application;
-        $establishment = $application->establishment ?? null;
-        $client = $establishment->client ?? null;
-
-        if ($client && $client->email) {
-            // Send email to client
-            Mail::to($client->email)->send(new ApplicationStatusUpdated($applicationStatus));
-        } else {
-            Log::error('Email not sent');
-        }
+        $this->notifier->sendApplicationUpdate($applicationStatus, sendEmail: true, sendSms: true);
     }
 }
