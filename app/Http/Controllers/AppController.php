@@ -65,10 +65,11 @@ class AppController extends Controller
                 'query' => [
                     'access_key' => env('SCREENSHOTLAYER_API_KEY'),
                     'url' => url('upload/' . $filename),
-                    'viewport' => '816x1344',
-                    'width' => 816,
+                    'viewport' => '855x1200',
+                    'width' => 855,
                     'fullpage' => true,
                     'format' => 'png',
+                    'delay' => 10,
                 ]
             ]);
 
@@ -77,10 +78,7 @@ class AppController extends Controller
 
                 file_put_contents($imageFilePath, $response->getBody());
 
-                $fsic->addMedia($imageFilePath)
-                    ->preservingOriginal()
-                    ->usingName('FSIC Certificate')
-                    ->toMediaCollection('fsic_certificates');
+                $fsic->addMedia($imageFilePath)->toMediaCollection('fsic_certificates');
 
                 File::delete($filePath);
                 File::delete($imageFilePath);

@@ -45,6 +45,11 @@ class Application extends Model implements HasMedia
         return $this->hasMany(Fsic::class);
     }
 
+    public function latestStatus()
+    {
+        return $this->hasOne(ApplicationStatus::class)->latestOfMany();
+    }
+
     public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
     {
         $this->addMediaConversion('thumbnail')

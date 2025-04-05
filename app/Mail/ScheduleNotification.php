@@ -13,15 +13,15 @@ class ScheduleNotification extends Mailable
     use Queueable, SerializesModels;
 
     public $schedule;
-    public $scheduleType;
+    public $inspectionType;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Schedule $schedule, $scheduleType)
+    public function __construct(Schedule $schedule, $inspectionType)
     {
         $this->schedule = $schedule;
-        $this->scheduleType = $scheduleType;
+        $this->inspectionType = $inspectionType;
     }
 
     /**
@@ -31,9 +31,9 @@ class ScheduleNotification extends Mailable
     {
 
         $subject = '';
-        if ($this->scheduleType == 'Reinspection') {
+        if ($this->inspectionType == 'Reinspection') {
             $subject = 'Establishment Scheduled for Reinspection';
-        } else if ($this->scheduleType == 'Reschedule') {
+        } else if ($this->inspectionType == 'Reschedule') {
             $subject = 'Establishment Inspection Reschedule';
         } else {
             $subject = 'Establishment Scheduled for Inspection';
@@ -46,7 +46,7 @@ class ScheduleNotification extends Mailable
                 'inspector' => $this->schedule->inspector,
                 'client' => $this->schedule->application->establishment->client,
                 'establishment' => $this->schedule->application->establishment,
-                'scheduleType' => $this->scheduleType,
+                'inspectionType' => $this->inspectionType,
                 'subject' => $subject,
             ]);
     }

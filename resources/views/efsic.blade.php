@@ -39,8 +39,7 @@
             height: auto;
             width: 100%;
         }
-    </style>
-    <style>
+
         /* Elegant Header Styling */
         .bfp-header {
             background: #b22222 url("https://bfp.gov.ph/wp-content/uploads/2018/08/banner_bg02_18Aug2018.png") no-repeat center;
@@ -150,9 +149,6 @@
         .btn-search:hover {
             background-color: #a71d2a;
         }
-
-        /* 📄 PDF Canvas */
-        <style>
 
         /* 📄 PDF Canvas Styling */
         .pdf-view-container {

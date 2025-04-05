@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Mail\FsicNotification;
 use App\Models\ApplicationStatus;
 use App\Models\Fsic;
+use App\Services\NotificationService;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -19,6 +20,13 @@ use Illuminate\Support\Facades\Crypt;
 
 class FsicObserver
 {
+    protected NotificationService $notifier;
+
+    public function __construct(NotificationService $notifier)
+    {
+        $this->notifier = $notifier;
+    }
+
     public function created(Fsic $fsic): void
     {
         $encryptedFsicNo = Crypt::encryptString($fsic->fsic_no);
@@ -68,19 +76,16 @@ class FsicObserver
             ->usingName('FSIC Certificate')
             ->toMediaCollection('fsic_requirements');
 
-        $application = $fsic->application;
-        $establishment = $application->establishment ?? null;
-        $client = $establishment->client ?? null;
+        ApplicationStatus::create(
+            [
+                'application_id' => $fsic->application->id,
+                'status' => 'Certificate Issued'
+            ]
+        );
 
-        ApplicationStatus::create([
-            'application_id' => $application->id,
-            'status' => 'Certificate Issued',
-        ]);
+        $this->notifier->sendFsicIssuedNotification($fsic, true, true);
 
-        if ($client && $client->email) {
-            Mail::to($client->email)->send(new FsicNotification($fsic, $pdfFilePath));
-        }
-
+        // Clean up temp files
         unlink($qrCodePath);
         unlink($pdfFilePath);
     }

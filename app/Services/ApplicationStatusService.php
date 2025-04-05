@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Application;
 use App\Models\ApplicationStatus;
 use App\Models\Schedule;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class ApplicationStatusService
 {
@@ -29,6 +31,7 @@ class ApplicationStatusService
         ]);
 
         if ($request->hasFile('image_proof')) {
+            Session::put('skip_schedule_notification_again', true);
             Application::findOrFail($application_id)
                 ->addMedia($request->file('image_proof'))
                 ->usingName('Proof of Investigation')
@@ -36,6 +39,7 @@ class ApplicationStatusService
         }
 
         if ($request->filled('schedule_date')) {
+            Session::put('skip_schedule_notification', true);
             $schedule->update(['schedule_date' => $request->schedule_date]);
         }
 
