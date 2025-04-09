@@ -26,9 +26,16 @@ class LoginController extends Controller
 
         // Attempt login
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            $user = Auth::user();
+
+            // Create Sanctum token
+            $token = $user->createToken('api-token')->plainTextToken;
+
             return response()->json([
                 'status' => 'success',
-                'message' => 'Login successful'
+                'message' => 'Login successful',
+                'token' => $token,
+                'user' => $user
             ], 200);
         }
 

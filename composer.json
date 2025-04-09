@@ -13,6 +13,7 @@
         "laravel-notification-channels/webpush": "^9.0",
         "laravel/framework": "^10.0",
         "laravel/sanctum": "^3.2",
+        "laravel/telescope": "^5.7",
         "laravel/tinker": "^2.8",
         "pusher/pusher-php-server": "^7.2",
         "spatie/browsershot": "^5.0",
