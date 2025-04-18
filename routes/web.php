@@ -4,6 +4,7 @@ use App\Http\Controllers\AppController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\ApplicationStatusController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ProfileController;
 use App\Http\Controllers\Auth\RegistrationController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\ClientController;
@@ -220,3 +221,5 @@ Route::get('/load-map-view', function (Request $request) {
 Route::post('/store-subscription', [PushNotificationController::class, 'storeSubscription']);
 
 Route::get('search-FSIC', [AppController::class, 'searchFSIC']);
+
+Route::post('/updateProfile', [ProfileController::class, 'updateProfile'])->name('update.profile');
