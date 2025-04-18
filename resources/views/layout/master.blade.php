@@ -101,6 +101,85 @@
 
     <div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"></div>
 
+    @php
+        $profile = auth()->user()->getProfile();
+    @endphp
+
+    <!-- Profile Modal -->
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <form id="profileForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profileModalLabel">User Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- First Name -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">First Name</label>
+                            <div class="form-control-plaintext view-mode" data-field="first_name">
+                                {{ $profile?->first_name }}</div>
+                            <input type="text" class="form-control edit-mode d-none" name="first_name"
+                                value="{{ $profile?->first_name }}">
+                        </div>
+
+                        <!-- Middle Name -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Middle Name</label>
+                            <div class="form-control-plaintext view-mode" data-field="middle_name">
+                                {{ $profile?->middle_name }}</div>
+                            <input type="text" class="form-control edit-mode d-none" name="middle_name"
+                                value="{{ $profile?->middle_name }}">
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Last Name</label>
+                            <div class="form-control-plaintext view-mode" data-field="last_name">
+                                {{ $profile?->last_name }}</div>
+                            <input type="text" class="form-control edit-mode d-none" name="last_name"
+                                value="{{ $profile?->last_name }}">
+                        </div>
+
+                        <!-- Extension Name -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Extension Name</label>
+                            <div class="form-control-plaintext view-mode" data-field="extension_name">
+                                {{ $profile?->extension_name }}</div>
+                            <input type="text" class="form-control edit-mode d-none" name="extension_name"
+                                value="{{ $profile?->extension_name }}">
+                        </div>
+
+                        <!-- Contact Number -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Contact Number</label>
+                            <div class="form-control-plaintext view-mode" data-field="contact_number">
+                                {{ $profile?->contact_number }}</div>
+                            <input type="text" class="form-control edit-mode d-none" name="contact_number"
+                                value="{{ $profile?->contact_number }}">
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Email</label>
+                            <div class="form-control-plaintext view-mode" data-field="email">{{ $profile?->email }}
+                            </div>
+                            <input type="email" class="form-control edit-mode d-none" name="email"
+                                value="{{ $profile?->email }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" form="profileForm" class="btn btn-success edit-mode d-none">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Library Bundle Script -->
     <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
 
@@ -220,6 +299,14 @@
             toastElement.show();
         }
 
+        function toggleProfileMode(mode) {
+            document.querySelectorAll('.view-mode').forEach(el => el.classList.toggle('d-none', mode === 'edit'));
+            document.querySelectorAll('.edit-mode').forEach(el => el.classList.toggle('d-none', mode === 'view'));
+
+            const modalTitle = document.getElementById('profileModalLabel');
+            modalTitle.textContent = mode === 'edit' ? 'Edit Profile' : 'Profile Info';
+        }
+
         $(document).ready(function() {
             // Setup CSRF Token for AJAX Requests
             $.ajaxSetup({
@@ -284,6 +371,52 @@
                 // Call the function to subscribe the user
                 subscribeUserToPush();
             }
+
+            $('#profileModal').on('hidden.bs.modal', function() {
+                toggleProfileMode('view');
+            });
+
+            $('#profileForm').submit(function(event) {
+                event.preventDefault();
+                let timerInterval = showLoadingDialog('Updating User Account');
+
+                let submitBtn = $('button[type="submit"]');
+                submitBtn.prop('disabled', true).text('Processing...');
+
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+
+                $.ajax({
+                    method: 'POST',
+                    url: '{{ route('update.profile') }}',
+                    data: $(this).serialize(),
+                    dataType: 'JSON',
+                    cache: false,
+                    success: function(response) {
+                        clearInterval(timerInterval);
+                        Swal.close();
+                        showToast('success', 'Profile updated');
+
+                        $('#userFullName').text(response.data.full_name);
+
+                        const fields = ['first_name', 'middle_name', 'last_name',
+                            'extension_name', 'contact_number', 'email'
+                        ];
+
+                        fields.forEach(field => {
+                            let value = response.data[field] ?? '';
+                            $(`[data-field="${field}"]`).text(value);
+                            $(`[name="${field}"]`).val(value);
+                        });
+
+                        $('#profileModal').modal('hide');
+                    },
+                    error: handleAjaxError,
+                    complete: function() {
+                        submitBtn.prop('disabled', false).text('Save');
+                    }
+                });
+            });
         });
     </script>
     @yield('APP-SCRIPT')

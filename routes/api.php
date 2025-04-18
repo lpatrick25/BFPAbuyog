@@ -4,6 +4,8 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\SmsRequest;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\EstablishmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +20,10 @@ use App\Models\SmsRequest;
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/ping', function () {
     return response()->json(['pong' => true], 200);
+});
+
+Route::prefix('clients')->group(function() {
+    Route::get('', [ClientController::class, 'index']);
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -35,4 +41,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         }
         return response()->json(['message' => 'SMS not found'], 404);
     });
+
+    Route::prefix('establishments')->group(function() {
+        Route::get('', [EstablishmentController::class, 'index']);
+        Route::post('', [EstablishmentController::class, 'store']);
+        Route::get('{establishment}', [EstablishmentController::class, 'show']);
+        Route::put('{establishment}', [EstablishmentController::class, 'update']);
+        Route::delete('{establishment}', [EstablishmentController::class, 'destroy']);
+    });
+
 });

@@ -77,4 +77,21 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return 'Administrator';
     }
+
+    public function getProfile(): ?object
+    {
+        if ($this->role === 'Client' && $this->client) {
+            return $this->client;
+        }
+
+        if ($this->role === 'Inspector' && $this->inspector) {
+            return $this->inspector;
+        }
+
+        if ($this->role === 'Marshall' && $this->marshall) {
+            return $this->marshall;
+        }
+
+        return null;
+    }
 }
