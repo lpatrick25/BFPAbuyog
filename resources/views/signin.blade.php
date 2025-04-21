@@ -154,17 +154,19 @@
             });
 
             function handleSuccess(response) {
-                showToast('success', response.message);
+                showToast('success', response.message || 'Login successful');
                 setTimeout(() => window.location.reload(), 1000);
             }
 
             function handleError(xhr) {
-                if (xhr.status === 422) {
-                    showValidationErrors(xhr.responseJSON.errors);
+                const response = xhr.responseJSON;
+
+                if (xhr.status === 422 && response?.errors) {
+                    showValidationErrors(response.errors);
                     showToast('danger', 'Please correct the errors in the form.');
-                } else if (xhr.status === 401) {
-                    showInvalidLoginError();
-                    showToast('danger', 'Invalid email or password.');
+                } else if (xhr.status === 401 && response?.message) {
+                    showInvalidLoginError(response.message);
+                    showToast('danger', response.message);
                 } else {
                     showToast('danger', 'Something went wrong. Please try again.');
                 }
@@ -177,12 +179,12 @@
                 });
             }
 
-            function showInvalidLoginError() {
+            function showInvalidLoginError(message) {
                 let emailField = $('#loginForm [name="email"]');
                 let passwordField = $('#loginForm [name="password"]');
 
-                displayFieldError(emailField, 'Invalid email.');
-                displayFieldError(passwordField, 'Invalid password.');
+                displayFieldError(emailField, message || 'Invalid email.');
+                displayFieldError(passwordField, message || 'Invalid password.');
             }
 
             function displayFieldError(inputField, message) {

@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1"
+                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1" data-fixed-right-number="1" data-fixed-right-number="1"
                             data-i18n-enhance="true" data-mobile-responsive="true" data-multiple-sort="true"
                             data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true" data-sticky-header="true"
                             data-toolbar="" data-pagination="true" data-search="true" data-show-refresh="true"
@@ -55,10 +55,50 @@
             </form>
         </div>
     </div>
+    <div class="modal fade" id="userActionModal" tabindex="-1" aria-labelledby="userActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userActionModalLabel">User Actions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center" id="userActionButtons">
+                    <!-- Buttons inserted dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @section('APP-SCRIPT')
     <script type="text/javascript">
         let userID;
+        var $table1 = $('#table1');
+
+        function openUserActionModal(userId) {
+            const rowData = $table1.bootstrapTable('getData').find(row => row.id === userId);
+            const isActive = rowData.is_active;
+
+            const toggleBtnClass = isActive ? 'btn-warning' : 'btn-success';
+            const toggleIcon = isActive ? 'bi-person-lock' : 'bi-person-check';
+            const toggleText = isActive ? 'Deactivate' : 'Activate';
+
+            const html = `
+                <button class="btn btn-sm btn-primary me-2 mb-2" onclick="editUser(${userId})">
+                    <i class="bi bi-pencil-square me-1"></i> Edit
+                </button>
+                <button class="btn btn-sm ${toggleBtnClass} me-2 mb-2" onclick="toggleUserStatus(${userId})">
+                    <i class="bi ${toggleIcon} me-1"></i> ${toggleText}
+                </button>
+                <button class="btn btn-sm btn-danger mb-2" onclick="deleteClient(${userId})">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            `;
+
+            $('#userActionButtons').html(html);
+            const modal = new bootstrap.Modal(document.getElementById('userActionModal'));
+            modal.show();
+        }
+
 
         // Redirect to the edit page with a session token
         function editUser(userId) {
@@ -72,6 +112,24 @@
             $('.invalid-feedback').remove();
 
             $('#updatePassword').modal('show');
+        }
+
+        function toggleUserStatus(userId) {
+            $.ajax({
+                method: 'PUT',
+                url: `/users/${userId}/toggle-status`,
+                dataType: 'JSON',
+                cache: false,
+                success: function(response) {
+                    $('#table1').bootstrapTable('refresh');
+                    showToast('success', response.message);
+                },
+                error: function(xhr) {
+                    const errorMsg = xhr.responseJSON?.message || xhr.responseJSON?.error ||
+                        'Something went wrong.';
+                    showToast('danger', errorMsg);
+                }
+            });
         }
 
         function deleteClient(userId) {
@@ -158,29 +216,27 @@
                 });
             });
 
-            var $table1 = $('#table1');
-
             $table1.bootstrapTable({
-                url: '/users', // Laravel API endpoint
+                url: '/users',
                 method: 'GET',
                 pagination: true,
-                sidePagination: 'server', // Enable server-side pagination
-                pageSize: 10, // Default records per page
-                pageList: [5, 10, 25, 50, 100], // Page size options
-                search: true, // Enable search
+                sidePagination: 'server',
+                pageSize: 10,
+                pageList: [5, 10, 25, 50, 100],
+                search: true,
                 buttonsAlign: 'left',
                 searchAlign: 'left',
                 toolbarAlign: 'right',
                 queryParams: function(params) {
                     return {
-                        limit: params.limit, // Number of records per page
-                        page: params.offset / params.limit + 1 // Page number
+                        limit: params.limit,
+                        page: params.offset / params.limit + 1
                     };
                 },
                 responseHandler: function(res) {
                     return {
-                        total: res.total, // Set total count
-                        rows: res.rows // Set data rows
+                        total: res.total,
+                        rows: res.rows
                     };
                 },
                 columns: [{
@@ -220,8 +276,20 @@
                         title: 'Role'
                     },
                     {
+                        field: 'is_active',
+                        title: 'Status',
+                        formatter: function(value, row, index) {
+                            if (row.is_active) {
+                                return `<span class="badge bg-success">Active</span>`;
+                            } else {
+                                return `<span class="badge bg-danger">Deactivated</span>`;
+                            }
+                        }
+                    },
+                    {
                         field: 'action',
                         title: 'Actions',
+                        align: 'right',
                         formatter: actionFormatter
                     }
                 ]
@@ -230,11 +298,8 @@
             // Format the "Actions" column with Bootstrap Icons
             function actionFormatter(value, row, index) {
                 return `
-                    <button class="btn btn-sm btn-primary" onclick="editUser('${row.id}')" title="Edit">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger" onclick="deleteClient('${row.id}')" title="Delete">
-                        <i class="bi bi-trash"></i>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="openUserActionModal(${row.id})" title="Actions">
+                        <i class="bi bi-three-dots-vertical"></i>
                     </button>
                 `;
             }
