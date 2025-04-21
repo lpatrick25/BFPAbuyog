@@ -76,7 +76,7 @@ class AdminController extends Controller
                 }
             }
 
-            return view('marshall.mapping', compact('response', 'summary'));
+            return view('admin.mapping', compact('response', 'summary'));
         } catch (\Exception $e) {
             Log::error('Error retrieving Mapping View', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Mapping View not found.'], 500);

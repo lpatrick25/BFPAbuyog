@@ -28,18 +28,29 @@ class LoginController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
 
-            // Create Sanctum token
-            $token = $user->createToken('api-token')->plainTextToken;
+            // Check if the account is active
+            if (!$user->is_active) {
+                // Log out the user just in case
+                Auth::logout();
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Account disabled. Please contact the administrator.'
+                ], 401);
+            }
+
+            // Create a Sanctum token with user agent as the token name
+            $token = $user->createToken($request->userAgent() ?? 'api-token')->plainTextToken;
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Login successful',
+                'message' => 'Login successful.',
                 'token' => $token,
-                'user' => $user
+                'user' => $user->only(['id', 'name', 'email']) // Return only safe fields
             ], 200);
         }
 
-        // If login fails
+        // Invalid login
         return response()->json([
             'status' => 'error',
             'message' => 'Invalid email or password.'

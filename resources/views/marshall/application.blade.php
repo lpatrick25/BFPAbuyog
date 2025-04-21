@@ -30,7 +30,7 @@
                     <div class="card-body">
                         <div id="toolbar">
                         </div>
-                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1"
+                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1" data-fixed-right-number="1"
                             data-i18n-enhance="true" data-mobile-responsive="true" data-multiple-sort="true"
                             data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true" data-sticky-header="true"
                             data-toolbar="#toolbar" data-pagination="true" data-search="true" data-show-refresh="true"

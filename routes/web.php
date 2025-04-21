@@ -223,3 +223,4 @@ Route::post('/store-subscription', [PushNotificationController::class, 'storeSub
 Route::get('search-FSIC', [AppController::class, 'searchFSIC']);
 
 Route::post('/updateProfile', [ProfileController::class, 'updateProfile'])->name('update.profile');
+Route::put('/users/{id}/toggle-status', [ProfileController::class, 'toggleStatus'])->name('users.toggle-status');
