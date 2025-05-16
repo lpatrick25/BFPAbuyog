@@ -11,6 +11,7 @@ use App\Services\ApplicationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ApplicationController extends Controller
@@ -40,11 +41,20 @@ class ApplicationController extends Controller
         return new ApplicationResource($application);
     }
 
-    public function destroy(Application $application): JsonResponse
+    public function destroy(Application $application)
     {
-        $application->delete();
+        try {
+            DB::beginTransaction();
 
-        return response()->json('', 200);
+            $application->delete();
+
+            DB::commit();
+
+            return response()->json('', 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json('Failed to delete', 500);
+        }
     }
 
     public function index(): PaginatedApplicationResource

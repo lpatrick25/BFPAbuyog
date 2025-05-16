@@ -9,6 +9,7 @@ use App\Http\Resources\User\UserResource;
 use App\Models\Client;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
@@ -48,7 +49,17 @@ class ClientController extends Controller
 
     public function destroy(Client $client)
     {
-        $client->delete();
-        return response()->json('', 200);
+        try {
+            DB::beginTransaction();
+
+            $client->delete();
+
+            DB::commit();
+
+            return response()->json('', 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json('Failed to delete', 500);
+        }
     }
 }

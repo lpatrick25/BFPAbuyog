@@ -9,6 +9,7 @@ use App\Http\Resources\Establishment\PaginatedEstablishmentResource;
 use App\Models\Establishment;
 use App\Services\EstablishmentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EstablishmentController extends Controller
 {
@@ -40,8 +41,19 @@ class EstablishmentController extends Controller
 
     public function destroy(Establishment $establishment)
     {
-        $establishment->delete();
-        return response()->json('', 200);
+
+        try {
+            DB::beginTransaction();
+
+            $establishment->delete();
+
+            DB::commit();
+
+            return response()->json('', 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json('Failed to delete', 500);
+        }
     }
 
     public function index(): PaginatedEstablishmentResource

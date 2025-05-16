@@ -14,6 +14,12 @@ class Fsic extends Model implements HasMedia
 
     protected $fillable = ['fsic_no', 'application_id', 'issue_date', 'expiration_date', 'amount', 'or_number', 'payment_date', 'inspector_id', 'marshall_id'];
 
+    protected $casts = [
+        'issue_date' => 'datetime',
+        'expiration_date' => 'datetime',
+        'payment_date' => 'datetime',
+    ];
+
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
@@ -27,6 +33,11 @@ class Fsic extends Model implements HasMedia
     public function marshall(): BelongsTo
     {
         return $this->belongsTo(Marshall::class);
+    }
+
+    public function getIsExpiredAttribute()
+    {
+        return $this->expiration_date->isPast();
     }
 
     public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void

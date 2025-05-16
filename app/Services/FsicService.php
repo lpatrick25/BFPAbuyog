@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Fsic;
 use App\Models\Schedule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class FsicService
 {
@@ -26,20 +27,30 @@ class FsicService
 
     public function store(array $data)
     {
-        $schedule = Schedule::where('application_id', $data['application_id'])->first();
+        try {
+            DB::beginTransaction();
 
-        $data['fsic_no'] = $this->generateUniqueFsicNo();
+            $schedule = Schedule::where('application_id', $data['application_id'])->first();
 
-        $data['issue_date'] = now()->format('Y-m-d');
-        $data['expiration_date'] = now()->addYear()->format('Y-m-d');
-        $data['inspector_id'] = $schedule->inspector_id;
+            $data['fsic_no'] = $this->generateUniqueFsicNo();
 
-        $user = Auth::user();
-        $data['marshall_id'] = $user->marshall->id;
+            $data['issue_date'] = now()->format('Y-m-d');
+            $data['expiration_date'] = now()->addYear()->format('Y-m-d');
+            $data['inspector_id'] = $schedule->inspector_id;
 
-        $fsic = Fsic::create($data);
+            $user = Auth::user();
+            $data['marshall_id'] = $user->marshall->id;
 
-        return $fsic;
+            $fsic = Fsic::create($data);
+
+            DB::commit();
+
+            return $fsic;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return null;
+        }
     }
 
     private function generateUniqueFsicNo(): string

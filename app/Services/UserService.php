@@ -4,46 +4,63 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UserService
 {
-    public function store(array $data, string $role): Model
+    public function store(array $data, string $role)
     {
-        $user = User::create([
-            'password' => Hash::make($data['password']),
-            'email' => $data['email'],
-            'email_verified_at' => now(),
-            'role' => $role,
-            'is_active' => true,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        $data['user_id'] = $user->id;
+            $user = User::create([
+                'password' => Hash::make($data['password']),
+                'email' => $data['email'],
+                'email_verified_at' => now(),
+                'role' => $role,
+                'is_active' => true,
+            ]);
 
-        $modelClass = $this->getModelClass($role);
-        $model = $modelClass::create($data);
+            $data['user_id'] = $user->id;
 
-        return $model;
+            $modelClass = $this->getModelClass($role);
+            $model = $modelClass::create($data);
+
+            DB::commit();
+
+            return $model;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return null;
+        }
     }
 
     public function update(array $data, string $role, int $id)
     {
-        $modelClass = $this->getModelClass($role);
-        $model = $modelClass::findOrFail($id);
+        try {
+            $modelClass = $this->getModelClass($role);
+            $model = $modelClass::findOrFail($id);
 
-        $user = User::findOrFail($model->user_id);
-        if (isset($data['email']) && $data['email'] !== $user->email) {
-            $user->update(['email' => $data['email']]);
+            $user = User::findOrFail($model->user_id);
+            if (isset($data['email']) && $data['email'] !== $user->email) {
+                $user->update(['email' => $data['email']]);
+            }
+
+            if (!empty($data['password'])) {
+                $user->update(['password' => Hash::make($data['password'])]);
+            }
+
+            $model->update($data);
+
+            DB::commit();
+
+            return $model;
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return null;
         }
-
-        if (!empty($data['password'])) {
-            $user->update(['password' => Hash::make($data['password'])]);
-        }
-
-        $model->update($data);
-
-        return $model;
     }
 
 

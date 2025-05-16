@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Establishment;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -150,6 +151,89 @@ class MarshallController extends Controller
         } catch (\Exception $e) {
             Log::error('Error retrieving FSIC View', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'FSIC View not found.'], 500);
+        }
+    }
+
+    public function reports()
+    {
+        try {
+            return view('marshall.reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsEstablishments()
+    {
+        try {
+            return view('reports.establishment-reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsApplications()
+    {
+        try {
+            return view('reports.application-reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsSchedules()
+    {
+        try {
+            return view('reports.schedule-reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsFsics()
+    {
+        try {
+            return view('reports.fsic-reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsCompliance()
+    {
+        try {
+            return view('reports.compliance-reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsStatistical()
+    {
+        try {
+            $occupancyDistribution = Establishment::groupBy('type_of_occupancy')
+                ->select('type_of_occupancy', DB::raw('count(*) as count'))
+                ->get();
+            return view('reports.statistical-reports', compact('occupancyDistribution'));
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
+        }
+    }
+
+    public function reportsAudit()
+    {
+        try {
+            return view('reports.audit-reports');
+        } catch (\Exception $e) {
+            Log::error('Error retrieving Reports View', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Reports View not found.'], 500);
         }
     }
 

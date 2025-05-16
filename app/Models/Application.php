@@ -25,6 +25,10 @@ class Application extends Model implements HasMedia
 
     protected $fillable = ['application_number', 'establishment_id', 'fsic_type', 'application_date'];
 
+    public $casts = [
+        'application_date' => 'datetime'
+    ];
+
     public function establishment(): BelongsTo
     {
         return $this->belongsTo(Establishment::class);

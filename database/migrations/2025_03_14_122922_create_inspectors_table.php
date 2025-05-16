@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('middle_name', 15)->nullable();
             $table->string('last_name', 20);
             $table->string('extension_name', 5)->nullable();
-            $table->string('contact_number', 15)->unique();
+            $table->string('contact_number', 20)->unique();
             $table->string('email', 30)->unique();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->softDeletes();
