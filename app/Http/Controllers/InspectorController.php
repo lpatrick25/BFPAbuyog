@@ -9,6 +9,7 @@ use App\Http\Resources\User\UserResource;
 use App\Models\Inspector;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class InspectorController extends Controller
 {
@@ -48,7 +49,17 @@ class InspectorController extends Controller
 
     public function destroy(Inspector $inspector)
     {
-        $inspector->delete();
-        return response()->json('', 200);
+        try {
+            DB::beginTransaction();
+
+            $inspector->delete();
+
+            DB::commit();
+
+            return response()->json('', 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json('Failed to delete', 500);
+        }
     }
 }

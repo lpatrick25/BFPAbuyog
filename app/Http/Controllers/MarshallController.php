@@ -9,6 +9,7 @@ use App\Http\Resources\User\UserResource;
 use App\Models\Marshall;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MarshallController extends Controller
 {
@@ -48,7 +49,17 @@ class MarshallController extends Controller
 
     public function destroy(Marshall $marshall)
     {
-        $marshall->delete();
-        return response()->json('', 200);
+        try {
+            DB::beginTransaction();
+
+            $marshall->delete();
+
+            DB::commit();
+
+            return response()->json('', 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json('Failed to delete', 500);
+        }
     }
 }

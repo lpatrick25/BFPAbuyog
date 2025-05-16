@@ -3,34 +3,48 @@
 namespace App\Services;
 
 use App\Models\Application;
-use App\Models\Establishment;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ApplicationService
 {
     public function store(array $data)
     {
-        $applicationNumber = $this->generateUniqueApplicationNumber();
+        try {
+            DB::beginTransaction();
+            $applicationNumber = $this->generateUniqueApplicationNumber();
 
-        $data['application_number'] = $applicationNumber;
-        $data['application_date'] = now();
-        $application = Application::create($data);
+            $data['application_number'] = $applicationNumber;
+            $data['application_date'] = now();
+            $application = Application::create($data);
 
-        $this->handleFsicRequirements($application);
+            $this->handleFsicRequirements($application);
 
-        return $application;
+            DB::commit();
+
+            return $application;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return null;
+        }
     }
 
     public function update(array $array, $id)
     {
-        $application = Application::find($id);
-        $application->clearMediaCollection('fsic_requirements');
-        $this->handleFsicRequirements($application);
+        try {
+            DB::beginTransaction();
 
-        return $application;
+            $application = Application::find($id);
+            $application->clearMediaCollection('fsic_requirements');
+            $this->handleFsicRequirements($application);
+
+            DB::commit();
+
+            return $application;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return null;
+        }
     }
 
     private function handleFsicRequirements(Application $application)
@@ -52,19 +66,17 @@ class ApplicationService
 
     public function getAllApplications()
     {
-        if (auth()->user()->role === 'Marshall') {
+        $user = auth()->user();
+        $clientId = optional($user->client)->id;
+
+        if (!$clientId) {
             return Application::with(['establishment', 'applicationStatuses']);
-        } else {
-            $client_id = optional(auth()->user())->client->id;
-            $establishment = Establishment::where('client_id', $client_id)->first();
-
-            if (!$establishment) {
-                return Application::whereNull('id');
-            }
-
-            return Application::with(['establishment', 'applicationStatuses'])
-                ->where('establishment_id', $establishment->id);
         }
+
+        return Application::with(['establishment', 'applicationStatuses'])
+            ->whereHas('establishment', function ($query) use ($clientId) {
+                $query->where('client_id', $clientId);
+            });
     }
 
     private function generateUniqueApplicationNumber()

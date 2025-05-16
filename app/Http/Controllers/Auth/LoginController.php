@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class LoginController extends Controller
 {
@@ -28,29 +29,21 @@ class LoginController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
 
-            // Check if the account is active
-            if (!$user->is_active) {
-                // Log out the user just in case
-                Auth::logout();
-
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Account disabled. Please contact the administrator.'
-                ], 401);
-            }
-
-            // Create a Sanctum token with user agent as the token name
-            $token = $user->createToken($request->userAgent() ?? 'api-token')->plainTextToken;
+            // Create Sanctum token with expiration (e.g., 24 hours)
+            $expiresAt = Carbon::now()->addDays(7);
+            $tokenResult = $user->createToken('api-token', ['*'], $expiresAt);
+            $token = $tokenResult->plainTextToken;
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Login successful.',
+                'message' => 'Login successful',
                 'token' => $token,
-                'user' => $user->only(['id', 'name', 'email']) // Return only safe fields
+                'expires_at' => $expiresAt->toISOString(), // ISO 8601 format
+                'user' => $user
             ], 200);
         }
 
-        // Invalid login
+        // If login fails
         return response()->json([
             'status' => 'error',
             'message' => 'Invalid email or password.'

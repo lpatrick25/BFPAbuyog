@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ApplicationStatusRequest;
 use App\Services\ApplicationStatusService;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationStatusController extends Controller
 {

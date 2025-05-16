@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Establishment;
+use Illuminate\Support\Facades\DB;
 
 class EstablishmentService
 {
@@ -19,17 +20,32 @@ class EstablishmentService
 
     public function store(array $data)
     {
-        $data['client_id'] = optional(auth()->user())->client->id;
-        $establishment = Establishment::create($data);
+        try {
+            DB::beginTransaction();
+            $data['client_id'] = optional(auth()->user())->client->id;
+            $establishment = Establishment::create($data);
 
-        return $establishment;
+            DB::commit();
+            return $establishment;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return null;
+        }
     }
 
     public function update(array $data, $id)
     {
-        $establishment = Establishment::find($id);
-        $establishment->update($data);
+        try {
+            DB::beginTransaction();
 
-        return $establishment;
+            $establishment = Establishment::find($id);
+            $establishment->update($data);
+            DB::commit();
+
+            return $establishment;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return null;
+        }
     }
 }

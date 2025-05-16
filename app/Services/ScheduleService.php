@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Schedule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ScheduleService
 {
@@ -37,16 +39,44 @@ class ScheduleService
 
     public function store(array $data)
     {
-        $schedule = Schedule::create($data);
+        try {
+            DB::beginTransaction();
 
-        return $schedule;
+            $schedule = Schedule::create($data);
+
+            Log::info("Schedule created successfully", ['schedule_id' => $schedule->id]);
+            DB::commit();
+
+            return $schedule;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to create schedule", ['error' => $e->getMessage()]);
+            return null;
+        }
     }
 
     public function update(array $data, $application_id)
     {
-        $schedule = Schedule::where('application_id', $application_id)->first();
-        $schedule->update($data);
+        try {
+            DB::beginTransaction();
 
-        return $schedule;
+            $schedule = Schedule::where('application_id', $application_id)->first();
+
+            if (!$schedule) {
+                Log::warning("No schedule found for application ID: {$application_id}");
+                return null;
+            }
+
+            $schedule->update($data);
+
+            Log::info("Schedule updated successfully", ['schedule_id' => $schedule->id]);
+            DB::commit();
+
+            return $schedule;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to update schedule", ['error' => $e->getMessage()]);
+            return null;
+        }
     }
 }

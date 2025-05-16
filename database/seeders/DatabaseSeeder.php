@@ -23,5 +23,6 @@ class DatabaseSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        $this->call(SampleDataSeeder::class);
     }
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\navigation\ClientController as NavigationClientControll
 use App\Http\Controllers\navigation\InspectorController as NavigationInspectorController;
 use App\Http\Controllers\navigation\MarshallController as NavigationMarshallController;
 use App\Http\Controllers\PushNotificationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
@@ -167,9 +168,30 @@ Route::prefix('marshall')->middleware('auth')->controller(NavigationMarshallCont
     Route::get('scheduleList', 'schedule')->name('schedule.list');
     Route::get('fsicList', 'fsic')->name('fsic.list');
 
+    Route::prefix('reportList')->group(function () {
+        Route::get('', 'reports')->name('reports.list');
+        Route::get('establishments', 'reportsEstablishments')->name('establishments.reports');
+        Route::get('applications', 'reportsApplications')->name('applications.reports');
+        Route::get('schedules', 'reportsSchedules')->name('schedules.reports');
+        Route::get('fsics', 'reportsFsics')->name('fsics.reports');
+        Route::get('compliance', 'reportsCompliance')->name('compliance.reports');
+        Route::get('statistical', 'reportsStatistical')->name('statistical.reports');
+        Route::get('audit', 'reportsAudit')->name('audit.reports');
+    });
+
     Route::get('getApplication/{application}', 'getApplication')->name('getApplication.list');
 
     Route::post('{sessionID}/generate-session', 'generateSessionToken')->name('marshallToken.session');
+
+    Route::prefix('reports')->controller(ReportController::class)->group(function () {
+        Route::get('establishments', 'establishmentReports')->name('reports.establishments');
+        Route::get('applications', 'applicationReports')->name('reports.applications');
+        Route::get('schedules', 'scheduleReports')->name('reports.schedules');
+        Route::get('fsics', 'fsicReports')->name('reports.fsics');
+        Route::get('compliance', 'complianceReports')->name('reports.compliance');
+        Route::get('statistical', 'statisticalReports')->name('reports.statistical');
+        Route::get('audit', 'auditReports')->name('reports.audit');
+    });
 });
 
 // =============================

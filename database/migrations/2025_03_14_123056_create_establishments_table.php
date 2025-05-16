@@ -34,7 +34,7 @@ return new class extends Migration
             $table->string('location_longitude', 15);
             $table->string('email', 255);
             $table->string('landline', 20)->nullable();
-            $table->string('contact_number', 15);
+            $table->string('contact_number', 20);
             $table->timestamps();
         });
     }

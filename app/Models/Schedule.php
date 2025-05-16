@@ -12,6 +12,10 @@ class Schedule extends Model
 
     protected $fillable = ['application_id', 'inspector_id', 'schedule_date', 'status'];
 
+    protected $casts = [
+        'schedule_date' => 'datetime',
+    ];
+
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
