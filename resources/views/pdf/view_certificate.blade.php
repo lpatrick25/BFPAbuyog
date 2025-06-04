@@ -104,7 +104,7 @@
             <table style="width: 100%; margin-bottom: 20px;">
                 <tr>
                     <td style="width: 20%; text-align: center;">
-                        <img src="{{ $fsic->dilgLogo }}" alt="DILG Logo" style="height: 120px; width: 120px;">
+                        <img src="{{ asset('img/dilg.webp') }}" alt="DILG Logo" style="height: 120px; width: 120px;">
                     </td>
                     <td style="width: 60%; text-align: center;">
                         <p>Republic of the Philippines</p>
@@ -116,7 +116,7 @@
                         <p style="margin-top: -5px;">Brgy. Loyonsawang, Abuyog, Leyte</p>
                     </td>
                     <td style="width: 20%; text-align: center;">
-                        <img src="{{ $fsic->bfpLogo }}" alt="BFP Logo" style="height: 120px; width: 120px;">
+                        <img src="{{ asset('img/bfp.webp') }}" alt="BFP Logo" style="height: 120px; width: 120px;">
                     </td>
                 </tr>
             </table>

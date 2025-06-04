@@ -7,25 +7,28 @@
 @endsection
 @section('APP-CSS')
     <style type="text/css">
-
         /* 📄 PDF Canvas Styling */
+
         .pdf-view-container {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #fafafa;
-            max-width: 100%;
+            background: white;
+            border: 1px solid rgba(178, 34, 34, 0.2);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            min-height: 400px;
+            overflow: auto;
+            box-shadow: var(--shadow);
+            transition: opacity 0.5s ease;
         }
 
-        /* Responsive image styling */
-        .pdf-view-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
+        .pdf-view-container.show {
+            opacity: 1;
+        }
+
+        #certificate-content {
+            font-size: 1rem;
+            line-height: 1.6;
         }
     </style>
 @endsection
@@ -42,11 +45,11 @@
                     <div class="card-body">
                         <div id="toolbar">
                         </div>
-                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1" data-fixed-right-number="1"
-                            data-i18n-enhance="true" data-mobile-responsive="true" data-multiple-sort="true"
-                            data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true" data-sticky-header="true"
-                            data-toolbar="#toolbar" data-pagination="true" data-search="true" data-show-refresh="true"
-                            data-show-copy-rows="true" data-show-columns="true" data-url="">
+                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1"
+                            data-fixed-right-number="1" data-i18n-enhance="true" data-mobile-responsive="true"
+                            data-multiple-sort="true" data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true"
+                            data-sticky-header="true" data-toolbar="#toolbar" data-pagination="true" data-search="true"
+                            data-show-refresh="true" data-show-copy-rows="true" data-show-columns="true" data-url="">
                         </table>
                     </div>
                     <div class="card-footer text-end">
@@ -64,10 +67,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Normal PDF View for Desktop -->
+                    <!-- HTML View Container -->
                     <div id="pdf-view" class="pdf-view-container">
-                                            <!-- Image will be displayed here -->
-                                        </div>
+                        <div id="certificate-content"></div>
+                    </div>
                 </div>
                 <div class="modal-footer text-end">
                 </div>
@@ -76,7 +79,7 @@
     </div>
 @endsection
 @section('APP-SCRIPT')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.4.0/purify.min.js"></script>
     <script type="text/javascript">
         function viewFSIC(fsicNo) {
             let timerInterval = showLoadingDialog('Retrieving FSIC');
@@ -85,35 +88,28 @@
                 method: 'GET',
                 url: `/search-FSIC`,
                 data: {
-                  fsic_no: fsicNo
+                    fsic_no: fsicNo
                 },
                 dataType: 'JSON',
                 cache: false,
                 success: function(response) {
                     console.log(response);
 
-                        if (response.message) {
-                            showToast('danger', response.message);
-                            return;
-                        }
+                    if (response.message) {
+                        showToast('danger', response.message);
+                        return;
+                    }
 
-                        if (!response.file_url) {
-                            viewFSIC(fsicNo);
-                            return;
-                        }
+                    if (!response.html || !response.file_url) {
+                        showToast('danger', 'Invalid response from server.');
+                        return;
+                    }
 
-                        // Fix the malformed URL by replacing \/\/ with /
-                        let fileUrl = response.file_url.replace(/\\\/\//g,
-                            '/'); // Remove escaped slashes and fix the URL
+                    // Sanitize and render HTML content
+                    $('#certificate-content').html(DOMPurify.sanitize(response.html));
 
-                        $('#pdf-view').show();
-
-                        // Check if the response file is a valid image URL
-                        var img = '<img src="' + fileUrl + '" alt="FSIC Certificate Image">';
-                        $('#pdf-view').html(img);
-
-                        clearInterval(timerInterval);
-                        Swal.close();
+                    clearInterval(timerInterval);
+                    Swal.close();
                     showToast('success', 'Success');
 
                     $('#fsic').modal('show');

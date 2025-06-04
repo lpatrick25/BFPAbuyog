@@ -25,285 +25,268 @@
     <!-- Customizer Css -->
     <link rel="stylesheet" href="{{ asset('assets/css/customizer.min.css') }}" />
 
-    <!-- leaflet CSS  -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="{{ asset('css/leaflet/leaflet.css') }}">
     <link rel="stylesheet" href="{{ asset('css/leaflet/Control.Geocoder.css') }}">
 
-    <style>
-        .carousel-item img {
-            height: 400px;
-            object-fit: cover;
-        }
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="{{ asset('css/sweetalert2.css') }}">
 
-        .img-fluid {
-            max-width: 100%;
-            height: auto;
-            width: 100%;
+    <style>
+        /* General Reset for Consistency */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
         }
 
         /* Elegant Header Styling */
         .bfp-header {
-            background: #b22222 url("https://bfp.gov.ph/wp-content/uploads/2018/08/banner_bg02_18Aug2018.png") no-repeat center;
+            background: linear-gradient(rgba(178, 34, 34, 0.95), rgba(178, 34, 34, 0.85)),
+                url("https://bfp.gov.ph/wp-content/uploads/2018/08/banner_bg02_18Aug2018.png") no-repeat center;
             background-size: cover;
-            height: auto;
             color: white;
-            padding: 10px 0;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         /* Logo Styling */
         .bfp-logo img {
-            max-height: 100px;
-            /* Ensures a fixed size */
+            max-height: 80px;
             height: auto;
-            max-width: 100%;
-            /* Ensures responsiveness */
+            transition: transform 0.3s ease;
         }
 
-        /* Mobile Centering */
-        .logo-container {
+        .bfp-logo img:hover {
+            /* transform: scale(1.05); */
+        }
+
+        /* Logo and Time Container */
+        .logo-container,
+        .time-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
         }
 
-        /* Time Container */
         .time-container {
             text-align: right;
-            font-size: 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
-        .time-container div {
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        /* Styling for text to look professional */
-        .time-container .time-label {
-            font-size: 14px;
-            font-weight: 600;
+        .time-container .time-label,
+        .time-container .time-value {
             color: #fff;
             opacity: 0.9;
         }
 
-        .time-container .time-value {
-            font-size: 14px;
-            font-weight: bold;
+        /* Navbar Styling */
+        .navbar {
+            background-color: #fff;
+            /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+            padding: 10px 0;
         }
 
-        /* 🔥 Background Section */
+        .navbar-brand h4 {
+            color: #b22222;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .nav-link {
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #b22222;
+        }
+
+        /* Hero Section */
         .bfp-section {
             position: relative;
             background: url('https://bfp.gov.ph/wp-content/uploads/2022/03/bfp-firefighters.jpg') no-repeat center center;
             background-size: cover;
-            height: auto;
-            padding: 60px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            padding: 80px 0;
             color: white;
+            text-align: center;
         }
 
-        /* 🔥 Overlay */
         .bfp-overlay {
+            background: rgba(0, 0, 0, 0.6);
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            /* Dark overlay for readability */
         }
 
-        /* ✨ Vision & Mission Image */
+        /* Vision & Mission Image */
         .vision-mission img {
-            max-width: 1000px;
+            max-width: 900px;
             width: 100%;
             height: auto;
-            display: block;
-            margin: 0 auto;
-            z-index: 2;
-            position: relative;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
         }
 
-        /* 🔍 Floating Input Group */
-        .floating-label {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 500px;
-            margin: auto;
+        .vision-mission img:hover {
+            transform: scale(1.02);
         }
 
+        /* Floating Label Styling */
         .floating-label .form-control {
-            padding: 14px;
             border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
             border: 1px solid #ced4da;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .floating-label .form-control:focus {
-            border-color: #dc3545;
-            box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+            border-color: #b22222;
+            box-shadow: 0 0 8px rgba(178, 34, 34, 0.3);
         }
 
-        .floating-label label {
+        .floating-label .form-label {
             position: absolute;
-            left: 14px;
             top: 50%;
+            left: 12px;
             transform: translateY(-50%);
-            background: white;
+            background: #fff;
             padding: 0 5px;
-            font-size: 16px;
+            font-size: 0.9rem;
             color: #6c757d;
             transition: all 0.3s ease;
             pointer-events: none;
         }
 
-        /* 🎭 Floating Effect */
-        .floating-label .form-control:focus~label,
-        .floating-label .form-control:not(:placeholder-shown)~label {
+        .floating-label .form-control:focus~.form-label,
+        .floating-label .form-control:not(:placeholder-shown)~.form-label {
             top: 0;
-            font-size: 12px;
-            color: #dc3545;
+            font-size: 0.75rem;
+            color: #b22222;
         }
 
-        /* 🔘 Elegant Button */
+        /* Search Button */
         .btn-search {
-            background-color: #dc3545;
+            background-color: #b22222;
             color: white;
             border-radius: 8px;
-            padding: 14px 20px;
-            font-size: 16px;
-            transition: 0.3s;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 500;
             border: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .btn-search:hover {
-            background-color: #a71d2a;
+            background-color: #8b1a1a;
+            transform: translateY(-2px);
         }
 
-        /* 📄 PDF Canvas Styling */
+        /* PDF View Container */
         .pdf-view-container {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #e0e0e0;
+            padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #fafafa;
-            max-width: 100%;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: opacity 0.3s ease;
         }
 
-        /* Responsive image styling */
-        .pdf-view-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-
-        /* Floating Search Input */
-        .floating-label {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .floating-label input {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-        }
-
-        .floating-label input:focus {
-            border-color: #0056b3;
-        }
-
-        .floating-label label {
-            position: absolute;
-            left: 12px;
-            top: 12px;
-            font-size: 14px;
-            color: #999;
-            transition: 0.2s ease;
-        }
-
-        .floating-label input:focus~label,
-        .floating-label input:not(:placeholder-shown)~label {
-            top: -8px;
-            font-size: 12px;
-            color: #0056b3;
-        }
-
-        /* Button Styling */
-        .btn-search {
-            background-color: #0056b3;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin-top: 10px;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .btn-search:hover {
-            background-color: #00408f;
-        }
-
-        /* Loading Spinner */
-        .spinner-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        /* Toast Notification Style */
+        /* Toast Styling */
         .toast {
-            background-color: #f8d7da;
-            color: #721c24;
-            border-radius: 4px;
-            padding: 10px 20px;
-            margin-top: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        /* 📱 Mobile Adjustments */
-        @media (max-width: 576px) {
-            .floating-label {
-                flex-direction: column;
-            }
-
-            .floating-label .btn-search {
-                width: 100%;
-                margin-top: 10px;
-            }
+        .toast.bg-success {
+            background-color: #28a745 !important;
         }
 
-        /* Mobile Responsiveness */
+        .toast.bg-danger {
+            background-color: #b22222 !important;
+        }
+
+        /* Card Styling */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .primary-gradient-card {
+            background: linear-gradient(135deg, #b22222 0%, #dc3545 100%);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .credit-card-widget .primary-gradient-card {
+            background: linear-gradient(135deg, #b22222 0%, #dc3545 100%);
+        }
+
+        /* Footer Styling */
+        .footer {
+            background-color: #fff;
+            padding: 20px 0;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .footer .right-panel {
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
             .bfp-header {
+                padding: 15px 0;
                 text-align: center;
-                height: auto;
             }
 
             .bfp-section {
-                padding: 40px 10px;
+                padding: 50px 15px;
             }
 
-            .logo-container {
+            .logo-container,
+            .time-container {
                 justify-content: center;
-                /* Centers logo on small screens */
                 margin-bottom: 10px;
             }
 
             .time-container {
                 text-align: center;
-                margin-top: 5px;
+            }
+
+            .navbar-brand h4 {
+                font-size: 1.2rem;
+            }
+
+            .bfp-logo img {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .floating-label {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn-search {
+                width: 100%;
+            }
+
+            .vision-mission img {
+                max-width: 100%;
             }
         }
     </style>
@@ -311,16 +294,16 @@
 
 <body class="theme-color-red light boxed-fancy">
     <div class="boxed-inner">
-        <!-- loader Start -->
+        <!-- Loader Start -->
         <div id="loading">
             <div class="loader simple-loader">
                 <div class="loader-body"></div>
             </div>
         </div>
-        <!-- loader END -->
+        <!-- Loader END -->
         <span class="screen-darken"></span>
         <main class="main-content">
-            <!--Nav Start-->
+            <!-- Nav Start -->
             <nav class="nav navbar navbar-expand-lg navbar-light iq-navbar">
                 <div class="container-fluid navbar-inner">
                     <button data-trigger="navbar_main" class="d-lg-none btn btn-primary rounded-pill p-1 pt-0"
@@ -330,56 +313,19 @@
                                 d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"></path>
                         </svg>
                     </button>
-                    <a href="/" class="navbar-brand">
-                        <!--Logo start-->
+                    <a href="/" class="navbar-brand d-flex align-items-center">
                         <img src="{{ asset('img/bfp.webp') }}" alt="BFP Abuyog" class="text-primary icon-50"
                             width="50">
-                        <!--logo End-->
-                        <h4 class="logo-title">BFP - Abuyog e-FSIC</h4>
+                        <h4 class="logo-title ms-2">BFP - Abuyog e-FSIC</h4>
                     </a>
                     <!-- Horizontal Menu Start -->
                     <nav id="navbar_main"
                         class="mobile-offcanvas nav navbar navbar-expand-xl hover-nav horizontal-nav mx-md-auto">
                         <div class="container-fluid">
                             <div class="offcanvas-header px-0">
-                                <div class="navbar-brand ms-3">
-                                    <!--Logo start-->
-                                    <div class="logo-main">
-                                        <div class="logo-normal">
-                                            <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <rect x="-0.757324" y="19.2427" width="28" height="4"
-                                                    rx="2" transform="rotate(-45 -0.757324 19.2427)"
-                                                    fill="currentColor" />
-                                                <rect x="7.72803" y="27.728" width="28" height="4"
-                                                    rx="2" transform="rotate(-45 7.72803 27.728)"
-                                                    fill="currentColor" />
-                                                <rect x="10.5366" y="16.3945" width="16" height="4"
-                                                    rx="2" transform="rotate(45 10.5366 16.3945)"
-                                                    fill="currentColor" />
-                                                <rect x="10.5562" y="-0.556152" width="28" height="4"
-                                                    rx="2" transform="rotate(45 10.5562 -0.556152)"
-                                                    fill="currentColor" />
-                                            </svg>
-                                        </div>
-                                        <div class="logo-mini">
-                                            <svg class="text-primary icon-30" viewBox="0 0 30 30" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <rect x="-0.757324" y="19.2427" width="28" height="4"
-                                                    rx="2" transform="rotate(-45 -0.757324 19.2427)"
-                                                    fill="currentColor" />
-                                                <rect x="7.72803" y="27.728" width="28" height="4"
-                                                    rx="2" transform="rotate(-45 7.72803 27.728)"
-                                                    fill="currentColor" />
-                                                <rect x="10.5366" y="16.3945" width="16" height="4"
-                                                    rx="2" transform="rotate(45 10.5366 16.3945)"
-                                                    fill="currentColor" />
-                                                <rect x="10.5562" y="-0.556152" width="28" height="4"
-                                                    rx="2" transform="rotate(45 10.5562 -0.556152)"
-                                                    fill="currentColor" />
-                                            </svg>
-                                        </div>
-                                    </div>
+                                <div class="navbar-brand ms- vx3">
+                                    <img src="{{ asset('img/bfp.webp') }}" alt="BFP Abuyog"
+                                        class="text-primary icon-50" width="50">
                                     <h4 class="logo-title">BFP - Abuyog e-FSIC</h4>
                                 </div>
                                 <button class="btn-close float-end"></button>
@@ -398,43 +344,26 @@
                                     role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <img src="{{ asset('assets/images/avatars/01.png') }}" alt="User-Profile"
                                         class="theme-color-default-img img-fluid avatar avatar-50 avatar-rounded"
-                                        style="width: 30px">
-                                    <img src="{{ asset('assets/images/avatars/avtar_1.png') }}" alt="User-Profile"
-                                        class="theme-color-purple-img img-fluid avatar avatar-50 avatar-rounded"
-                                        style="width: 30px">
-                                    <img src="{{ asset('assets/images/avatars/avtar_2.png') }}" alt="User-Profile"
-                                        class="theme-color-blue-img img-fluid avatar avatar-50 avatar-rounded"
-                                        style="width: 30px">
-                                    <img src="{{ asset('assets/images/avatars/avtar_4.png') }}" alt="User-Profile"
-                                        class="theme-color-green-img img-fluid avatar avatar-50 avatar-rounded"
-                                        style="width: 30px">
-                                    <img src="{{ asset('assets/images/avatars/avtar_5.png') }}" alt="User-Profile"
-                                        class="theme-color-yellow-img img-fluid avatar avatar-50 avatar-rounded"
-                                        style="width: 30px">
-                                    <img src="{{ asset('assets/images/avatars/avtar_3.png') }}" alt="User-Profile"
-                                        class="theme-color-pink-img img-fluid avatar avatar-50 avatar-rounded"
-                                        style="width: 30px">
-                                    <div class="caption ms-3 d-none d-md-block ">
-                                        <h6 class="mb-0 caption-title">{{ optional(auth()->user())->getFullName() }}
-                                        </h6>
-                                        <p class="mb-0 caption-sub-title">{{ auth()->user()->role }}</p>
+                                        style="width: 40px">
+                                    <div class="caption ms-3 d-none d-md-block">
+                                        <h6 class="mb-0 caption-title">{{ optional(auth()->user())->getFullName() }}</h6>
+                                        <p class="mb-0 caption-sub-title text-muted">{{ auth()->user()->role }}</p>
                                     </div>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="#">Profile</a></li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
-                                    <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a>
-                                    </li>
+                                    <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a></li>
                                 </ul>
                             </li>
                         @else
-                            <!-- Login Button -->
                             <li class="nav-item">
                                 <a href="{{ route('signin') }}"
-                                    class="nav-link btn btn-primary px-3 py-2 text-white fw-semibold rounded-pill shadow-sm">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                                    class="nav-link btn btn-primary px-4 py-2 text-white fw-semibold rounded-pill shadow-sm"
+                                    style="background-color: #b22222;">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> Login
                                 </a>
                             </li>
                         @endauth
@@ -445,117 +374,127 @@
             <header class="bfp-header">
                 <div class="container">
                     <div class="row align-items-center">
-                        <!-- Logo Section -->
                         <div class="col-md-9 col-12 logo-container">
                             <a href="https://bfp.gov.ph/" title="BFP : Bureau of Fire Protection" rel="home"
                                 class="bfp-logo">
-                                <img src="https://bfp.gov.ph/wp-content/uploads/2024/05/banner2024-v4.png"
-                                    alt="BFP Logo">
+                                <img src="{{ asset('img/banner2024-v4.png') }}" alt="BFP Logo">
                             </a>
                         </div>
-
-                        <!-- Philippine Standard Time -->
-                        <div class="col-md-3 col-12 text-md-end text-center">
-                            <div class="time-container">
-                                <div class="time-label">Philippine Standard Time:</div>
-                                <div id="pst-time" class="time-value"><a href="#"
-                                        style="text-decoration: none; color: inherit;">Loading...</a></div>
-                            </div>
+                        <div class="col-md-3 col-12 time-container">
+                            <div class="time-label">Philippine Standard Time:</div>
+                            <div id="pst-time" class="time-value"><a href="#"
+                                    style="text-decoration: none; color: inherit;">Loading...</a></div>
                         </div>
                     </div>
                 </div>
             </header>
-            <div class="conatiner-fluid content-inner pb-0">
+            <div class="container-fluid content-inner pb-5">
                 <div class="row d-flex min-vh-100">
                     <div class="col-md-12 col-lg-8 d-flex flex-column">
                         @yield('APP-CONTENT')
                     </div>
                     <div class="col-md-12 col-lg-4 d-flex flex-column">
-                        <div class="row">
-                            <div class="col-md-12 col-lg-12">
-                                <div class="card credit-card-widget" style="margin-bottom: 10px;">
-                                    <div class="card-header pb-4 border-0">
-                                        <div class="p-4 primary-gradient-card rounded border border-white">
+                        <div class="row g-3">
+                            {{-- <div class="col-12">
+                                <div class="card primary-gradient-card">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="font-weight-bold text-white">ABUYOG</h5>
+                                                <p class="mb-0 text-white">Fire Station North Leyte</p>
+                                            </div>
+                                            <div class="master-card-content">
+                                                <img src="{{ asset('img/bfp.webp') }}" alt="BFP Abuyog"
+                                                    class="icon-60" width="60">
+                                                <img src="{{ asset('img/dilg.webp') }}" alt="DILG Abuyog"
+                                                    class="icon-60" width="60">
+                                            </div>
+                                        </div>
+                                        <div class="my-3">
+                                            <div class="card-number d-flex align-items-center">
+                                                <i class="bi bi-telephone-fill fs-5 me-2 text-white"></i>
+                                                <span class="fs-5 text-white">0916 908 5788</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-2">
+                                            <p class="mb-0 text-white fw-semibold">Email</p>
+                                        </div>
+                                        <div>
+                                            <h6 class="text-white">abuyogfsnorthleyte@gmail.com</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> --}}
+                            <div class="col-l2">
+                                <div class="card credit-card-widget" data-aos="fade-up" data-aos-delay="900">
+                                    <div class="pb-4 border-0 card-header">
+                                        <div class="p-4 border rounded primary-gradient-card">
                                             <div class="d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h5 class="font-weight-bold">ABUYOG </h5>
-                                                    <P class="mb-0 text-dark">Fire Station North Leyte</P>
+                                                    <h5 class="font-weight-bold text-white">ABUYOG</h5>
+                                                    <p class="mb-0 text-white">Fire Station North Leyte</p>
                                                 </div>
                                                 <div class="master-card-content">
                                                     <img src="{{ asset('img/bfp.webp') }}" alt="BFP Abuyog"
-                                                        class="text-primary icon-60" width="60">
+                                                        class="icon-60" width="60">
                                                     <img src="{{ asset('img/dilg.webp') }}" alt="DILG Abuyog"
-                                                        class="text-primary icon-60" width="60">
+                                                        class="icon-60" width="60">
                                                 </div>
                                             </div>
-                                            <div class="my-4">
-                                                <div class="card-number">
-                                                    <span class="fs-5 me-2">
-                                                        <svg class="icon-32" width="32" viewBox="0 0 24 24"
-                                                            fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                                d="M11.5317 12.4724C15.5208 16.4604 16.4258 11.8467 18.9656 14.3848C21.4143 16.8328 22.8216 17.3232 19.7192 20.4247C19.3306 20.737 16.8616 24.4943 8.1846 15.8197C-0.493478 7.144 3.26158 4.67244 3.57397 4.28395C6.68387 1.17385 7.16586 2.58938 9.61449 5.03733C12.1544 7.5765 7.54266 8.48441 11.5317 12.4724Z"
-                                                                fill="currentColor"></path>
-                                                        </svg>
-                                                    </span>
-                                                    <span class="fs-5 me-2">0916</span>
-                                                    <span class="fs-5 me-2">908</span>
-                                                    <span class="fs-5">5788</span>
+                                            <div class="my-3">
+                                                <div class="card-number d-flex align-items-center">
+                                                    <i class="bi bi-telephone-fill fs-5 me-2 text-white"></i>
+                                                    <span class="fs-5 text-white">0916 908 5788</span>
                                                 </div>
                                             </div>
-                                            <div class="d-flex align-items-center mb-2 justify-content-between">
-                                                <p class="mb-0 text-dark" style="font-weight: bolder;">Email</p>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <p class="mb-0 text-white fw-semibold">Email</p>
                                             </div>
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <h6 class="text-dark">abuyogfsnorthleyte@gmail.com</h6>
+                                            <div>
+                                                <h6 class="text-white">abuyogfsnorthleyte@gmail.com</h6>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 col-lg-12">
-                                <div class="card" style="margin-bottom: 10px;">
-                                    <div class="card-body" style="padding: 10px;">
-                                        <div class="user-post">
-                                            <a href="https://bfp.gov.ph/official-transparency-seal/"><img
-                                                    src="{{ asset('img/transparency_seal_2019-500x231.jpg') }}"
-                                                    alt="Transparency Seal" class="img-fluid"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-lg-12">
-                                <div class="card" style="margin-bottom: 10px;">
-                                    <div class="card-body" style="padding: 10px;">
-                                        <div class="user-post">
-                                            <a href="https://www.foi.gov.ph/requests?agency=BFP"><img
-                                                    src="{{ asset('img/FOI.jpg') }}"
-                                                    alt="Free of Information" class="img-fluid"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-lg-12">
-                                <div class="card" style="margin-bottom: 10px;">
-                                    <div class="card-body" style="padding: 10px;">
-                                        <div class="user-post">
-                                            <a href="https://bfp.gov.ph/bfp-citizens-charter/"><img
-                                                    src="{{ asset('img/citizens-charter.png') }}"
-                                                    alt="Citizen Charter" class="img-fluid"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-lg-12">
+                            <div class="col-12">
                                 <div class="card">
-                                    <div class="card-body" style="padding: 10px;">
+                                    <div class="card-body p-2">
+                                        <a href="https://bfp.gov.ph/official-transparency-seal/">
+                                            <img src="{{ asset('img/transparency_seal_2019-500x231.jpg') }}"
+                                                alt="Transparency Seal" class="img-fluid">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <a href="https://www.foi.gov.ph/requests?agency=BFP">
+                                            <img src="{{ asset('img/FOI.jpg') }}" alt="Free of Information"
+                                                class="img-fluid">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <a href="https://bfp.gov.ph/bfp-citizens-charter/">
+                                            <img src="{{ asset('img/citizens-charter.png') }}" alt="Citizen Charter"
+                                                class="img-fluid">
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body p-2">
                                         <div class="fb-page" data-href="https://www.facebook.com/AbuyogPIS/"
                                             data-tabs="timeline" data-width="1200" data-height="260"
                                             data-small-header="false" data-adapt-container-width="true"
                                             data-hide-cover="false" data-show-facepile="true">
                                         </div>
-
-                                        <!-- Load Facebook SDK -->
                                         <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0"
                                             nonce="your-nonce"></script>
                                     </div>
@@ -563,18 +502,17 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-md-12 col-lg-12">
+                    <div class="col-12">
                         <div class="card">
-                            <div class="card-body">
+                            <div class="card-body p-0">
                                 <section class="bfp-section">
                                     <div class="bfp-overlay"></div>
                                     <div class="container position-relative">
                                         <div class="row justify-content-center">
                                             <div class="col-lg-12 text-center vision-mission">
-                                                <a href="https://bfp.gov.ph/wp-content/uploads/2022/03/vision-mission.png"
+                                                <a href="{{ asset('img/vision-mission.png') }}"
                                                     data-fslightbox="fsic-gallery" data-type="image">
-                                                    <img src="https://bfp.gov.ph/wp-content/uploads/2022/03/vision-mission.png"
+                                                    <img src="{{ asset('img/vision-mission.png') }}"
                                                         alt="Vision & Mission" class="img-fluid">
                                                 </a>
                                             </div>
@@ -586,51 +524,42 @@
                     </div>
                 </div>
             </div>
-            <!-- Footer Section Start -->
+            <!-- Footer Section -->
             <footer class="footer">
-                <div class="footer-body">
-                    <ul class="left-panel list-inline mb-0 p-0">
-                        <li class="list-inline-item"><a href="#">Privacy
-                                Policy</a></li>
-                        <li class="list-inline-item"><a href="#">Terms of
-                                Use</a></li>
-                    </ul>
-                    <div class="right-panel">
-                        ©
-                        <script>
-                            document.write(new Date().getFullYear())
-                        </script>, Made with
-                        <span class="">
-                            <svg class="icon-15" width="15" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M15.85 2.50065C16.481 2.50065 17.111 2.58965 17.71 2.79065C21.401 3.99065 22.731 8.04065 21.62 11.5806C20.99 13.3896 19.96 15.0406 18.611 16.3896C16.68 18.2596 14.561 19.9196 12.28 21.3496L12.03 21.5006L11.77 21.3396C9.48102 19.9196 7.35002 18.2596 5.40102 16.3796C4.06102 15.0306 3.03002 13.3896 2.39002 11.5806C1.26002 8.04065 2.59002 3.99065 6.32102 2.76965C6.61102 2.66965 6.91002 2.59965 7.21002 2.56065H7.33002C7.61102 2.51965 7.89002 2.50065 8.17002 2.50065H8.28002C8.91002 2.51965 9.52002 2.62965 10.111 2.83065H10.17C10.21 2.84965 10.24 2.87065 10.26 2.88965C10.481 2.96065 10.69 3.04065 10.89 3.15065L11.27 3.32065C11.3618 3.36962 11.4649 3.44445 11.554 3.50912C11.6104 3.55009 11.6612 3.58699 11.7 3.61065C11.7163 3.62028 11.7329 3.62996 11.7496 3.63972C11.8354 3.68977 11.9247 3.74191 12 3.79965C13.111 2.95065 14.46 2.49065 15.85 2.50065ZM18.51 9.70065C18.92 9.68965 19.27 9.36065 19.3 8.93965V8.82065C19.33 7.41965 18.481 6.15065 17.19 5.66065C16.78 5.51965 16.33 5.74065 16.18 6.16065C16.04 6.58065 16.26 7.04065 16.68 7.18965C17.321 7.42965 17.75 8.06065 17.75 8.75965V8.79065C17.731 9.01965 17.8 9.24065 17.94 9.41065C18.08 9.58065 18.29 9.67965 18.51 9.70065Z"
-                                    fill="currentColor"></path>
-                            </svg>
-                        </span> by <a href="#">BFP Abuyog</a>.
+                <div class="container">
+                    <div class="footer-body d-flex justify-content-between align-items-center flex-wrap">
+                        <ul class="list-inline mb-0 p-0">
+                            <li class="list-inline-item"><a href="#"
+                                    class="text-decoration-none text-muted">Privacy Policy</a></li>
+                            <li class="list-inline-item"><a href="#"
+                                    class="text-decoration-none text-muted">Terms of Use</a></li>
+                        </ul>
+                        <div class="right-panel">
+                            ©
+                            <script>
+                                document.write(new Date().getFullYear())
+                            </script>, Made with
+                            <i class="bi bi-heart-fill text-danger"></i> by <a href="#"
+                                class="text-decoration-none text-muted">BFP Abuyog</a>.
+                        </div>
                     </div>
                 </div>
             </footer>
-            <!-- Footer Section End -->
         </main>
-        <!-- Wrapper End-->
     </div>
 
     <!-- Library Bundle Script -->
     <script src="{{ asset('assets/js/core/libs.min.js') }}"></script>
-
     <!-- External Library Bundle Script -->
     <script src="{{ asset('assets/js/core/external.min.js') }}"></script>
-
-    <!-- AOS Animation Plugin-->
-
     <!-- App Script -->
     <script src="{{ asset('assets/js/hope-ui.js') }}" defer></script>
-
-    <!-- fslightbox Script -->
+    <!-- Fslightbox Script -->
     <script src="{{ asset('assets/js/plugins/fslightbox.js') }}"></script>
 
-    <!-- JavaScript for Dynamic Time -->
+    <!-- SweetAlert2 JS -->
+    <script src="{{ asset('js/sweetalert2.js') }}"></script>
+    <!-- Time Script -->
     <script>
         function updateTime() {
             const now = new Date().toLocaleString("en-US", {
@@ -651,7 +580,6 @@
         updateTime();
     </script>
     @yield('APP-SCRIPT')
-
 </body>
 
 </html>

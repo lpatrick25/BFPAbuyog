@@ -1,4 +1,3 @@
-html
 @extends('layout.master')
 
 @section('APP-TITLE')
