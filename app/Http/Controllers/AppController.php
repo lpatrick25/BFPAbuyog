@@ -7,12 +7,14 @@ use App\Models\Fsic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Client;
 
 class AppController extends Controller
 {
+
     public function searchFSIC(Request $request)
     {
+        $request->validate(['fsic_no' => 'required|string|exists:fsics,fsic_no']);
+
         $fsic_no = $request->fsic_no;
 
         $fsic = Fsic::with('application', 'inspector', 'marshall')
@@ -20,85 +22,54 @@ class AppController extends Controller
             ->first();
 
         if (!$fsic) {
-            return response()->json(['message' => 'FSIC No not found'], 200);
+            return response()->json(['message' => 'FSIC No not found'], 404);
         }
 
         $existingMedia = $fsic->getFirstMedia('fsic_certificates');
-
         if ($existingMedia) {
             return response()->json([
                 'fsic_no' => $fsic->fsic_no,
-                'file_url' => $existingMedia->getUrl()
-            ]);
+                'file_url' => $existingMedia->getUrl(),
+                'html' => file_get_contents($existingMedia->getPath()) // Include existing HTML content
+            ], 200);
         }
 
-        $application = $fsic->application;
-        $bfpLogo = url('img/bfp.webp');
-        $dilgLogo = url('img/dilg.webp');
-        $fsic->bfpLogo = $bfpLogo;
-        $fsic->dilgLogo = $dilgLogo;
-
-        $qrCodeMedia = $application->getMedia('fsic_requirements')->where('name', 'QR Code')->first();
-
+        $qrCodeMedia = $fsic->application->getMedia('fsic_requirements')->where('name', 'QR Code')->first();
         if ($qrCodeMedia) {
-            $fsicQrCodeUrl = $qrCodeMedia->getUrl();
-            $fsic->fsicQrCode = $fsicQrCodeUrl;
+            $fsic->fsicQrCode = $qrCodeMedia->getUrl();
         }
 
-        // Render the Blade view into HTML (for the certificate)
+        // Render HTML from Blade view
         $html = view('pdf.view_certificate', compact('fsic'))->render();
 
-        $directory = public_path('upload');
-        $filename = 'fsic_certificate_' . $fsic->fsic_no . '.html';
-        $filePath = $directory . '/' . $filename;
+        // Save HTML to file
+        $htmlFilePath = public_path('upload/fsic_certificate_' . $fsic->fsic_no . '.html');
+        $directory = dirname($htmlFilePath);
 
         if (!File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true, true);
+            File::makeDirectory($directory, 0755, true);
         }
 
-        file_put_contents($filePath, $html);
-
-        $client = new Client();
-
         try {
-            $response = $client->request('GET', 'https://api.screenshotlayer.com/api/capture', [
-                'query' => [
-                    'access_key' => env('SCREENSHOTLAYER_API_KEY'),
-                    'url' => url('upload/' . $filename),
-                    'viewport' => '855x1200',
-                    'width' => 855,
-                    'fullpage' => true,
-                    'format' => 'png',
-                    'delay' => 10,
-                ]
-            ]);
+            file_put_contents($htmlFilePath, $html);
 
-            if ($response->getStatusCode() === 200) {
-                $imageFilePath = public_path('upload/fsic_certificate_' . $fsic->fsic_no . '.png');
+            // Add to media collection
+            $media = $fsic->addMedia($htmlFilePath)->toMediaCollection('fsic_certificates');
 
-                file_put_contents($imageFilePath, $response->getBody());
+            // Clean up temporary file
+            File::delete($htmlFilePath);
 
-                $fsic->addMedia($imageFilePath)->toMediaCollection('fsic_certificates');
-
-                File::delete($filePath);
-                File::delete($imageFilePath);
-
-                return response()->json([
-                    'fsic_no' => $fsic->fsic_no,
-                    'file_url' => $fsic->getFirstMediaUrl('fsic_certificates')
-                ]);
-            } else {
-                Log::error('Screenshotlayer API error: ', [
-                    'status' => $response->getStatusCode(),
-                    'body' => $response->getBody(),
-                ]);
-                return response()->json(['message' => 'Error generating screenshot'], 500);
-            }
+            return response()->json([
+                'fsic_no' => $fsic->fsic_no,
+                'file_url' => $media->getUrl(),
+                'html' => $html
+            ], 200);
         } catch (\Exception $e) {
-            Log::error('Screenshotlayer API exception: ', [
+            Log::error('Error saving HTML file', [
                 'message' => $e->getMessage(),
+                'fsic_no' => $fsic->fsic_no
             ]);
-            return response()->json(['message' => 'Error generating screenshot'], 500);
+            return response()->json(['message' => 'Error saving HTML certificate'], 500);
         }
     }
 

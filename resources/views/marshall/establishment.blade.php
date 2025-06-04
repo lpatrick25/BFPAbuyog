@@ -63,11 +63,11 @@
                     <div class="card-body">
                         <div id="toolbar">
                         </div>
-                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1" data-fixed-right-number="1"
-                            data-i18n-enhance="true" data-mobile-responsive="true" data-multiple-sort="true"
-                            data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true" data-sticky-header="true"
-                            data-toolbar="#toolbar" data-pagination="true" data-search="true" data-show-refresh="true"
-                            data-show-copy-rows="true" data-show-columns="true" data-url="">
+                        <table id="table1" data-toggle="data-bs-toggle" data-fixed-columns="true" data-fixed-number="1"
+                            data-fixed-right-number="1" data-i18n-enhance="true" data-mobile-responsive="true"
+                            data-multiple-sort="true" data-page-jump-to="true" data-pipeline="true" data-reorder-rows="true"
+                            data-sticky-header="true" data-toolbar="#toolbar" data-pagination="true" data-search="true"
+                            data-show-refresh="true" data-show-copy-rows="true" data-show-columns="true" data-url="">
                         </table>
                     </div>
                     <div class="card-footer text-end">
@@ -269,6 +269,8 @@
                             new Date(a.updated_at) - new Date(b.updated_at)
                         );
 
+                        console.log(sortedStatuses.length === 0);
+
                         // Find the earliest status date (if available) or use today's date for "Application Submitted"
                         let submittedDate = sortedStatuses.length > 0 ? sortedStatuses[0]
                             .updated_at : new Date();
@@ -317,7 +319,21 @@
                                 </div>
                             </li>
                         `;
-                        timelineContainer.append(submittedHTML); // Ensure it's always first
+
+                        if (sortedStatuses.length !== 0) {
+                            timelineContainer.append(submittedHTML); // Ensure it's always first
+                        } else {
+                            timelineContainer.append(
+                                `
+                                    <li>
+                                        <div class="timeline-dots1 border-primary text-primary">
+                                            <i class="icon-20 bi ${statusIcons["Closed"]}"></i>
+                                        </div>
+                                        <h6 class="float-left mb-1" style="margin-top: 10px;">No Application Submitted</h6>
+                                    </li>
+                                `
+                            );
+                        }
 
                         // Clone sorted statuses to avoid modifying the original array
                         let augmentedStatuses = [...sortedStatuses];

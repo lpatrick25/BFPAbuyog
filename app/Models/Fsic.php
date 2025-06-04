@@ -60,5 +60,9 @@ class Fsic extends Model implements HasMedia
             ->withResponsiveImages()
             ->optimize()
             ->performOnCollections('fsic_certificates');
+
+        $this->addMediaCollection('fsic_certificates')
+            ->singleFile()
+            ->acceptsMimeTypes(['text/html']);
     }
 }
