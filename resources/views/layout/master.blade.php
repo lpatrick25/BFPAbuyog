@@ -556,7 +556,6 @@
                                         break;
                                     default:
                                         applicationTypeText = "Unknown Application Type";
-                                        break;
                                 }
 
                                 let message =
@@ -583,7 +582,7 @@
                     })
                     .catch(error => {
                         console.error("Error fetching application details:", error);
-                        alert("Something went wrong while retrieving application details.");
+                        showToast('error', 'Something went wrong while retrieving application details.');
                     });
             });
 

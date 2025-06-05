@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UserUpdateRequest;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,7 @@ class UserController extends Controller
     /**
      * Update a User and associated User.
      */
-    public function update(UserUpdateRequest $request, $id)
+    public function update(UserUpdateRequest $request, $id): JsonResponse
     {
         try {
             DB::beginTransaction();

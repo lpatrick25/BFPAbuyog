@@ -8,6 +8,7 @@ use App\Http\Resources\Establishment\EstablishmentResource;
 use App\Http\Resources\Establishment\PaginatedEstablishmentResource;
 use App\Models\Establishment;
 use App\Services\EstablishmentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +40,7 @@ class EstablishmentController extends Controller
         return new EstablishmentResource($establishment);
     }
 
-    public function destroy(Establishment $establishment)
+    public function destroy(Establishment $establishment): JsonResponse
     {
 
         try {

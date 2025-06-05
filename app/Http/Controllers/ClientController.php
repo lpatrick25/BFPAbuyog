@@ -8,6 +8,7 @@ use App\Http\Resources\User\PaginatedUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Client;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,21 +26,21 @@ class ClientController extends Controller
         $this->userService = $userService;
     }
 
-    public function store(ClientCreateRequest $request)
+    public function store(ClientCreateRequest $request): UserResource
     {
         $user = $this->userService->store($request->validated(), 'Client');
 
         return new UserResource($user);
     }
 
-    public function update(ClientUpdateRequest $request, $id)
+    public function update(ClientUpdateRequest $request, $id): UserResource
     {
         $user = $this->userService->update($request->validated(), 'Client', $id);
 
         return new UserResource($user);
     }
 
-    public function index()
+    public function index(): PaginatedUserResource
     {
         $query = $this->userService->getAllUser('Client');
         $users = $query->paginate($this->limit, ['*'], 'page', $this->page);
@@ -47,7 +48,7 @@ class ClientController extends Controller
         return new PaginatedUserResource($users);
     }
 
-    public function destroy(Client $client)
+    public function destroy(Client $client): JsonResponse
     {
         try {
             DB::beginTransaction();

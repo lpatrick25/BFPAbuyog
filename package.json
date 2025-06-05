@@ -10,8 +10,9 @@
         "vite": "^6.2.2"
     },
     "dependencies": {
-        "laravel-echo": "^2.0.2",
-        "puppeteer": "^24.5.0",
+        "@popperjs/core": "^2.11.8",
+        "datatables.net": "^2.3.1",
+        "jquery": "^3.7.1",
         "pusher-js": "^8.4.0"
     },
     "type": "module"

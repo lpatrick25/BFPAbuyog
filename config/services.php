@@ -30,10 +30,4 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
-    'hcti' => [
-        'user_id' => env('HCTI_USER_ID'),
-        'api_key' => env('HCTI_API_KEY'),
-    ],
-
 ];

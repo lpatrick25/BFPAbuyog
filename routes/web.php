@@ -22,11 +22,11 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\UserController;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,7 +43,7 @@ Route::get('/e-FSIC/{fsicNo?}', function ($fsicNo = null) {
 });
 
 Route::get('/fsic_no/{fsicNo}', function ($fsicNo) {
-    $fsicNo = Crypt::decryptString($fsicNo);  // Use consistent variable case
+    $fsicNo = Crypt::decryptString($fsicNo);
     return redirect('/e-FSIC/' . $fsicNo);
 });
 
@@ -237,8 +237,6 @@ Route::get('/load-map-view', function (Request $request) {
 
     return view('pages.map', compact('location'));
 })->name('loadMap');
-
-
 
 Route::post('/store-subscription', [PushNotificationController::class, 'storeSubscription']);
 

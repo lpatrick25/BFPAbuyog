@@ -380,7 +380,7 @@
             });
 
             // $('#establishment_id').click();
-            // $('#establishment_id').trigger('change');
+            $('#establishment_id').trigger('change');
 
             $('#fsic_type').change(function() {
                 // Hide all elements first

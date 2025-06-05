@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\navigation;
 
 use App\Http\Controllers\Controller;
+use App\Models\Application;
 use App\Models\Establishment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,10 +14,32 @@ class ClientController extends Controller
     public function dashboards()
     {
         try {
-            return view('client.dashboard');
+            $user = auth()->user();
+            $client = $user->client;
+
+            if (!$client) {
+                throw new \Exception('Client profile not found.');
+            }
+
+            $metrics = [
+                'total_establishments' => Establishment::where('client_id', $client->id)->count(),
+                'total_applications' => Application::whereHas('establishment', function ($query) use ($client) {
+                    $query->where('client_id', $client->id);
+                })->count(),
+                'pending_applications' => Application::whereHas('establishment', function ($query) use ($client) {
+                    $query->where('client_id', $client->id);
+                })->whereHas('applicationStatuses', function ($query) {
+                    $query->where('status', 'Pending');
+                })->count(),
+                'issued_fsics' => \App\Models\Fsic::whereHas('application.establishment', function ($query) use ($client) {
+                    $query->where('client_id', $client->id);
+                })->count(),
+            ];
+
+            return view('client.dashboard', compact('metrics', 'client'));
         } catch (\Exception $e) {
-            Log::error('Error retrieving Dashboard View', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Dashboard View not found.'], 500);
+            Log::error('Error retrieving Client Dashboard View', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to load dashboard: ' . $e->getMessage());
         }
     }
 

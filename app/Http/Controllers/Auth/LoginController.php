@@ -7,10 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 
 class LoginController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         // Validate input
         $validator = Validator::make($request->all(), [
