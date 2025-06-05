@@ -4,6 +4,8 @@ namespace App\Http\Controllers\navigation;
 
 use App\Http\Controllers\Controller;
 use App\Models\Establishment;
+use App\Models\Fsic;
+use App\Models\Schedule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -12,11 +14,30 @@ class InspectorController extends Controller
     public function dashboards()
     {
         try {
+            $user = auth()->user();
+            $inspector = $user->inspector;
 
-            return view('inspector.dashboard');
+            if (!$inspector) {
+                throw new \Exception('Inspector profile not found.');
+            }
+
+            $metrics = [
+                'issued_fsics' => Fsic::where('inspector_id', $inspector->id)->count(),
+                'pending_schedules' => Schedule::where('inspector_id', $inspector->id)
+                    ->where('status', 'Ongoing')
+                    ->count(),
+                'completed_schedules' => Schedule::where('inspector_id', $inspector->id)
+                    ->where('status', 'Completed')
+                    ->count(),
+                'total_applications' => \App\Models\Application::whereHas('fsics', function ($query) use ($inspector) {
+                    $query->where('inspector_id', $inspector->id);
+                })->count(),
+            ];
+
+            return view('inspector.dashboard', compact('metrics', 'inspector'));
         } catch (\Exception $e) {
-            Log::error('Error retrieving Dashboard View', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Dashboard View not found.'], 500);
+            Log::error('Error retrieving Inspector Dashboard View', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to load dashboard: ' . $e->getMessage());
         }
     }
 

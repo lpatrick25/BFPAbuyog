@@ -5,6 +5,8 @@ namespace App\Http\Controllers\navigation;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\Establishment;
+use App\Models\Fsic;
+use App\Models\Schedule;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,13 +17,32 @@ class MarshallController extends Controller
     public function dashboards()
     {
         try {
-            // $notifications = auth()->user()->unreadNotifications;
+            $user = auth()->user();
+            $marshall = $user->marshall;
 
-            return view('marshall.dashboard');
-            // return view('marshall.dashboard', compact('notifications'));
+            if (!$marshall) {
+                throw new \Exception('Marshall profile not found.');
+            }
+
+            $metrics = [
+                'pending_schedules' => Schedule::where('status', 'Ongoing')
+                    ->count(),
+                'completed_schedules' => Schedule::where('status', 'Completed')
+                    ->count(),
+                'total_establishments' => Establishment::count(),
+                'total_applications' => Application::count(),
+                'pending_applications' => Application::whereHas('applicationStatuses', function ($query) {
+                    $query->where('status', 'Pending');
+                })->count(),
+                'completed_inspections' => Schedule::where('status', 'Completed')->count(),
+                'issued_fsics' => Fsic::count(),
+                'active_users' => User::where('is_active', true)->count(),
+            ];
+
+            return view('marshall.dashboard', compact('metrics', 'marshall'));
         } catch (\Exception $e) {
-            Log::error('Error retrieving Dashboard View', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Dashboard View not found.'], 500);
+            Log::error('Error retrieving Marshall Dashboard View', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to load dashboard: ' . $e->getMessage());
         }
     }
 

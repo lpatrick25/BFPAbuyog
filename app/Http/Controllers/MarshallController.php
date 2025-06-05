@@ -8,6 +8,7 @@ use App\Http\Resources\User\PaginatedUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Marshall;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,21 +26,21 @@ class MarshallController extends Controller
         $this->userService = $userService;
     }
 
-    public function store(MarshallCreateRequest $request)
+    public function store(MarshallCreateRequest $request): UserResource
     {
         $user = $this->userService->store($request->validated(), 'Marshall');
 
         return new UserResource($user);
     }
 
-    public function update(MarshallUpdateRequest $request, $id)
+    public function update(MarshallUpdateRequest $request, $id): UserResource
     {
         $user = $this->userService->update($request->validated(), 'Marshall', $id);
 
         return new UserResource($user);
     }
 
-    public function index()
+    public function index(): PaginatedUserResource
     {
         $query = $this->userService->getAllUser('Marshall');
         $users = $query->paginate($this->limit, ['*'], 'page', $this->page);
@@ -47,7 +48,7 @@ class MarshallController extends Controller
         return new PaginatedUserResource($users);
     }
 
-    public function destroy(Marshall $marshall)
+    public function destroy(Marshall $marshall): JsonResponse
     {
         try {
             DB::beginTransaction();

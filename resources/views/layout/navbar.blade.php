@@ -56,13 +56,16 @@
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                        <li><a class="dropdown-item" href="#" onclick="toggleProfileMode('view')"
-                                data-bs-toggle="modal" data-bs-target="#profileModal">View Profile</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="toggleProfileMode('edit')"
-                                data-bs-toggle="modal" data-bs-target="#profileModal">Edit Profile</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+                        @if (auth()->user()->role !== 'Admin')
+                            <li><a class="dropdown-item" href="#" onclick="toggleProfileMode('view')"
+                                    data-bs-toggle="modal" data-bs-target="#profileModal">View Profile</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="toggleProfileMode('edit')"
+                                    data-bs-toggle="modal" data-bs-target="#profileModal">Edit Profile</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                        @endif
+
                         <li><a class="dropdown-item" href="{{ route('logout') }}">Logout</a>
                         </li>
                     </ul>

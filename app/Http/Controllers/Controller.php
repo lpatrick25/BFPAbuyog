@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller as BaseController;
@@ -21,7 +22,7 @@ class Controller extends BaseController
         $this->page = (int) $request->get('page', 1);
     }
 
-    final public function success($data, string $message = 'OK', int $code = Response::HTTP_OK)
+    final public function success($data, string $message = 'OK', int $code = Response::HTTP_OK): JsonResponse
     {
         return response()->json([
             'code' => $code,
@@ -30,7 +31,7 @@ class Controller extends BaseController
         ], $code);
     }
 
-    final public function denied(string $message = 'Forbidden', int $code = Response::HTTP_FORBIDDEN)
+    final public function denied(string $message = 'Forbidden', int $code = Response::HTTP_FORBIDDEN): array
     {
         return [
             'code' => $code,

@@ -103,6 +103,7 @@
         // Redirect to the edit page with a session token
         function editUser(userId) {
             userID = userId;
+            $('#userActionModal').modal('hide');
 
             // Clear the input fields to prevent leftover data
             $('#password').val('');
@@ -115,6 +116,7 @@
         }
 
         function toggleUserStatus(userId) {
+            $('#userActionModal').modal('hide');
             $.ajax({
                 method: 'PUT',
                 url: `/users/${userId}/toggle-status`,
@@ -133,6 +135,7 @@
         }
 
         function deleteClient(userId) {
+            $('#userActionModal').modal('hide');
             $.ajax({
                 method: 'DELETE',
                 url: `/clients/${userId}`,

@@ -41,7 +41,7 @@ class ApplicationController extends Controller
         return new ApplicationResource($application);
     }
 
-    public function destroy(Application $application)
+    public function destroy(Application $application): JsonResponse
     {
         try {
             DB::beginTransaction();

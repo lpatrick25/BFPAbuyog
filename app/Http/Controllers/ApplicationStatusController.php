@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ApplicationStatusRequest;
 use App\Services\ApplicationStatusService;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class ApplicationStatusController extends Controller
 {
@@ -15,7 +15,7 @@ class ApplicationStatusController extends Controller
         $this->applicationStatusService = $applicationStatusService;
     }
 
-    public function update(ApplicationStatusRequest $request, $application_id)
+    public function update(ApplicationStatusRequest $request, $application_id): JsonResponse
     {
         return $this->applicationStatusService->updateApplicationStatus($request, $application_id);
     }

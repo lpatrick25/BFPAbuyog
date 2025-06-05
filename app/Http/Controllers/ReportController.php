@@ -7,6 +7,7 @@ use App\Models\ApplicationStatus;
 use App\Models\Establishment;
 use App\Models\Fsic;
 use App\Models\Schedule;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +20,7 @@ class ReportController extends Controller
     }
 
     // Establishment Reports
-    public function establishmentReports(Request $request)
+    public function establishmentReports(Request $request): JsonResponse
     {
         $query = Establishment::with('client')
             ->select('id', 'name', 'trade_name', 'client_id', 'total_building_area', 'type_of_occupancy', 'address_brgy', 'high_rise', 'eminent_danger')
@@ -49,7 +50,7 @@ class ReportController extends Controller
     }
 
     // Application Reports
-    public function applicationReports(Request $request)
+    public function applicationReports(Request $request): JsonResponse
     {
         $query = Application::with(['establishment', 'applicationStatuses'])
             ->select('id', 'application_number', 'establishment_id', 'fsic_type', 'application_date')
@@ -80,7 +81,7 @@ class ReportController extends Controller
     }
 
     // Inspection Schedule Reports
-    public function scheduleReports(Request $request)
+    public function scheduleReports(Request $request): JsonResponse
     {
         $query = Schedule::with(['application.establishment', 'inspector'])
             ->select('id', 'application_id', 'inspector_id', 'schedule_date', 'status')
@@ -111,7 +112,7 @@ class ReportController extends Controller
     }
 
     // FSIC Reports
-    public function fsicReports(Request $request)
+    public function fsicReports(Request $request): JsonResponse
     {
         $query = Fsic::with(['application.establishment', 'inspector', 'marshall'])
             ->select('id', 'fsic_no', 'application_id', 'issue_date', 'expiration_date', 'amount', 'or_number', 'payment_date')
@@ -140,7 +141,7 @@ class ReportController extends Controller
     }
 
     // Compliance and Risk Reports
-    public function complianceReports(Request $request)
+    public function complianceReports(Request $request): JsonResponse
     {
         $query = Establishment::leftJoin('applications', 'establishments.id', '=', 'applications.establishment_id')
             ->leftJoin('application_statuses', 'applications.id', '=', 'application_statuses.application_id')
@@ -179,7 +180,7 @@ class ReportController extends Controller
     }
 
     // Audit and Historical Reports
-    public function auditReports(Request $request)
+    public function auditReports(Request $request): JsonResponse
     {
         $query = ApplicationStatus::with('application.establishment')
             ->select('id', 'application_id', 'status', 'remarks', 'created_at', 'updated_at')

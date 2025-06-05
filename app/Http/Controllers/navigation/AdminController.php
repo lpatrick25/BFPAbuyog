@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\navigation;
 
 use App\Http\Controllers\Controller;
+use App\Models\Application;
 use App\Models\Client;
 use App\Models\Establishment;
+use App\Models\Fsic;
 use App\Models\Inspector;
 use App\Models\Marshall;
+use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -16,17 +20,38 @@ class AdminController extends Controller
     public function dashboards()
     {
         try {
-            return view('admin.dashboard');
+            $metrics = [
+                'pending_schedules' => Schedule::where('status', 'Ongoing')
+                    ->count(),
+                'completed_schedules' => Schedule::where('status', 'Completed')
+                    ->count(),
+                'total_establishments' => Establishment::count(),
+                'total_applications' => Application::count(),
+                'pending_applications' => Application::whereHas('applicationStatuses', function ($query) {
+                    $query->where('status', 'Pending');
+                })->count(),
+                'completed_inspections' => Schedule::where('status', 'Completed')->count(),
+                'issued_fsics' => Fsic::count(),
+                'active_users' => User::where('is_active', true)->count(),
+            ];
+
+            return view('admin.dashboard', compact('metrics'));
         } catch (\Exception $e) {
-            Log::error('Error retrieving Dashboard View', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Dashboard View not found.'], 500);
+            Log::error('Error retrieving Admin Dashboard View', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to load dashboard: ' . $e->getMessage());
         }
     }
 
     public function mapping()
     {
         try {
-            $role = session('role');
+            // Ensure user is authenticated
+            if (!auth()->check()) {
+                throw new \Exception('User not authenticated.');
+            }
+
+            $user = auth()->user();
+            $role = $user->role;
             $response = [];
             $summary = [
                 'inspected' => 0,
@@ -34,41 +59,50 @@ class AdminController extends Controller
                 'not_applied' => 0,
             ];
 
-            // Query establishments based on role
-            $establishmentsQuery = Establishment::query()->with(['applications.fsics']);
+            // Query establishments with specific columns and relationships
+            $establishmentsQuery = Establishment::query()
+                ->select('id', 'location_latitude', 'location_longitude', 'client_id')
+                ->with(['applications.fsics']);
 
             if ($role === 'client') {
-                $client = auth()->user()->client;
-                $establishmentsQuery->where('client_id', $client->id);
+                if (!$user->client) {
+                    throw new \Exception('Client not found for user.');
+                }
+                $establishmentsQuery->where('client_id', $user->client->id);
             }
 
-            // Fetch establishments only once
             $establishments = $establishmentsQuery->get();
 
             if ($role === 'client' && $establishments->isEmpty()) {
-                throw new \Exception('Establishment not found.');
+                throw new \Exception('No establishments found for this client.');
             }
 
             foreach ($establishments as $establishment) {
+                // Validate coordinates
+                $latitude = floatval($establishment->location_latitude);
+                $longitude = floatval($establishment->location_longitude);
+                if (!is_numeric($latitude) || !is_numeric($longitude)) {
+                    Log::warning('Invalid coordinates for establishment', ['id' => $establishment->id]);
+                    continue;
+                }
+
                 $application = $establishment->applications->first();
                 $inspected = $application && $application->fsics->isNotEmpty();
 
-                if (!$application) {
-                    if (!in_array($role, ['marshall', 'inspector'])) {
-                        $summary['not_applied']++;
-                        $response[] = [
-                            floatval($establishment->location_latitude),
-                            floatval($establishment->location_longitude),
-                            $establishment->id,
-                            false,
-                            'Not Applied'
-                        ];
-                    }
+                if (!$application && $role !== ' Marshall' && $role !== 'inspector') {
+                    $summary['not_applied']++;
+                    $response[] = [
+                        $latitude,
+                        $longitude,
+                        $establishment->id,
+                        false,
+                        'Not Applied'
+                    ];
                 } else {
                     $inspected ? $summary['inspected']++ : $summary['not_inspected']++;
                     $response[] = [
-                        floatval($establishment->location_latitude),
-                        floatval($establishment->location_longitude),
+                        $latitude,
+                        $longitude,
                         $establishment->id,
                         $inspected,
                         $inspected ? 'Inspected' : 'Not Inspected'
@@ -79,7 +113,7 @@ class AdminController extends Controller
             return view('admin.mapping', compact('response', 'summary'));
         } catch (\Exception $e) {
             Log::error('Error retrieving Mapping View', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Mapping View not found.'], 500);
+            return redirect()->back()->with('error', 'Failed to load mapping view: ' . $e->getMessage());
         }
     }
 

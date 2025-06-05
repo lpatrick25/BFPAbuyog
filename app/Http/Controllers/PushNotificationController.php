@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\PushSubscription;
+use Illuminate\Http\JsonResponse;
 
 class PushNotificationController extends Controller
 {
-    public function storeSubscription(Request $request)
+    public function storeSubscription(Request $request): JsonResponse
     {
         // Validate and store the subscription object in the database
         $validated = $request->validate([

@@ -8,6 +8,7 @@ use App\Http\Resources\User\PaginatedUserResource;
 use App\Http\Resources\User\UserResource;
 use App\Models\Inspector;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,21 +26,21 @@ class InspectorController extends Controller
         $this->userService = $userService;
     }
 
-    public function store(InspectorCreateRequest $request)
+    public function store(InspectorCreateRequest $request): UserResource
     {
         $user = $this->userService->store($request->validated(), 'Inspector');
 
         return new UserResource($user);
     }
 
-    public function update(InspectorUpdateRequest $request, $id)
+    public function update(InspectorUpdateRequest $request, $id): UserResource
     {
         $user = $this->userService->update($request->validated(), 'Inspector', $id);
 
         return new UserResource($user);
     }
 
-    public function index()
+    public function index(): PaginatedUserResource
     {
         $query = $this->userService->getAllUser('Inspector');
         $users = $query->paginate($this->limit, ['*'], 'page', $this->page);
@@ -47,7 +48,7 @@ class InspectorController extends Controller
         return new PaginatedUserResource($users);
     }
 
-    public function destroy(Inspector $inspector)
+    public function destroy(Inspector $inspector): JsonResponse
     {
         try {
             DB::beginTransaction();

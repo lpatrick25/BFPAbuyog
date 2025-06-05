@@ -4,9 +4,6 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\SmsRequest;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\EstablishmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,11 +18,7 @@ use App\Http\Controllers\EstablishmentController;
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/ping', function () {
-    return response()->json(['pong' => true], 200);
-});
-
-Route::prefix('clients')->group(function () {
-    Route::get('', [ClientController::class, 'index']);
+    return response()->json(['ping' => true], 200);
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
@@ -42,17 +35,5 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
             return response()->json(['message' => 'SMS status updated']);
         }
         return response()->json(['message' => 'SMS not found'], 404);
-    });
-
-    Route::get('/documents', [DocumentController::class, 'index']);     // List all documents
-    Route::get('/documents/{id}', [DocumentController::class, 'show']); // View single document
-    Route::post('/documents/submit', [DocumentController::class, 'store']); // Submit/upload
-
-    Route::prefix('establishments')->group(function () {
-        Route::get('', [EstablishmentController::class, 'index']);
-        Route::post('', [EstablishmentController::class, 'store']);
-        Route::get('{establishment}', [EstablishmentController::class, 'show']);
-        Route::put('{establishment}', [EstablishmentController::class, 'update']);
-        Route::delete('{establishment}', [EstablishmentController::class, 'destroy']);
     });
 });
