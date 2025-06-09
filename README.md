@@ -7,27 +7,98 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+# BFP Abuyog Laravel System
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+This is a Laravel-based system for the Bureau of Fire Protection (BFP) Abuyog. Follow these steps to set up and run the project locally.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Prerequisites
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP >= 8.1
+- Composer
+- Node.js & npm
+- MySQL or compatible database
+- Git
 
-## Learning Laravel
+## Setup Instructions
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 1. Clone the Repository
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```powershell
+git clone git@github.com:lpatrick25/BFPAbuyog.git
+cd BFPAbuyog
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2. Install PHP Dependencies
+
+```powershell
+composer install
+```
+
+### 3. Install Node.js Dependencies
+
+```powershell
+npm install
+```
+
+### 4. Copy and Configure Environment File
+
+```powershell
+copy .env.example .env
+```
+
+Edit the `.env` file to match your local database and mail settings.
+
+### 5. Generate Application Key
+
+```powershell
+php artisan key:generate
+```
+
+### 6. Run Migrations and Seeders
+
+```powershell
+php artisan migrate --seed
+```
+
+### 7. Link Storage (for file uploads)
+
+```powershell
+php artisan storage:link
+```
+
+### 8. Build Frontend Assets
+
+```powershell
+npm run build
+```
+
+### 9. Start the Development Server
+
+```powershell
+php artisan serve
+```
+
+Visit [http://localhost:8000](http://localhost:8000) in your browser.
+
+---
+
+## Additional Commands
+
+- To run tests:
+  ```powershell
+  php artisan test
+  ```
+- To run the frontend in watch mode:
+  ```powershell
+  npm run dev
+  ```
+
+## Troubleshooting
+- Ensure all prerequisites are installed and available in your PATH.
+- If you encounter permission issues, try running your terminal as administrator.
+- For any issues, check the Laravel [documentation](https://laravel.com/docs) or open an issue in this repository.
+
+---
 
 ## Laravel Sponsors
 
