@@ -351,7 +351,7 @@
                                     </div>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
-                                    <li><a class="dropdown-item" href="#">Profile</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>

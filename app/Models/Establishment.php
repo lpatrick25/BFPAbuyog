@@ -25,8 +25,7 @@ class Establishment extends Model
 
     public function latestApplicationStatus()
     {
-        return $this->hasOne(ApplicationStatus::class, 'application_id', 'id')
-            ->latest('updated_at'); // Get the latest status based on update time
+        return $this->hasOne(ApplicationStatus::class, 'application_id', 'id')->latest('updated_at');
     }
 
     public function hasApplication(): bool

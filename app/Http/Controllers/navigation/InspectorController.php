@@ -6,11 +6,21 @@ use App\Http\Controllers\Controller;
 use App\Models\Establishment;
 use App\Models\Fsic;
 use App\Models\Schedule;
+use App\Services\MappingService;
+use App\Services\SessionTokenService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class InspectorController extends Controller
 {
+    protected $sessionTokenService;
+    protected $mappingService;
+
+    public function __construct(SessionTokenService $sessionTokenService, MappingService $mappingService)
+    {
+        $this->sessionTokenService = $sessionTokenService;
+        $this->mappingService = $mappingService;
+    }
+
     public function dashboards()
     {
         try {
@@ -44,56 +54,9 @@ class InspectorController extends Controller
     public function mapping()
     {
         try {
-            $role = session('role');
-            $response = [];
-            $summary = [
-                'inspected' => 0,
-                'not_inspected' => 0,
-                'not_applied' => 0,
-            ];
-
-            // Query establishments based on role
-            $establishmentsQuery = Establishment::query()->with(['applications.fsics']);
-
-            if ($role === 'client') {
-                $client = auth()->user()->client;
-                $establishmentsQuery->where('client_id', $client->id);
-            }
-
-            // Fetch establishments only once
-            $establishments = $establishmentsQuery->get();
-
-            if ($role === 'client' && $establishments->isEmpty()) {
-                throw new \Exception('Establishment not found.');
-            }
-
-            foreach ($establishments as $establishment) {
-                $application = $establishment->applications->first();
-                $inspected = $application && $application->fsics->isNotEmpty();
-
-                if (!$application) {
-                    if (!in_array($role, ['marshall', 'inspector'])) {
-                        $summary['not_applied']++;
-                        $response[] = [
-                            floatval($establishment->location_latitude),
-                            floatval($establishment->location_longitude),
-                            $establishment->id,
-                            false,
-                            'Not Applied'
-                        ];
-                    }
-                } else {
-                    $inspected ? $summary['inspected']++ : $summary['not_inspected']++;
-                    $response[] = [
-                        floatval($establishment->location_latitude),
-                        floatval($establishment->location_longitude),
-                        $establishment->id,
-                        $inspected,
-                        $inspected ? 'Inspected' : 'Not Inspected'
-                    ];
-                }
-            }
-
+            $user = auth()->user();
+            $role = $user->role ?? session('role');
+            list($response, $summary) = $this->mappingService->getMappingData($role, $user);
             return view('inspector.mapping', compact('response', 'summary'));
         } catch (\Exception $e) {
             Log::error('Error retrieving Mapping View', ['error' => $e->getMessage()]);
@@ -134,18 +97,10 @@ class InspectorController extends Controller
 
     public function generateSessionToken($sessionId)
     {
-        try {
-            // Generate a unique session ID and cast it to a string
-            $sessionID = (string) Str::uuid();
-
-            // Store the session ID with expiration (1 hour)
-            session([$sessionID => $sessionId]);
-            session()->put('session_expiry_' . $sessionID, now()->addHour());
-
-            return response()->json(['sessionID' => $sessionID]);
-        } catch (\Exception $e) {
-            Log::error('Error generating session token', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to generate session token.'], 500);
+        $result = $this->sessionTokenService->generate($sessionId);
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 500);
         }
+        return response()->json(['sessionID' => $result['sessionID']]);
     }
 }

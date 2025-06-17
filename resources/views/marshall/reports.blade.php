@@ -44,18 +44,18 @@
                         'desc' => 'Identify non-compliant establishments and risks.',
                         'icon' => 'shield-exclamation',
                     ],
-                    [
-                        'route' => 'audit.reports',
-                        'title' => 'Audit & Historical Reports',
-                        'desc' => 'Track application history and deleted records.',
-                        'icon' => 'journal-text',
-                    ],
-                    [
-                        'route' => 'statistical.reports',
-                        'title' => 'Statistical & Analytical Reports',
-                        'desc' => 'Analyze occupancy types and approval rates.',
-                        'icon' => 'bar-chart',
-                    ],
+                    // [
+                    //     'route' => 'audit.reports',
+                    //     'title' => 'Audit & Historical Reports',
+                    //     'desc' => 'Track application history and deleted records.',
+                    //     'icon' => 'journal-text',
+                    // ],
+                    // [
+                    //     'route' => 'statistical.reports',
+                    //     'title' => 'Statistical & Analytical Reports',
+                    //     'desc' => 'Analyze occupancy types and approval rates.',
+                    //     'icon' => 'bar-chart',
+                    // ],
                 ];
             @endphp
 

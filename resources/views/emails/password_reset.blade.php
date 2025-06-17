@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FSIC Certificate Issued</title>
+    <title>{{ $subject }}</title>
     <style>
         /* General Styles */
         body {
@@ -170,27 +170,28 @@
         <!-- Main Content -->
         <div class="content">
             <div class="content-header">
-                <h2>FSIC Certificate Issued</h2>
-                <p>Dear <strong>{{ $clientName }}</strong>,</p>
-                <p>Congratulations! Your application has been successfully completed, and we have issued your Fire
-                    Safety Inspection Certificate (FSIC) for the establishment
-                    <strong>{{ $establishmentName }}</strong>.</p>
-                <p>Please find the FSIC attached to this email. Keep it for your records.</p>
+                <h2>{{ $subject }}</h2>
+                <p>Dear <strong>{{ $userName }}</strong>,</p>
+                <p>We received a request to reset your password for your account. Click the button below to set a new
+                    password.</p>
             </div>
 
             <!-- Details Section -->
             <div class="details">
-                <p><strong>🏢 Establishment:</strong> {{ $establishmentName }}</p>
+                <p><strong>📧 Email:</strong> {{ $email }}</p>
+                <p><strong>⏳ This reset link will expire in
+                        {{ config('auth.passwords.' . config('auth.defaults.passwords') . '.expire') }}
+                        minutes.</strong></p>
             </div>
 
             <!-- Centered CTA Button -->
             <div class="button-container">
-                <a class="button" href="{{ url('/view-fsic') }}">
-                    📄 View FSIC
+                <a class="button" href="{{ $resetUrl }}">
+                    🔑 Reset Password
                 </a>
             </div>
 
-            <p>If you have any questions or need further assistance, please contact us.</p>
+            <p>If you did not request a password reset, please ignore this email or contact us for assistance.</p>
             <p>Thank you, <br><strong>Bureau of Fire Protection - Abuyog</strong></p>
         </div>
 

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\PasswordResetNotification;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -55,7 +56,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Check if the user is an marshall.
+     * Check if the user is a marshall.
      */
     public function isMarshall(): bool
     {
@@ -94,5 +95,16 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return null;
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new PasswordResetNotification($token));
     }
 }

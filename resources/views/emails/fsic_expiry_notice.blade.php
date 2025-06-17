@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FSIC Certificate Issued</title>
+    <title>FSIC Certificate Expiration Notice</title>
     <style>
         /* General Styles */
         body {
@@ -170,27 +170,29 @@
         <!-- Main Content -->
         <div class="content">
             <div class="content-header">
-                <h2>FSIC Certificate Issued</h2>
+                <h2>FSIC Certificate Expiration Notice</h2>
                 <p>Dear <strong>{{ $clientName }}</strong>,</p>
-                <p>Congratulations! Your application has been successfully completed, and we have issued your Fire
-                    Safety Inspection Certificate (FSIC) for the establishment
-                    <strong>{{ $establishmentName }}</strong>.</p>
-                <p>Please find the FSIC attached to this email. Keep it for your records.</p>
+                <p>This is a reminder that your Fire Safety Inspection Certificate (FSIC) for the establishment
+                    <strong>{{ $establishmentName }}</strong> is set to expire on
+                    <strong>{{ $expirationDate }}</strong>.
+                </p>
+                <p>Please take the necessary steps to renew your certificate to avoid any inconvenience.</p>
             </div>
 
             <!-- Details Section -->
             <div class="details">
                 <p><strong>🏢 Establishment:</strong> {{ $establishmentName }}</p>
+                <p><strong>📅 Expiration Date:</strong> {{ $expirationDate }}</p>
             </div>
 
             <!-- Centered CTA Button -->
             <div class="button-container">
-                <a class="button" href="{{ url('/view-fsic') }}">
-                    📄 View FSIC
+                <a class="button" href="{{ url('/renew-fsic') }}">
+                    📋 Renew FSIC
                 </a>
             </div>
 
-            <p>If you have any questions or need further assistance, please contact us.</p>
+            <p>If you have already renewed, kindly disregard this message.</p>
             <p>Thank you, <br><strong>Bureau of Fire Protection - Abuyog</strong></p>
         </div>
 

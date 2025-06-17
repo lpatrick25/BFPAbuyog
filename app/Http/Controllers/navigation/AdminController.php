@@ -11,12 +11,21 @@ use App\Models\Inspector;
 use App\Models\Marshall;
 use App\Models\Schedule;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use App\Services\SessionTokenService;
+use App\Services\MappingService;
 
 class AdminController extends Controller
 {
+    protected $sessionTokenService;
+    protected $mappingService;
+
+    public function __construct(SessionTokenService $sessionTokenService, MappingService $mappingService)
+    {
+        $this->sessionTokenService = $sessionTokenService;
+        $this->mappingService = $mappingService;
+    }
+
     public function dashboards()
     {
         try {
@@ -45,71 +54,9 @@ class AdminController extends Controller
     public function mapping()
     {
         try {
-            // Ensure user is authenticated
-            if (!auth()->check()) {
-                throw new \Exception('User not authenticated.');
-            }
-
             $user = auth()->user();
-            $role = $user->role;
-            $response = [];
-            $summary = [
-                'inspected' => 0,
-                'not_inspected' => 0,
-                'not_applied' => 0,
-            ];
-
-            // Query establishments with specific columns and relationships
-            $establishmentsQuery = Establishment::query()
-                ->select('id', 'location_latitude', 'location_longitude', 'client_id')
-                ->with(['applications.fsics']);
-
-            if ($role === 'client') {
-                if (!$user->client) {
-                    throw new \Exception('Client not found for user.');
-                }
-                $establishmentsQuery->where('client_id', $user->client->id);
-            }
-
-            $establishments = $establishmentsQuery->get();
-
-            if ($role === 'client' && $establishments->isEmpty()) {
-                throw new \Exception('No establishments found for this client.');
-            }
-
-            foreach ($establishments as $establishment) {
-                // Validate coordinates
-                $latitude = floatval($establishment->location_latitude);
-                $longitude = floatval($establishment->location_longitude);
-                if (!is_numeric($latitude) || !is_numeric($longitude)) {
-                    Log::warning('Invalid coordinates for establishment', ['id' => $establishment->id]);
-                    continue;
-                }
-
-                $application = $establishment->applications->first();
-                $inspected = $application && $application->fsics->isNotEmpty();
-
-                if (!$application && $role !== ' Marshall' && $role !== 'inspector') {
-                    $summary['not_applied']++;
-                    $response[] = [
-                        $latitude,
-                        $longitude,
-                        $establishment->id,
-                        false,
-                        'Not Applied'
-                    ];
-                } else {
-                    $inspected ? $summary['inspected']++ : $summary['not_inspected']++;
-                    $response[] = [
-                        $latitude,
-                        $longitude,
-                        $establishment->id,
-                        $inspected,
-                        $inspected ? 'Inspected' : 'Not Inspected'
-                    ];
-                }
-            }
-
+            $role = $user->role ?? session('role');
+            list($response, $summary) = $this->mappingService->getMappingData($role, $user);
             return view('admin.mapping', compact('response', 'summary'));
         } catch (\Exception $e) {
             Log::error('Error retrieving Mapping View', ['error' => $e->getMessage()]);
@@ -252,18 +199,10 @@ class AdminController extends Controller
 
     public function generateSessionToken($sessionId)
     {
-        try {
-            // Generate a unique session ID and cast it to a string
-            $sessionID = (string) Str::uuid();
-
-            // Store the session ID with expiration (1 hour)
-            session([$sessionID => $sessionId]);
-            session()->put('session_expiry_' . $sessionID, now()->addHour());
-
-            return response()->json(['sessionID' => $sessionID]);
-        } catch (\Exception $e) {
-            Log::error('Error generating session token', ['error' => $e->getMessage()]);
-            return response()->json(['error' => 'Failed to generate session token.'], 500);
+        $result = $this->sessionTokenService->generate($sessionId);
+        if (isset($result['error'])) {
+            return response()->json(['error' => $result['error']], 500);
         }
+        return response()->json(['sessionID' => $result['sessionID']]);
     }
 }
